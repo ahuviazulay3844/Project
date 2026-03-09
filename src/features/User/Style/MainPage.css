@@ -1,0 +1,144 @@
+
+/*ריכוז הגדרות בסיס| */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* מבטיח שהרקע הסגול ימלא את כל גובה הדפדפן */
+    background-color: #4b0a6e;
+}
+
+.city-car-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* נועל את גובה האתר בדיוק לגובה המסך של המשתמש */
+    width: 100vw;
+    direction: rtl;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    overflow: hidden; /* מונע גלילה מיותרת ומבטיח שהאתר ייראה כבלוק אחד */
+}
+
+/* --- תפריט עליון (Navbar) --- */
+.top-navbar {
+    background-color: #4b0a6e;
+    color: white;
+    height: 65px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 10;
+    flex-wrap: nowrap; /* מונע מהתפריט "להישבר" לשתי שורות במסכים צרים */
+}
+
+.nav-right, .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.main-logo {
+    height: 50px;
+    width: auto;
+}
+
+.user-name { font-size: 15px; font-weight: 500; }
+.phone-info { font-size: 14px; letter-spacing: 1px; margin-right: 10px; }
+
+.btn-white-outline {
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    background: transparent;
+    color: white;
+    padding: 6px 22px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.btn-white-outline:hover {
+    background: white;
+    color: #4b0a6e;
+}
+
+/* --- אזור התוכן המרכזי --- */
+.content-area {
+    display: flex;
+    flex: 1; /* גורם לאלמנט למלא את כל הגובה שנותר פנוי מתחת ל-Navbar */
+    background-image: url('../../../assets/background_car.jpg');
+    background-size: cover; /* מותח את התמונה למקסימום בלי לעוות אותה */
+    background-position: center;
+    background-color: #4b0a6e;
+    width: 100%; 
+    background-size: cover; /* מותח את התמונה לקצוות בלי לעוות אותה */
+    background-repeat: no-repeat;
+}
+/* --- תפריט צד ימין (Sidebar) --- */
+.right-sidebar {
+    width: 80px;
+    background-color: #4b0a6e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 30px;
+    gap: 5px;
+    z-index: 5;
+    flex-shrink: 0; /* מונע מהתפריט הצידי להידחס או להתכווץ ברוחב */
+}
+
+.menu-icon-item, .menu-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    width: 50px;
+    padding: 15px 0;
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.menu-icon-item span, .menu-item span {
+    margin-top: 8px;
+    font-weight: 300;
+}
+
+.menu-icon-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.info-card-bottom h3 {
+    color: #4b0a6e;
+    margin: 0 0 10px 0;
+}
+
+/* --- התאמות רספונסיביות --- */
+@media (max-width: 768px) {
+    .city-car-wrapper { overflow-y: auto; }
+    
+    .content-area {
+        flex-direction: column-reverse; /* הופך את סדר האלמנטים - ה-Sidebar יופיע מתחת לתמונה */
+    }
+
+    .right-sidebar {
+        width: 100%;
+        height: 60px;
+        flex-direction: row; /* משנה את סידור האייקונים מטור לשורה */
+        padding-top: 0;
+        justify-content: space-around;
+        position: fixed; /* נועל את התפריט לתחתית המסך במובייל */
+        bottom: 0;
+    }
+
+    .menu-icon-item span { display: none; }
+
+    .info-card-bottom {
+        position: relative; /* משחרר את הכרטיס מהמיקום האבסולוטי כדי שיזרום בתוך הדף */
+        right: auto;
+        bottom: auto;
+        margin: 20px auto 80px auto;
+        width: 90%;
+    }
+
+    .phone-info, .user-name { display: none; }
+}
