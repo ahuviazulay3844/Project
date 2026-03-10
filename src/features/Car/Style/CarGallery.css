@@ -1,0 +1,80 @@
+:root {
+  --swiper-navigation-color: #4a148c; /*  לחיצים */
+  --swiper-navigation-size: 25px;
+}
+
+.cars-container {
+  width: 100%;
+  padding: 60px 60px;
+  background-color: #ffffff; 
+  position: relative;
+  text-align: center;
+}
+
+.gallery-title {
+  color: #4a148c;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.gallery-subtitle {
+  color: #ffb300; 
+  font-size: 1.1rem;
+  margin-bottom: 40px;
+}
+
+.cars-swiper-wrapper {
+  padding: 20px 0;
+  min-height: 250px;
+}
+
+.minimal-car-card {
+  text-align: center;
+  width: 100%; 
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.minimal-car-card:hover {
+  transform: translateY(-5px);
+}
+
+.minimal-car-img {
+  width: 100%;
+  height: auto;
+  max-height: 150px;
+  object-fit: contain;
+}
+
+.car-model-name {
+  color: #4a148c; 
+  font-size: 1.4rem;
+  margin: 15px 0 5px 0;
+}
+
+.car-category-label {
+  color: #757575;
+  font-size: 1rem;
+}
+
+.view-all-btn {
+  background-color: #ffb300;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 25px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 30px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* עיצוב החיצים מעל הרקע הלבן */
+.swiper-button-next, .swiper-button-prev {
+  background: white;
+  width: 45px;
+  height: 45px;
+}
