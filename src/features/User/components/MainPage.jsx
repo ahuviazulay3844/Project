@@ -3,24 +3,47 @@ import { useSelector } from 'react-redux';
 import '../Style/MainPage.css';
 import logoImg from '../../../assets/top_icon.png';
 import darkCarImg from '../../../assets/background_dark_car.jpg'; 
+import carFeatureImg from '../../../assets/dacia.webp';
+
 const MainPage = () => {
-const currentUser = useSelector((state) => state.user.currentUser);
-  useEffect(() => {
-    const wrapper = document.querySelector(".city-car-wrapper");
-    const handleScroll = () => {
-      if (!wrapper) return;
-      const scroll = wrapper.scrollTop;
-      const darkness = Math.min(scroll / 400, 0.8); 
-      const showNext = scroll > 200 ? Math.min((scroll - 200) / 300, 1) : 0;
-      const contentArea = document.querySelector(".content-area");
-      if (contentArea) {
-        contentArea.style.setProperty('--darkness', darkness);
-        contentArea.style.setProperty('--show-next', showNext);
-      }
-    };
-    wrapper.addEventListener('scroll', handleScroll);
-    return () => wrapper.removeEventListener('scroll', handleScroll);
-  }, []);
+  const currentUser = useSelector((state) => state.user.currentUser);
+
+useEffect(() => {
+
+  const wrapper = document.querySelector(".city-car-wrapper");
+
+  const handleScroll = () => {
+
+    if (!wrapper) return;
+
+    const scroll = wrapper.scrollTop;
+
+    const darkness = Math.min(scroll / 250, 0.8); // החשכה הדרגתית ונעימה
+        const showNext = Math.min(scroll / 300, 1);   // הופעת התמונה הבאה
+
+    const contentArea = document.querySelector(".content-area");
+
+    if (contentArea) {
+
+      contentArea.style.setProperty('--darkness', darkness);
+
+    }
+
+    const darkOverlay = document.querySelector(".dark-background-replacement");
+
+    if (darkOverlay) {
+
+      darkOverlay.style.opacity = showNext;
+
+    }
+
+  };
+
+  wrapper.addEventListener('scroll', handleScroll);
+
+  return () => wrapper.removeEventListener('scroll', handleScroll);
+
+}, []);
   return (
     <div className="city-car-wrapper">
       <nav className="top-navbar">
@@ -38,30 +61,81 @@ const currentUser = useSelector((state) => state.user.currentUser);
           </div>
         </div>
       </nav>
+
+      {/* אזור התמונה הראשונה - זורם בטבעיות */}
       <div className="content-area">
         <div className="dark-background-replacement" style={{ 
           backgroundImage: `url(${darkCarImg})`,
-          opacity: 'var(--show-next, 0)'
+          opacity: 0
         }}>
-        <div className="info-card-text">
-          <h3>כבר אלפי לקוחות בחרו בסיטי קאר</h3>
-          <p>סיטי קאר חברת הרכב השיתופי הגדולה והמתקדמת בישראל</p>
-        </div>
-        </div>
-        <aside className="right-sidebar">
+          <div className="info-card-text">
+            <h3>כבר אלפי לקוחות בחרו בסיטי קאר</h3>
+            <p>סיטי קאר חברת הרכב השיתופי הגדולה והמתקדמת בישראל</p>
+          </div>
+        </div>    
+      </div>
+       <aside className="right-sidebar">
           <div className="sidebar-item">👤 <span>אזור אישי</span></div>
           <div className="sidebar-item">🚗 <span>הזמנות</span></div>
           <div className="sidebar-item">₪ <span>מחירון</span></div>
           <div className="sidebar-item">ℹ️ <span>מידע חשוב</span></div>
           <div className="sidebar-item">📞 <span>צור קשר</span></div>
         </aside>
-      </div>
-      <div className="scroll-fake-path"></div>
+
+      {/* החלק הסגול - מופיע מיד אחרי התמונה הראשונה */}
       <section className="next-section">
-          <h2>למה דווקא סיטי קאר?</h2>
-          {/* כאן יבוא התוכן הנוסף */}
+        <div className="features-wrapper">         
+          <div className="features-text-side">        
+            <h2 className="features-title">למה דווקא סיטי קאר?</h2>     
+            <div className="feature-row">
+              <div className="feature-icon-box">📅</div>
+              <div className="feature-info">
+            
+                <h4>בגלל הגמישות</h4>
+                <p>מגוון מסלולים גמישים המאפשרים לשלם רק על מה שצריך.</p>
+              </div>
+            </div>
+
+            <div className="feature-row">
+              <div className="feature-icon-box">📍</div>
+              <div className="feature-info">
+                <h4>בגלל הנגישות</h4>
+                <p>מגוון רכבים פרוסים לך בכל האזורים בעיר ומאפשרים לך לקחת מיידית את הרכב שאתה זקוק לו.</p>
+              </div>
+            </div>
+
+            <div className="feature-row">
+               <div className="feature-icon-box">⚡</div>
+              <div className="feature-info">
+                <h4>בגלל המהירות</h4>
+                <p>אפליקציה מהירה וידידותית, נפתחת בכל החסימות.</p>
+              </div>            
+            </div>
+            <div className="feature-row">
+              <div className="feature-icon-box">🚗</div>
+              <div className="feature-info">               
+                <h4>בגלל המגוון</h4>
+                <p>מגוון רכבים מקטן ועד גדול - כל סוגי וגדלי הרכבים.</p>
+              </div>
+            </div>
+
+            <div className="feature-row">
+              <div className="feature-icon-box">⭐</div>
+              <div className="feature-info">                
+                <h4>בגלל הניסיון</h4>
+                <p>ניסיון של למעלה מ-10 שנים שמאפשר לנו לתת לכם את המיטב.</p>
+              </div>
+              
+            </div>
+          </div>
+
+          <div className="features-image-side">
+            <img src={carFeatureImg} alt="City Car Side" className="side-car-img" />
+          </div>
+        </div>
       </section>
     </div>
   );
 };
+
 export default MainPage;
