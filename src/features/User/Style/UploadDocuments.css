@@ -1,0 +1,269 @@
+/* UploadDocuments.css */
+
+/* קונטיינר ראשי */
+.upload-page-container {
+    display: flex;
+    min-height: calc(100vh - 65px);
+    background-color: #fff;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    direction: rtl;
+}
+
+/* אלמנטים עיצוביים בצד */
+.square-decoration {
+    aspect-ratio: 1;
+    width: min(100%, 550px);
+    background-color: #ffc45f;
+    border-radius: 42%;
+    transform: rotate(30deg);
+    position: absolute;
+    top: -80px;
+    left: -160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 1;
+}
+
+.decoration-text {
+    color: #fff;
+    font-size: 3rem;
+    font-weight: 800;
+    transform: rotate(-30deg);
+    margin: 0;
+    text-align: center;
+}
+
+.circle-icon-decoration {
+    background-color: #7030a0;
+    width: 115px;
+    height: 115px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50px;
+    right: -45px;
+    transform: rotate(-30deg);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+}
+
+.main-icon-img {
+    width: 65px;
+    height: auto;
+}
+
+/* תוכן מרכזי */
+.upload-main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    position: relative;
+    margin-right: 150px; 
+}
+
+/* --- הקטנת הסטפר (עיגולים) --- */
+.stepper-dots-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px; /* צמצום רווח */
+    z-index: 10;
+}
+
+.step-dot {
+    width: 28px; /* הוקטן מ-35 */
+    height: 28px; /* הוקטן מ-35 */
+    border-radius: 50%;
+    border: 1.5px solid #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 0.85rem; /* הוקטן */
+    color: #ccc;
+    cursor: pointer;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.step-dot.active {
+    border-color: #7030a0;
+    color: #7030a0;
+    transform: scale(1.05);
+}
+
+.step-dot.filled {
+    background-color: #7030a0;
+    border-color: #7030a0;
+    color: white;
+}
+
+/* --- הקטנת הכותרות --- */
+.main-title {
+    color: #6F3293;
+    font-size: 1.4rem; /* הוקטן משמעותית מ-2rem */
+    margin-bottom: 5px;
+    font-weight: 800;
+}
+
+.sub-title {
+    color: #666;
+    font-size: 0.85rem; /* הוקטן מ-1rem */
+    margin-bottom: 25px; /* צמצום רווח לתיבה */
+}
+
+/* תיבת העלאה */
+.upload-box-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* הקטנת סימן השאלה */
+.help-icon {
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    border: 2px solid #7030a0;
+    color: #7030a0;
+    width: 30px; /* הוקטן מ-40 */
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 900;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    z-index: 20;
+    box-shadow: 0 3px 8px rgba(112, 48, 160, 0.15);
+}
+
+.help-gif-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* --- הקטנת תיבת ההעלאה (Dropzone) --- */
+.upload-dropzone {
+    width: 320px; /* הוקטן מ-450 - מתאים למקור */
+    height: 200px; /* הוקטן מ-280 */
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    overflow: hidden;
+}
+
+.upload-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* פינות המסגרת - מותאמות לגודל החדש */
+.upload-dropzone::before, .upload-dropzone::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #333;
+}
+.upload-dropzone::before { top: 12px; right: 12px; border-left: 0; border-bottom: 0; }
+.upload-dropzone::after { bottom: 12px; left: 12px; border-right: 0; border-top: 0; }
+
+.upload-link {
+    color: #6F3293;
+    font-weight: bold;
+    text-decoration: underline;
+    font-size: 0.95rem; /* הוקטן */
+}
+
+/* כפתור חץ חזרה */
+.bottom-back-btn {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    background: #ffc45f;
+    color: #333;
+    border: none;
+    width: 50px; /* הוקטן מעט */
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.4rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+}
+
+/* כפתור סיום והמשך */
+.finish-btn {
+    margin-top: 20px;
+    background-color: #7030a0;
+    color: white;
+    border: none;
+    padding: 10px 35px; /* הוקטן */
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(112, 48, 160, 0.25);
+}
+
+/* הודעת שגיאה */
+.error-message-text {
+    color: #ff4d4d;
+    background-color: #fff5f5;
+    padding: 6px 12px;
+    border-radius: 8px;
+    margin-top: 12px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    border: 1px solid #ffcccc;
+}
+
+/* מודל (נשאר ללא שינוי) */
+.example-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.example-modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    position: relative;
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+}
