@@ -1,0 +1,109 @@
+/* --- אזור התוכן (תמונה ראשונה) --- */
+.content-area {
+  position: relative; 
+  height: calc(100vh - 65px);
+  width: 100%;
+  background-image: url('../../../assets/background_car.jpg');
+  background-size: cover;
+  background-position: center;
+  z-index: 10;
+}
+
+.content-area::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: black;
+  opacity: var(--darkness, 0);
+  z-index: 1;
+  transition: opacity 0.1s ease-out;
+}
+
+.dark-background-replacement {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  transition: opacity 0.3s ease-out;
+}
+
+.info-card-text {
+  color: white;
+  text-align: center;
+  padding: 20px;
+  max-width: 90%;
+  position: relative;
+  z-index: 5;
+}
+
+/* --- חלק היתרונות (למה סיטי קאר) --- */
+.next-section {
+  position: relative;
+  z-index: 30;
+  background: #6F3293;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 10%;
+  direction: rtl;
+}
+
+.features-wrapper {
+  display: flex;
+  width: 100%;
+  max-width: 1400px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 60px;
+}
+
+.features-image-side { flex: 1.4; display: flex; justify-content: center; }
+.side-car-img { width: 100%; height: auto; filter: drop-shadow(0 30px 60px rgba(0,0,0,0.7)); }
+.features-text-side { flex: 1; color: white; text-align: right; }
+
+.features-title {
+  font-size: 3rem;
+  margin-bottom: 50px;
+  font-weight: 800;
+  background: linear-gradient(to bottom, #ffffff, #e0e0e0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.feature-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 35px;
+  gap: 25px;
+}
+
+.feature-icon-box {
+  font-size: 2.5rem;
+  min-width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.feature-info h4 { margin: 0; font-size: 1.6rem; color: #ffd700; font-weight: 700; }
+.feature-info p { margin: 5px 0 0 0; font-size: 1.15rem; line-height: 1.5; opacity: 0.9; }
+
+.gallery-section {
+  padding: 50px 20px;
+}
+
+@media (max-width: 1024px) {
+  .features-wrapper { flex-direction: column-reverse; }
+  .features-text-side { text-align: center; }
+  .feature-row { flex-direction: column; align-items: center; }
+}

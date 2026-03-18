@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0; padding: 0; height: 100vh;
+  background-color: #6F3293;
+  font-family: 'Assistant', sans-serif;
+  overflow-x: auto;
+}
+
+.city-car-wrapper {
+  display: block;
+  padding-top: 65px; 
+  height: 100vh;
+  width: 100vw;
+  direction: rtl;
+  scroll-behavior: smooth;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.city-car-wrapper::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* --- נאבר --- */
+.top-navbar {
+  background-color: #6F3293;
+  height: 65px;
+  width: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px; 
+}
+
+.nav-right { display: flex; align-items: center; gap: 15px; color: white; }
+.nav-left { display: flex; align-items: center; gap: 20px; color: white; }
+.main-logo { height: 45px; width: auto; }
+.phone-info { font-size: 14px; white-space: nowrap; }
+.nav-buttons { display: flex; gap: 10px; }
+
+/* סיידבר */
+.right-sidebar {
+  position: fixed;
+  right: 0;
+  top: 65px;
+  width: 80px;
+  height: calc(100vh - 65px);
+  background-color: #6F3293;
+  z-index: 9999; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+}
+.sidebar-item { color: white; padding: 15px 5px; font-size: 12px; text-align: center; cursor: pointer; width: 100%; }
+.sidebar-item span { display: block; margin-top: 5px; }
+
+.btn-white-outline {
+  border: 1px solid white;
+  background: transparent;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.btn-white-outline:hover { background: white; color: #6F3293; }

@@ -8,11 +8,12 @@ html, body {
     margin: 0; padding: 0; height: 100vh;
     background-color: #6F3293;
     font-family: 'Assistant', sans-serif;
-    
+   overflow-x:auto;
 }
 
 .city-car-wrapper {
     display: block;
+    padding-top: 65px; /* גובה הנאבר */
     height: 100vh;
     width: 100vw;
     direction: rtl;
@@ -32,7 +33,9 @@ html, body {
     background-color: #6F3293;
     height: 65px;
     width: 100%;
-    position: sticky;
+    position: fixed;
+    left: 0;
+
     top: 0;
     z-index: 100;
     display: flex;
