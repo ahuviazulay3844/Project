@@ -6,6 +6,18 @@ import {
   MarkerClusterer
 } from '@react-google-maps/api';
 
+const whiteMinimalStyle = [
+  { elementType: "geometry", stylers: [{ color: "#ffffff" }] },
+  { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#000000" }] },
+  { elementType: "labels.text.stroke", stylers: [{ visibility: "off" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#cccccc" }] },
+  { featureType: "poi", stylers: [{ visibility: "off" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  { featureType: "water", stylers: [{ visibility: "off" }] },
+  { featureType: "landscape", stylers: [{ color: "#ffffff" }] }
+];
+
 const GoogleMapWithClusters = ({ carsList = [] }) => {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -22,7 +34,6 @@ const GoogleMapWithClusters = ({ carsList = [] }) => {
     return lat && lng;
   });
 
-  // התאמת המפה לכל הרכבים
   useEffect(() => {
     if (mapRef.current && carsWithLocation.length > 0) {
       const bounds = new window.google.maps.LatLngBounds();
@@ -45,6 +56,7 @@ const GoogleMapWithClusters = ({ carsList = [] }) => {
         mapContainerStyle={{ width: '100%', height: '100%' }}
         center={center}
         zoom={15}
+        options={{ styles: whiteMinimalStyle, disableDefaultUI: true, zoomControl: true }}
         onLoad={map => (mapRef.current = map)}
       >
         {carsWithLocation.length > 0 && (
