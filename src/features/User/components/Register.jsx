@@ -42,17 +42,16 @@ const Register = ({ onStepClick }) => { // מקבלים את הפונקציה מ
         </svg>
 
         {/* שלב 1: שאלות אישיות */}
-        <div className="step-item s1 clickable" onClick={() => onStepClick('questions')}>
-          <div className="circle-wrap"><img src={personal_details} alt="" /></div>
-          <div className="text-wrap">
-            <h3>פרטים אישיים</h3>
-            <ul>
-              <li>אימות פלאפון</li>
-              <li>שם וכתובת</li>
-              <li>אימות אימייל</li>
-            </ul>
-          </div>
-        </div>
+       <div className="step-item s1 clickable" onClick={() => onStepClick('questions')}>
+        <div className="circle-wrap"><img src={personal_details} alt="" /></div>
+        <div className="text-wrap">
+        <h3>פרטים אישיים</h3>
+       <ul>
+      <li>אימות אימייל</li> {/* עדכנתי לפי מה שביקשת קודם */}
+      <li>שם וכתובת</li>
+     </ul>
+    </div>
+     </div>
 
         {/* שלב 2: העלאת מסמכים */}
         <div className="step-item s2 clickable" onClick={() => onStepClick('upload')}>

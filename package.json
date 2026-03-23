@@ -13,12 +13,15 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.9",
+    "@react-google-maps/api": "^2.20.8",
     "@reduxjs/toolkit": "^2.11.2",
     "axios": "^1.13.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-icons": "^5.6.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.13.1",
+    "react-signature-canvas": "^1.1.0-alpha.2",
     "swiper": "^12.1.2"
   },
   "devDependencies": {

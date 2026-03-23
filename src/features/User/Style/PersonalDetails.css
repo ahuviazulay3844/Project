@@ -1,0 +1,267 @@
+/* רקע העמוד - תופס את כל המסך וממרכז את התוכן */
+.questions-page-bg {
+    width: 100%;
+    height: 100vh;
+    background: #fdfbff;
+    background-image: url('../../../assets/registration_bg.png');
+    background-size: cover;
+    background-position: center bottom;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    direction: rtl;
+}
+
+.questions-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.question-card {
+    background: white;
+    border-radius: 40px; 
+    box-shadow: 0 15px 50px rgba(112, 48, 160, 0.1);
+    width: 100%;
+    max-width: 680px; 
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    transition: all 0.4s ease-in-out;
+    min-height: 450px;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-header-purple {
+    background-color: #f6eefe; 
+    padding: 25px 30px;
+    border-bottom: 1px solid #efe0fc;
+}
+
+.header-main-title {
+    color: #7030a0;
+    font-size: 1.8rem; 
+    font-weight: 800;
+    margin: 5px 0 0 0;
+}
+
+.header-sub-text {
+    color: #a3a3a3;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.card-body {
+    padding: 40px 80px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    justify-content: center;
+}
+
+.input-wrapper {
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 20px;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 12px 5px;
+    border: none;
+    border-bottom: 2px solid #eee; 
+    font-size: 1.2rem; 
+    outline: none;
+    background: transparent;
+    text-align: center;
+    transition: 0.3s;
+    color: #4a4a4a;
+}
+
+.input-wrapper input:focus {
+    border-bottom-color: #7030a0;
+}
+
+/* --- עיצוב OTP מתוקן (כמו בתמונה הראשונה) --- */
+
+.code-inputs {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin: 40px 0;
+    direction: ltr;
+}
+
+.code-square-oval {
+    width: 45px;
+    height: 55px;
+    font-size: 1.6rem;
+    font-weight: 500;
+    text-align: center;
+
+    border: none;
+    border-bottom: 2px solid #e6e6e6;
+
+    background: transparent;
+    color: #7030a0;
+
+    outline: none;
+    transition: all 0.25s ease;
+}
+
+.code-square-oval:focus {
+    border-bottom: 2px solid #7030a0;
+}
+
+.code-square-oval:focus-visible {
+    outline: none;
+}
+
+.code-square-oval::-webkit-outer-spin-button,
+.code-square-oval::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* --- סיום OTP --- */
+
+.gold-btn {
+    background: #ffdb8b;
+    border: none;
+    padding: 16px 30px;
+    border-radius: 50px;
+    width: 100%;
+    max-width: 350px; 
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: #5d4037;
+    cursor: pointer;
+    margin-top: 15px;
+    box-shadow: 0 6px 15px rgba(255, 219, 139, 0.3);
+    transition: 0.3s;
+}
+
+.gold-btn:hover:not(:disabled) {
+    background: #ffcc66;
+    transform: translateY(-2px);
+}
+
+.error-text {
+    color: #ff4d4d;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.back-arrow-btn {
+    position: absolute;
+    bottom: 25px;
+    right: 25px;
+    background: #ffcc66;
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+/* הוסיפי את זה ל-PersonalDetails.css */
+.info-label {
+    color: #7030a0;
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.input-wrapper input[type="date"] {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 15px 0;
+    color: #4a4a4a;
+    font-weight: 500;
+}
+
+.checkbox-wrapper input {
+    width: 20px;
+    height: 20px;
+    accent-color: #7030a0;
+}
+.success-container-modern {
+    width: 100%;
+    max-width: 500px;
+    animation: fadeInScale 0.5s ease-out;
+}
+
+.success-card {
+    background: white;
+    padding: 50px 40px;
+    border-radius: 40px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(112, 48, 160, 0.15);
+}
+
+.success-check-icon {
+    font-size: 60px;
+    color: #28a745;
+    background: #eefaf1;
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 25px;
+}
+
+.success-card h2 {
+    color: #7030a0;
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+.success-card p {
+    color: #666;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.progress-loader {
+    width: 100%;
+    height: 6px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    margin: 30px 0 15px;
+    overflow: hidden;
+}
+
+.progress-loader-bar {
+    height: 100%;
+    background: #ffdb8b;
+    width: 0%;
+    animation: loadProgress 3.5s linear forwards;
+}
+
+.redirect-info {
+    font-size: 0.9rem;
+    color: #a3a3a3;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes loadProgress {
+    from { width: 0%; }
+    to { width: 100%; }
+}

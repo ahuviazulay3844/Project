@@ -17,9 +17,7 @@ const UploadDocuments = ({ onBack, onFinish, uploadData, setUploadData }) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result;
-        // עדכון ה-State של MainPage
         setUploadData(prev => ({ ...prev, [currentStep]: base64String }));
-        
         // מעבר אוטומטי לשלב הבא
         if (currentStep < 2) {
           setTimeout(() => setCurrentStep(currentStep + 1), 500);
@@ -28,15 +26,12 @@ const UploadDocuments = ({ onBack, onFinish, uploadData, setUploadData }) => {
       reader.readAsDataURL(file);
     }
   };
-
   // בדיקה האם יש תמונות כפולות
   const hasDuplicates = () => {
     const images = [uploadData[0], uploadData[1], uploadData[2]].filter(img => img !== null);
     return new Set(images).size !== images.length;
   };
-
   const isAllUploaded = uploadData[0] && uploadData[1] && uploadData[2];
-
   return (
     <div className="upload-page-container">
       {/* עיצוב צדדי */}
@@ -46,7 +41,6 @@ const UploadDocuments = ({ onBack, onFinish, uploadData, setUploadData }) => {
            <img src={idCardImg} alt="Passport Icon" className="main-icon-img" />
         </div>
       </div>
-
       <div className="upload-main-content">
         {/* עיגולי סטפר למעלה */}
         <div className="stepper-dots-container">
@@ -84,7 +78,6 @@ const UploadDocuments = ({ onBack, onFinish, uploadData, setUploadData }) => {
           <p className="error-message-text">נראה שהעלית תמונות זהות. נא לוודא שכל המסמכים שונים.</p>
         )}
 
-        {/* חץ צהוב - חזרה לרישום */}
         <button className="bottom-back-btn" onClick={onBack}>➜</button>
 
         {/* כפתור סיום - יופיע רק אם הכל הועלה ואין כפילויות */}
@@ -95,7 +88,6 @@ const UploadDocuments = ({ onBack, onFinish, uploadData, setUploadData }) => {
         )}
       </div>
 
-      {/* מודל דוגמה */}
       {showExample && (
         <div className="example-modal-overlay" onClick={() => setShowExample(false)}>
           <div className="example-modal-content" onClick={(e) => e.stopPropagation()}>

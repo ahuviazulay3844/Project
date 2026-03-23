@@ -2,8 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { userApi } from './userApi';
 
 const initialState = {
-  currentUser: null,
-  token: null, // נוסיף שדה נפרד לטוקן
+  token: localStorage.getItem('token') || null,
 };
 
 const userSlice = createSlice({
@@ -11,23 +10,22 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      state.currentUser = null;
       state.token = null;
       localStorage.removeItem('token');
+      // גורם לכל ה-API להימחק מהזיכרון כדי למנוע דליפת נתונים של משתמש קודם
+      window.location.reload(); 
     },
   },
-extraReducers: (builder) => {
-  builder.addMatcher(
-    userApi.endpoints.loginUser.matchFulfilled,
-    (state, { payload }) => {
-      // payload עכשיו מכיל את האובייקט החדש מהשרת
-      state.token = payload.token; 
-      state.currentUser = payload.user; // כאן נשמר השם "אהובה"
-      
-      localStorage.setItem('token', payload.token);
-    }
-  );
-},
+  extraReducers: (builder) => {
+    builder.addMatcher(
+      userApi.endpoints.loginUser.matchFulfilled,
+      (state, { payload }) => {
+        // payload הוא ה-string שה-API מחזיר (הטוקן)
+        state.token = payload; 
+        localStorage.setItem('token', payload);
+      }
+    );
+  },
 });
 
 export default userSlice.reducer;

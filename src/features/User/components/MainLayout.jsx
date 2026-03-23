@@ -1,7 +1,8 @@
 import React from 'react';
 import logoImg from '../../../assets/top_icon.png';
 import '../Style/MainLayout.css';
-const MainLayout = ({ children, userName, onLogoClick, onRegisterClick }) => {
+
+const MainLayout = ({ children, userName, onLogoClick, onRegisterClick, onNewOrderClick, onProfileClick }) => {
   return (
     <div className="city-car-wrapper">
       <nav className="top-navbar">
@@ -14,7 +15,7 @@ const MainLayout = ({ children, userName, onLogoClick, onRegisterClick }) => {
           <div className="nav-left">
             <span className="phone-info">* 2319 | 0-2319-2319</span>
             <div className="nav-buttons">
-              <button className="btn-white-outline">הזמנה חדשה</button>
+              <button className="btn-white-outline" onClick={onNewOrderClick}>הזמנה חדשה</button>
               <button className="btn-white-outline" onClick={onRegisterClick}>הרשמה</button>
             </div>
           </div>
@@ -22,7 +23,9 @@ const MainLayout = ({ children, userName, onLogoClick, onRegisterClick }) => {
       </nav>
 
       <aside className="right-sidebar">
-        <div className="sidebar-item">👤 <span>אזור אישי</span></div>
+        <div className="sidebar-item" onClick={onProfileClick} style={{cursor: 'pointer'}}>
+            👤 <span>אזור אישי</span>
+        </div>
         <div className="sidebar-item">🚗 <span>הזמנות</span></div>
         <div className="sidebar-item">₪ <span>מחירון</span></div>
         <div className="sidebar-item">ℹ️ <span>מידע חשוב</span></div>
@@ -30,7 +33,7 @@ const MainLayout = ({ children, userName, onLogoClick, onRegisterClick }) => {
       </aside>
 
       <div className="main-scroll-area">
-        {children} {/* כאן יוזרק התוכן המשתנה */}
+        {children}
       </div>
     </div>
   );
