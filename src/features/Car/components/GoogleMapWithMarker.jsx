@@ -1,15 +1,11 @@
 import React, { useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
-import '../Style/GoogleMapWithMarkerars.css';
+import '../Style/GoogleMapWithMarker.css';
+
 const whiteMinimalStyle = [
   { elementType: "geometry", stylers: [{ color: "#ffffff" }] },
   { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#000000" }] },
-  { elementType: "labels.text.stroke", stylers: [{ visibility: "off" }] },
   { featureType: "road", elementType: "geometry", stylers: [{ color: "#cccccc" }] },
-  { featureType: "poi", stylers: [{ visibility: "off" }] },
-  { featureType: "transit", stylers: [{ visibility: "off" }] },
-  { featureType: "water", stylers: [{ visibility: "off" }] },
   { featureType: "landscape", stylers: [{ color: "#ffffff" }] }
 ];
 
@@ -31,20 +27,16 @@ const GoogleMapWithMarker = ({ carLocation, carTitle }) => {
   return (
     <div className="map-container-style">
       <GoogleMap
-        mapContainerStyle={{ width: '100%', height: '100%', borderRadius: '15px' }}
+        mapContainerStyle={{ width: '100%', height: '100%' }}
         center={position}
         zoom={16}
-        options={{ 
-          disableDefaultUI: true, 
-          zoomControl: true, 
-          styles: whiteMinimalStyle 
-        }}
+        options={{ disableDefaultUI: true, zoomControl: true, styles: whiteMinimalStyle }}
       >
         <MarkerF
           position={position}
           title={carTitle}
           icon={{
-            url: '/assets/car-purple.png', 
+            url: '/assets/car_icon_purple.png', 
             scaledSize: new window.google.maps.Size(45, 45),
             anchor: new window.google.maps.Point(22, 22)
           }}
