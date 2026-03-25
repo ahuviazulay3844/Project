@@ -1,18 +1,81 @@
-.map-container-style {
+/* רקע כהה שקוף מאחורי הפופ-אפ */
+.custom-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 450px;
-    border-radius: 18px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    overflow: hidden;
-    border: 1px solid #eee;
-}
-
-.loading-map {
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4); /* החשכה של המפה */
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 450px;
-    background: #fdfdfd;
-    font-family: inherit;
-    color: #999;
+    z-index: 2000;
+}
+
+.car-details-popup {
+    background: #f4eaff; /* צבע סגלגל בהיר מהתמונה */
+    width: 380px;
+    padding: 30px;
+    border-radius: 25px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.status-title {
+    color: #5d299a;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.car-main-img {
+    width: 180px;
+    margin: 20px 0;
+}
+
+.location-name {
+    color: #5d299a;
+    font-size: 1.2rem;
+    margin: 5px 0;
+}
+
+.car-model-name {
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.change-times-btn {
+    background: none;
+    border: none;
+    color: #5d299a;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.action-confirm-btn {
+    background-color: #ffc107; /* צהוב "סיטי קאר" */
+    color: #5d299a;
+    border: none;
+    width: 100%;
+    padding: 15px;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-top: 25px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.close-popup-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #5d299a;
+    cursor: pointer;
 }

@@ -1,64 +1,181 @@
+/* מכולה ראשית */
 .map-wrapper {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    position: relative;
     width: 100%;
-}
-
-.map-container {
-    position: relative; 
-    width: 100%;
-    height: 500px;
-    border-radius: 20px;
+    height: 100vh;
     overflow: hidden;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-    border: 1px solid #eee;
+    background-color: #f8f9fa;
 }
 
-.loading-map {
-    display: flex;
-    align-items: center;
-    height: 500px;
-    background: #fdfdfd;
-    color: #999;
-    font-size: 1.1rem;
+.map-inner-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
 
-/* עיצוב כפתור המיקום שלי */
+.google-map-instance {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* --- כפתורי שליטה (סימטריה מלאה) --- */
+
+/* כפתור מיקום */
 .my-location-floating-btn {
-    position: absolute;
-    right: 20px;
-    bottom: 20px;
-    z-index: 10;
-    width: 45px;
-    height: 45px;
-    background: white;
-    border: none;
+    position: absolute !important;
+    left: 25px !important;
+    bottom: 60px !important; 
+    z-index: 9999 !important;
+    width: 50px; /* גודל זהה לזום */
+    height: 50px;
+    background: #ffffff !important;
+    border: 1px solid #e0e0e0;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    display: flex;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: flex !important;
     align-items: center;
-    transition: all 0.2s ease;
+    justify-content: center;
+    padding: 0;
 }
 
-.my-location-floating-btn:hover {
-    transform: scale(1.05);
-    background-color: #f8f8f8;
-}
-
+/* עיצוב פנימי לכפתור המיקום כדי שלא יהיה ריק */
 .location-outer-circle {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #5d299a; 
+    width: 18px;
+    height: 18px;
+    border: 2px solid #5d299a;
     border-radius: 50%;
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 .location-inner-dot {
-    width: 7px;
-    height: 7px;
+    width: 8px;
+    height: 8px;
     background-color: #5d299a;
     border-radius: 50%;
+}
+
+/* כפתורי זום */
+.custom-zoom-controls {
+    position: absolute !important;
+    left: 25px !important;
+    bottom: 125px !important; /* רווח קבוע מעל המיקום */
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 9999 !important;
+}
+
+.custom-zoom-controls button {
+    width: 50px; /* גודל זהה למיקום */
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid #e0e0e0;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-size: 22px;
+    font-weight: bold;
+    color: #5d299a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- פופאפ ועיצוב תוכן --- */
+
+.custom-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.car-details-popup {
+    background: #f4eaff; 
+    width: 350px;
+    padding: 25px;
+    border-radius: 35px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.popup-image-container {
+    width: 100%;
+    height: 120px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.car-main-img {
+    max-width: 200px; /* גודל תמונה מאוזן */
+    height: auto;
+    max-height: 100px;
+    object-fit: contain;
+}
+
+.status-title {
+    color: #5d299a;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.location-name {
+    color: #5d299a;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 5px 0;
+}
+
+.car-model-name {
+    color: #333;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.action-confirm-btn {
+    background-color: #ffc107;
+    color: #5d299a;
+    border: none;
+    width: 100%;
+    padding: 15px;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.close-popup-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #5d299a;
+    cursor: pointer;
+}
+
+.change-times-btn {
+    background: none;
+    border: none;
+    color: #5d299a;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
 }
