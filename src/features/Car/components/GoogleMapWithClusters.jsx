@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, MarkerF, MarkerClusterer } from '@react-google-maps/api';
 import '../Style/GoogleMapWithClusters.css';
-
 const whiteMinimalStyle = [
   { elementType: "geometry", stylers: [{ color: "#ffffff" }] },
   { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
@@ -23,7 +22,7 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect }) => {
     language: 'iw',
     region: 'IL'
   });
-
+  const [currentStep, setCurrentStep] = useState(1);
   const [userLocation, setUserLocation] = useState(null);
   const [selectedCar, setSelectedCar] = useState(null);
   const mapRef = useRef(null);
@@ -67,7 +66,50 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect }) => {
   return (
     <div className="map-wrapper">
       <div className="map-inner-container">
-        
+
+     <div className="left-steps-panel">
+  <div className="steps-container">
+
+    <div className="steps-title">ביצוע הזמנה</div>
+
+    {/* שלב 1 */}
+    <div 
+      className={`step-pill ${currentStep === 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}
+      onClick={() => setCurrentStep(1)}
+    >
+      <div className="step-circle">{currentStep > 1 ? '✓' : ''}</div>
+      <div className="step-text">
+        <span className="step-number">שלב 1</span>
+        <span className="step-label">מסלולים זמינים</span>
+      </div>
+    </div>
+
+    {/* שלב 2 */}
+    <div 
+      className={`step-pill ${currentStep === 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}
+      onClick={() => setCurrentStep(2)}
+    >
+      <div className="step-circle">{currentStep > 2 ? '✓' : ''}</div>
+      <div className="step-text">
+        <span className="step-number">שלב 2</span>
+        <span className="step-label">בחירת רכב</span>
+      </div>
+    </div>
+
+    {/* שלב 3 */}
+    <div 
+      className={`step-pill ${currentStep === 3 ? 'active' : ''} ${currentStep > 3 ? 'completed' : ''}`}
+      onClick={() => setCurrentStep(3)}
+    >
+      <div className="step-circle">{currentStep > 3 ? '✓' : ''}</div>
+      <div className="step-text">
+        <span className="step-number">שלב 3</span>
+        <span className="step-label">בחירת כיסויים</span>
+      </div>
+    </div>
+
+  </div>
+</div>
         <GoogleMap
           mapContainerClassName="google-map-instance"
           onLoad={map => mapRef.current = map}
