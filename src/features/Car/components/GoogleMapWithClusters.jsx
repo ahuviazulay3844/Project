@@ -2,6 +2,7 @@ import React, { useMemo, useState, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, MarkerF, MarkerClusterer } from '@react-google-maps/api';
 import '../Style/GoogleMapWithClusters.css';
 import RouteSidePanel from './RouteSidePanel.jsx';
+import CoverageSidePanel from './CoverageSidePanel.jsx';
 import CarSelectionList from './CarSelectionList.jsx';
 import { useGetClosestCarsQuery } from '../redux/carApi.jsx';
 
@@ -49,10 +50,17 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
           mapRef.current?.panTo(coords);
           mapRef.current?.setZoom(16);
         },
-        () => alert("יש לאשר הרשאות מיקום.")
+        () => setNotification('יש לאשר הרשאות מיקום בדפדפן (ההרשאות נחוצות).')
       );
     }
   };
+
+  const [notification, setNotification] = useState(null);
+  React.useEffect(() => {
+    if (!notification) return;
+    const t = setTimeout(() => setNotification(null), 4000);
+    return () => clearTimeout(t);
+  }, [notification]);
 
   const processedCars = useMemo(() => {
     return (carsList || [])
@@ -144,56 +152,67 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
 
         <div className="main-display-area">
           <div className="map-and-grid">
-            {!showGridFull ? (
-              <div className="map-view">
-            <GoogleMap
-              mapContainerClassName="google-map-instance"
-              onLoad={map => mapRef.current = map}
-              center={processedCars[0]?.position || { lat: 32.05, lng: 34.95 }}
-              zoom={14}
-              options={{ styles: whiteMinimalStyle, disableDefaultUI: true }}
-            >
-              {userLocation && (
-                <MarkerF position={userLocation} icon={{ url: '/assets/my_position_icon.png', scaledSize: new window.google.maps.Size(30, 40) }} />
-              )}
-              <MarkerClusterer>
-                {(clusterer) =>
-                  processedCars.map((car) => (
-                    <MarkerF
-                      key={car.id}
-                      position={car.position}
-                      clusterer={clusterer}
-                      onClick={() => { setSelectedCar(car); setSelectedCarId(car.id); setOriginSelection('map'); setShowSidePanel(true); }}
-                      icon={{ url: car.carIcon, scaledSize: new window.google.maps.Size(25, 45) }}
-                    />
-                  ))
-                }
-              </MarkerClusterer>
-            </GoogleMap>
-
-            <div className="custom-zoom-controls">
-              <button onClick={() => mapRef.current?.setZoom(mapRef.current.getZoom() + 1)}>+</button>
-              <button onClick={() => mapRef.current?.setZoom(mapRef.current.getZoom() - 1)}>-</button>
-            </div>
-            <button className="my-location-floating-btn" onClick={handleLocationClick}>
-              <div className="location-outer-circle"><div className="location-inner-dot"></div></div>
-            </button>
-
-            </div>
-            ) : (
+            {currentStep === 3 ? (
+              <div className="grid-full">
+                <CoverageSidePanel
+                  selectedCar={selectedCar}
+                  onClose={() => { setCurrentStep(2); }}
+                  onConfirm={(payload) => {
+                    setCompletedSteps(prev => [...new Set([...prev, 3])]);
+                    try {
+                      if (typeof onRouteConfirm === 'function') onRouteConfirm(payload);
+                    } catch (e) { console.error('onRouteConfirm error', e); }
+                    setCurrentStep(4);
+                  }}
+                />
+              </div>
+            ) : showGridFull ? (
               <div className="grid-full">
                 <CarSelectionList
                   cars={sortedCars.length ? sortedCars : processedCars}
                   onSelectCar={(car) => {
-                      setSelectedCar(car);
-                      setSelectedCarId(car.id);
-                      setCompletedSteps(prev => [...new Set([...prev, 2])]);
-                      setCurrentStep(3);
-                      if (typeof onCarSelect === 'function') {
-                        onCarSelect(car);
-                      }
+                    setSelectedCar(car);
+                    setSelectedCarId(car.id);
+                    setCompletedSteps(prev => [...new Set([...prev, 2])]);
+                    setCurrentStep(3);
+                    if (typeof onCarSelect === 'function') onCarSelect(car);
                   }}
                 />
+              </div>
+            ) : (
+              <div className="map-view">
+                <GoogleMap
+                  mapContainerClassName="google-map-instance"
+                  onLoad={map => mapRef.current = map}
+                  center={processedCars[0]?.position || { lat: 32.05, lng: 34.95 }}
+                  zoom={14}
+                  options={{ styles: whiteMinimalStyle, disableDefaultUI: true }}
+                >
+                  {userLocation && (
+                    <MarkerF position={userLocation} icon={{ url: '/assets/my_position_icon.png', scaledSize: new window.google.maps.Size(30, 40) }} />
+                  )}
+                  <MarkerClusterer>
+                    {(clusterer) =>
+                      processedCars.map((car) => (
+                        <MarkerF
+                          key={car.id}
+                          position={car.position}
+                          clusterer={clusterer}
+                          onClick={() => { setSelectedCar(car); setSelectedCarId(car.id); setOriginSelection('map'); setShowSidePanel(true); }}
+                          icon={{ url: car.carIcon, scaledSize: new window.google.maps.Size(25, 45) }}
+                        />
+                      ))
+                    }
+                  </MarkerClusterer>
+                </GoogleMap>
+
+                <div className="custom-zoom-controls">
+                  <button onClick={() => mapRef.current?.setZoom(mapRef.current.getZoom() + 1)}>+</button>
+                  <button onClick={() => mapRef.current?.setZoom(mapRef.current.getZoom() - 1)}>-</button>
+                </div>
+                <button className="my-location-floating-btn" onClick={handleLocationClick}>
+                  <div className="location-outer-circle"><div className="location-inner-dot"></div></div>
+                </button>
               </div>
             )}
           </div>
@@ -210,7 +229,7 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
                 setShowSidePanel(false);
                 try {
                   if (typeof onRouteConfirm === 'function') {
-                    try { onRouteConfirm(payload); } catch { /* ignore */ }
+                    onRouteConfirm(payload);
                   }
 
                   if (originSelection === 'grid') {
@@ -235,7 +254,7 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
                       setCompletedSteps(prev => [...new Set([...prev, 2])]);
                       setCurrentStep(3);
                       if (typeof onCarSelect === 'function') {
-                        try { onCarSelect(payload.selectedCar); } catch { /* ignore */ }
+                        onCarSelect(payload.selectedCar);
                       }
                     }
                     setShowGridFull(false);

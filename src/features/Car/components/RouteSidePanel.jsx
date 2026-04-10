@@ -73,6 +73,26 @@ const RouteSidePanel = ({ onClose, onConfirm, selectedCar }) => {
     });
   };
 
+  const [error, setError] = React.useState(null);
+
+  const includesSaturday = (start, end) => {
+    if (!start || !end) return false;
+    const s = new Date(start);
+    const e = new Date(end);
+    // if start is saturday => invalid
+    if (s.getDay() === 6) return true;
+    // iterate days from start to end (inclusive); if any day is Saturday (6) -> invalid
+    const cur = new Date(s);
+    cur.setHours(0,0,0,0);
+    const last = new Date(e);
+    last.setHours(0,0,0,0);
+    while (cur <= last) {
+      if (cur.getDay() === 6) return true;
+      cur.setDate(cur.getDate() + 1);
+    }
+    return false;
+  };
+
   return (
     <div className="route-side-panel">
       <div className="panel-header">
@@ -128,7 +148,13 @@ const RouteSidePanel = ({ onClose, onConfirm, selectedCar }) => {
         </div>
       </div>
 
+      {error && <div className="panel-error">{error}</div>}
       <button className="confirm-btn-large" onClick={() => {
+            setError(null);
+            if (includesSaturday(startDateTime, endDateTime)) {
+              setError('לא ניתן להתחיל או שההזמנה נמשכת לשבת. בחרי זמנים אחרים.');
+              return;
+            }
             const payload = {
               selectedCar: selectedCar || null,
               route: {
