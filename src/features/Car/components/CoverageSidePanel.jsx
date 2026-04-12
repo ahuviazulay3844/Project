@@ -1,49 +1,86 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../Style/CoverageSidePanel.css';
 
-export default function CoverageSidePanel({ selectedCar, onClose, onConfirm }) {
-  const [routeDraft] = useState(() => {
-    const raw = localStorage.getItem('routeDraft');
-    return raw ? JSON.parse(raw) : { totalHours: 0, start: null, end: null };
+export default function CoverageSidePanel({ selectedCar: propCar, onClose, onConfirm }) {  
+  // 1. טעינת הזמנים - נשמרים ב-localStorage ומתעדכנים אוטומטית
+  const [routeDraft, setRouteDraft] = useState(() => {
+    try {
+      const raw = localStorage.getItem('routeDraft');
+      return raw ? JSON.parse(raw) : { totalHours: 0, start: null, end: null, selectedCar: null };
+    } catch { 
+      return { totalHours: 0, start: null, end: null, selectedCar: null };
+    }
   });
 
-  const [waiver, setWaiver] = useState(false);
+  // 2. טעינת הכיסוי (V) - עכשיו הוא יבדוק בזיכרון אם כבר בחרת משהו קודם
+  const [waiver, setWaiver] = useState(() => {
+    return localStorage.getItem('coverage_waiver') === 'true';
+  });
 
-  const totalHours = routeDraft.totalHours || 0;
-  const totalDays = Math.floor(totalHours / 24);
-  const remainingHours = totalHours % 24;
-  
-  // חישוב אוטומטי: 50 ליום ו-3 לכל שעה נוספת
-  const calculatedCost = (totalDays * 50) + (remainingHours * 3);
+  // 3. שמירת הבחירה של ה-V בזיכרון בכל פעם שהיא משתנה
+  useEffect(() => {
+    localStorage.setItem('coverage_waiver', waiver);
+  }, [waiver]);
 
-  const isTimeBlocked = () => {
-    if (!routeDraft.end) return false;
-    const endDate = new Date(routeDraft.end);
-    const day = endDate.getDay(); 
-    const hour = endDate.getHours();
-    if (day === 6) return true; // שבת
-    if (day === 5 && hour >= 15) return true; // שישי מ-15:00
-    return false;
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const raw = localStorage.getItem('routeDraft');
+      if (raw) setRouteDraft(JSON.parse(raw));
+    };
+    window.addEventListener('storage', handleStorageChange);
+    handleStorageChange(); 
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const activeCar = propCar || routeDraft?.selectedCar;
+
+  const calculateFinalHours = () => {
+    if (!routeDraft?.start || !routeDraft?.end) return 0;
+    const start = new Date(routeDraft.start);
+    const end = new Date(routeDraft.end);
+    let diffInHours = Math.ceil((end - start) / (1000 * 60 * 60)); 
+    if (diffInHours <= 0) diffInHours = 1;
+    let billableCount = 0;
+    let current = new Date(start);
+    for (let i = 0; i < diffInHours; i++) {
+      const day = current.getDay();
+      const hour = current.getHours();
+      const isShabbat = (day === 5 && hour >= 16) || (day === 6 && hour < 20);
+      if (!isShabbat) billableCount++;
+      current.setHours(current.getHours() + 1);
+    }
+    return billableCount;
   };
 
-  const blocked = isTimeBlocked();
+  const billableHours = calculateFinalHours();
+  const fullDays = Math.floor(billableHours / 24);
+  const remainingHours = billableHours % 24;
+  const waiverCost = (fullDays * 50) + (remainingHours * 3);
+
+  const isCarSelected = !!(activeCar?.id || activeCar?.Id || activeCar?.model || activeCar?.Model);
+
+  const blocked = (() => {
+    if (!routeDraft?.end) return true;
+    const end = new Date(routeDraft.end);
+    const day = end.getDay();
+    const hour = end.getHours();
+    return (day === 5 && hour >= 16) || (day === 6 && hour < 20);
+  })();
+
+  const canProgress = isCarSelected && !blocked && billableHours >= 1;
 
   const handleFinalConfirm = () => {
-    if (blocked) return;
-
-    // אובייקט נתונים מושלם לעדכון ה-DB
-    const bookingData = {
-      carId: selectedCar?.id || selectedCar?.Id,
-      model: selectedCar?.Model || selectedCar?.model,
+    if (!canProgress) return;
+    onConfirm({
+      carId: activeCar?.id || activeCar?.Id || activeCar?.carId,
+      model: activeCar?.Model || activeCar?.model,
       startTime: routeDraft.start,
       endTime: routeDraft.end,
-      totalHours: totalHours,
-      totalPrice: calculatedCost + (waiver ? calculatedCost : 0),
+      billableHours: billableHours,
+      totalPrice: (waiver ? waiverCost : 0), 
       hasWaiver: waiver,
-      status: 'Occupied' // משנה לרכב תפוס בדאטה
-    };
-
-    onConfirm(bookingData);
+      status: 'Occupied'
+    });
   };
 
   return (
@@ -51,46 +88,37 @@ export default function CoverageSidePanel({ selectedCar, onClose, onConfirm }) {
       <div className="coverage-card">
         <button className="close-x" onClick={onClose}>×</button>
         
-        <h2 className="car-title">אישור הזמנה: {selectedCar?.Model}</h2>
+        <h2 className="car-title">
+          ביטול השתתפות עצמית
+        </h2>
         
         <div className="selection-area">
-          <label className={`custom-waiver-row ${waiver ? 'active' : ''}`}>
+          <p className="summary-text">
+            זמן לחיוב: <strong>{fullDays > 0 ? `${fullDays} ימים ו-` : ''}{remainingHours} שעות</strong>
+          </p>          
+          <div className={`custom-waiver-row ${waiver ? 'active' : ''}`} onClick={() => setWaiver(!waiver)}>
             <div className="waiver-info">
               <span className="waiver-label">ביטול השתתפות עצמית</span>
-              <span className="waiver-subtext">הגנה מלאה בנסיעה שלך</span>
+              <span className="waiver-subtext">3₪ לשעה / 50₪ ליום</span>
             </div>
-            <div className="waiver-action">
-              <span className="price-display">₪{calculatedCost}</span>
-              <input 
-                type="checkbox" 
-                checked={waiver} 
-                onChange={() => setWaiver(!waiver)} 
-              />
-            </div>
-          </label>
-        </div>
-
-        {blocked ? (
-          <div className="shabbat-alert">
-            <div className="shabbat-icon">🕯️🕯️</div>
-            <div className="shabbat-text">
-              <strong>זמני השבת חסומים</strong>
-              <p>לא ניתן לבצע הזמנות בשבת קודש. נא לבחור מועד אחר.</p>
+            <div className="waiver-selection">
+                <span className="price-tag">₪{waiverCost}</span>
+                <div className={`custom-checkbox ${waiver ? 'checked' : ''}`}>
+                  {waiver && <span className="check-mark">✓</span>}
+                </div>
             </div>
           </div>
-        ) : (
-          <div className="final-price-summary">
-             <span>סה"כ לתשלום:</span>
-             <strong>₪{calculatedCost + (waiver ? calculatedCost : 0)}</strong>
+        </div>
+
+        {blocked && (
+          <div className="shabbat-alert">
+            <strong>🕯️ זמני השבת חסומים</strong>
+            <p>לא ניתן להחזיר רכב בשבת.</p>
           </div>
         )}
 
-        <button 
-          className={`confirm-btn ${blocked ? 'disabled' : ''}`}
-          disabled={blocked}
-          onClick={handleFinalConfirm}
-        >
-          {blocked ? 'מועד לא זמין' : 'אשר ושנה לרכב תפוס'}
+        <button className={`confirm-btn ${!canProgress ? 'disabled' : ''}`} disabled={!canProgress} onClick={handleFinalConfirm}>
+          {!isCarSelected ? 'בחר רכב תחילה' : blocked ? 'מועד לא זמין' : ` אישור ${waiver ? `(₪${waiverCost})` : ''}`}
         </button>
       </div>
     </div>

@@ -1,132 +1,157 @@
 .coverage-modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* צבע סגול כהה עם שקיפות המכסה את כל המסך */
+  background: rgba(46, 12, 63, 0.75); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* z-index גבוה במיוחד כדי לעבור את התפריטים הצדדיים */
+  z-index: 9999; 
+  /* אפקט טשטוש לכל מה שמתחת לרקע הסגול */
+  backdrop-filter: blur(8px); 
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .coverage-card {
-  background: #fff;
-  width: 400px;
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  background: #ffffff;
+  width: 440px;
+  border-radius: 28px;
+  padding: 40px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
   position: relative;
   direction: rtl;
 }
 
 .car-title {
   color: #5d299a;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
-  margin-bottom: 25px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.category-title {
+  color: #5d299a;
+  font-size: 1.1rem;
+  margin: 20px 0 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+}
+
+.summary-text {
+  color: #333;
+  font-size: 1.1rem;
   text-align: center;
 }
 
-/* שורת בחירה מעוצבת */
 .custom-waiver-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px;
-  border: 2px solid #f0f0f0;
-  border-radius: 12px;
+  padding: 22px;
+  border: 2px solid #ddd;
+  border-radius: 18px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.2s ease;
 }
 
 .custom-waiver-row.active {
   border-color: #5d299a;
-  background-color: #f9f5ff;
-}
-
-.waiver-info {
-  display: flex;
-  flex-direction: column;
+  background-color: #f4eaff;
 }
 
 .waiver-label {
-  font-weight: 700;
-  font-size: 16px;
-  color: #333;
+  font-weight: bold;
+  color: #5d299a;
+  display: block;
 }
 
 .waiver-subtext {
-  font-size: 12px;
-  color: #888;
+  color: #666;
+  font-size: 0.85rem;
 }
 
-.price-display {
+.price-tag {
+  font-size: 1.2rem;
   font-weight: 800;
-  color: #5d299a;
-  font-size: 18px;
+  color: #333;
   margin-left: 10px;
 }
 
-/* הודעת שבת יפה */
-.shabbat-alert {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 12px;
-  padding: 15px;
-  margin-top: 20px;
+.waiver-selection {
   display: flex;
   align-items: center;
-  gap: 15px;
-  text-align: right;
 }
 
-.shabbat-icon {
-  font-size: 24px;
-}
-
-.shabbat-text strong {
-  display: block;
-  color: #1e40af;
-  font-size: 14px;
-}
-
-.shabbat-text p {
-  margin: 0;
-  font-size: 13px;
-  color: #1e40af;
-}
-
-.final-price-summary {
-  margin-top: 20px;
+.custom-checkbox {
+  border: 2px solid #5d299a;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
   display: flex;
-  justify-content: space-between;
-  font-size: 18px;
-  color: #333;
+  align-items: center;
+  justify-content: center;
+  background: white;
 }
 
-/* כפתור אישור */
+.custom-checkbox.checked {
+  background: #5d299a;
+}
+
+.check-mark {
+  color: white;
+  font-weight: bold;
+}
+
+.shabbat-alert {
+  background: #ffebee;
+  padding: 12px;
+  border-radius: 12px;
+  color: #c62828;
+  text-align: center;
+  margin-top: 15px;
+  border: 1px solid #ffcdd2;
+}
+
 .confirm-btn {
   width: 100%;
   margin-top: 25px;
   padding: 16px;
   border-radius: 50px;
   border: none;
-  background: #ffcc00;
-  color: #333;
+  background-color: #ffc107;
+  color: #5d299a;
   font-weight: 800;
-  font-size: 18px;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(255, 204, 0, 0.4);
+  font-size: 1.2rem;
+  transition: transform 0.1s active;
+}
+
+.confirm-btn:active {
+  transform: scale(0.98);
 }
 
 .confirm-btn.disabled {
-  background: #e5e7eb;
-  color: #9ca3af;
+  background-color: #e0e0e0;
+  color: #9e9e9e;
   cursor: not-allowed;
-  box-shadow: none;
 }
 
 .close-x {
   position: absolute;
-  top: 15px; right: 15px;
-  background: none; border: none;
-  font-size: 20px; color: #999; cursor: pointer;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #bdc3c7;
+  cursor: pointer;
+}
+
+.close-x:hover {
+  color: #7f8c8d;
 }

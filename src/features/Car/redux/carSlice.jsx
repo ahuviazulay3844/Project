@@ -41,6 +41,7 @@ const carSlice = createSlice({
             );
     },
 });
-
+export const selectCarStatus = (state) => state.car.status;
+export const selectAllCars = (state) => state.car.carsList;
 export const { resetCarState } = carSlice.actions;
 export default carSlice.reducer;

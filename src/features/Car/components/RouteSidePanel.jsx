@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import "../Style/RouteSidePanel.css";
 
 const roundToNext10 = (d) => {
@@ -7,167 +7,150 @@ const roundToNext10 = (d) => {
   const next = Math.ceil(minutes / 10) * 10;
   copy.setMinutes(next);
   copy.setSeconds(0);
+  copy.setMilliseconds(0);
   return copy;
 };
 
 const RouteSidePanel = ({ onClose, onConfirm, selectedCar }) => {
-  const now = roundToNext10(new Date());
+  const now = useMemo(() => roundToNext10(new Date()), []);
 
-  // פונקציה לשליפת נתונים שמורים
-  const getSavedData = useCallback(() => {
+  const getInitialEndDate = useCallback(() => {
     const saved = localStorage.getItem("routeDraft");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         const savedEnd = new Date(parsed.end);
-        if (savedEnd > now) return savedEnd;
-      } catch (e) {
-        console.error("Error loading saved route", e);
-      }
+        if (!isNaN(savedEnd) && savedEnd > new Date(now.getTime() + 60 * 60 * 1000)) {
+          return savedEnd;
+        }
+      } catch (e) { console.error(e); }
     }
     return new Date(now.getTime() + 60 * 60 * 1000);
   }, [now]);
 
-  const [startDateTime] = useState(now);
-  const [endDateTime, setEndDateTime] = useState(getSavedData);
+  const [endDateTime, setEndDateTime] = useState(getInitialEndDate);
+  const [error, setError] = useState(null);
 
-  // חישוב ערכים לתצוגה
-  const diffMs = Math.max(0, endDateTime - startDateTime);
+  const diffMs = Math.max(0, endDateTime - now);
   const totalDays = Math.floor(diffMs / (24 * 3600 * 1000));
-  const remainingHours = Math.floor((diffMs - totalDays * 24 * 3600 * 1000) / (3600 * 1000));
+  const remainingHours = Math.floor((diffMs % (24 * 3600 * 1000)) / (3600 * 1000));
 
-  // שמירה אוטומטית ל-LocalStorage בכל פעם שהתאריך משתנה
   useEffect(() => {
     const payload = {
-      start: startDateTime.toISOString(),
+      start: now.toISOString(),
       end: endDateTime.toISOString(),
       totalDays,
-      totalHours: totalDays * 24 + remainingHours,
+      totalHours: Math.max(1, Math.floor(diffMs / (3600 * 1000))),
+      selectedCar: selectedCar // שמירת הרכב לתוך ה-Draft לצורך סנכרון
     };
     localStorage.setItem("routeDraft", JSON.stringify(payload));
-  }, [endDateTime, startDateTime, totalDays, remainingHours]);
-
-  const formatTime = (d) => d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
-  const formatDate = (d) => {
-    const dd = String(d.getDate()).padStart(2, "0");
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const yy = String(d.getFullYear()).slice(-2);
-    return `${dd}.${mm}.${yy}`;
-  };
+  }, [endDateTime, now, totalDays, diffMs, selectedCar]);
 
   const handleReset = () => {
-    setEndDateTime(new Date(now.getTime() + 60 * 60 * 1000));
+    const resetDate = new Date(now.getTime() + 60 * 60 * 1000);
+    setEndDateTime(resetDate);
+    localStorage.removeItem("routeDraft");
+    setError(null);
   };
 
   const updateHours = (val) => {
-    setEndDateTime(prev => {
+    setEndDateTime((prev) => {
       const next = new Date(prev.getTime() + val * 3600000);
-      return next > startDateTime ? next : prev;
+      const minLimit = new Date(now.getTime() + 3600000);
+      return next < minLimit ? minLimit : next;
     });
   };
 
   const updateDays = (val) => {
-    setEndDateTime(prev => {
+    setEndDateTime((prev) => {
       const next = new Date(prev.getTime() + val * 86400000);
-      return next > startDateTime ? next : prev;
+      const minLimit = new Date(now.getTime() + 3600000);
+      return next < minLimit ? minLimit : next;
     });
   };
 
-  const [error, setError] = React.useState(null);
-
-  const includesSaturday = (start, end) => {
-    if (!start || !end) return false;
-    const s = new Date(start);
-    const e = new Date(end);
-    // if start is saturday => invalid
-    if (s.getDay() === 6) return true;
-    // iterate days from start to end (inclusive); if any day is Saturday (6) -> invalid
-    const cur = new Date(s);
-    cur.setHours(0,0,0,0);
-    const last = new Date(e);
-    last.setHours(0,0,0,0);
-    while (cur <= last) {
-      if (cur.getDay() === 6) return true;
-      cur.setDate(cur.getDate() + 1);
+  const handleConfirm = () => {
+    setError(null);
+    const day = endDateTime.getDay();
+    const hour = endDateTime.getHours();
+    const isShabbat = (day === 5 && hour >= 16) || (day === 6 && hour < 20);
+    if (isShabbat) {
+      setError('לא ניתן להחזיר רכב בשבת.');
+      return;
     }
-    return false;
+    onConfirm({
+      selectedCar: selectedCar || null,
+      route: {
+        start: now.toISOString(),
+        end: endDateTime.toISOString(),
+        totalDays,
+        totalHours: Math.max(1, Math.floor(diffMs / (3600 * 1000)))
+      }
+    });
   };
 
-  return (
-    <div className="route-side-panel">
-      <div className="panel-header">
-        <div className="header-right">
-          <span>{selectedCar ? 'פרטי רכב' : 'בחירת מסלול'}</span>
-          <button className="reset-link" onClick={handleReset}>איפוס</button>
-        </div>
-        <button className="close-panel-btn" onClick={onClose}>✕</button>
-      </div>
+  const formatTime = (d) => d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+  const formatDate = (d) => `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getFullYear()).slice(-2)}`;
 
-      {selectedCar && (
-        <div className="car-detail-inline" style={{marginBottom:16}}>
-          <div style={{display:'flex', gap:12, alignItems:'center'}}>
-            <img src={selectedCar.imageUrl || '/assets/default_car.png'} alt="car" style={{width:90, height:60, objectFit:'contain', borderRadius:8}} />
-            <div>
-              <div style={{fontWeight:800, color:'#5d299a'}}>{selectedCar.Model || selectedCar.model || 'דגם רכב'}</div>
-              <div style={{color:'#777', fontSize:13}}>{selectedCar.StartParking || selectedCar.startParking || 'מיקום התחנה'}</div>
+  return (
+    <div className="route-panel-overlay">
+      <div className="route-panel">
+        <div className="panel-header-row">
+           <button className="route-close" onClick={onClose}>✕</button>
+           <button className="reset-link" onClick={handleReset}>איפוס</button>
+        </div>
+        
+        <h2 className="route-title">{selectedCar ? 'פרטי הזמנה' : 'בחירת מסלול'}</h2>
+        
+        {selectedCar && (
+          <div className="car-status-card">
+            <div className="status-bar"></div>
+            <div className="card-main">
+              <div className="car-info">
+                <div className="availability-text">רכב נבחר</div>
+                <h3 className="car-model-title">{selectedCar.Model || selectedCar.model}</h3>
+                {/* הצגת הרחוב/מיקום מה-DB */}
+                <p className="car-location">{selectedCar.startParking}</p>
+              </div>
+              <div className="car-img-side">
+                <img src={selectedCar.imageUrl || selectedCar.image || '/assets/default_car.png'} alt="car" />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="time-grid">
-        <div className="time-column">
-          <div className="label">התחלה</div>
-          <div className="pill-box">{formatTime(startDateTime)}</div>
-          <div className="pill-box">{formatDate(startDateTime)}</div>
-        </div>
-        <div className="time-column">
-          <div className="label">סיום</div>
-          <div className="pill-box">{formatTime(endDateTime)}</div>
-          <div className="pill-box">{formatDate(endDateTime)}</div>
-        </div>
-      </div>
-
-      <div className="counter-section">
-        <div className="counter-row">
-          <span className="counter-label">סה״כ שעות</span>
-          <div className="counter-controls">
-            <button className="counter-btn" onClick={() => updateHours(-1)}>−</button>
-            <span className="count-value">{remainingHours}</span>
-            <button className="counter-btn" onClick={() => updateHours(1)}>+</button>
+        <div className="route-grid">
+          <div className="route-right">
+            <span className="field-label">התחלה</span>
+            <div className="pill-input">{formatTime(now)}</div>
+            <div className="pill-input">{formatDate(now)}</div>
+          </div>
+          <div className="route-left">
+            <span className="field-label">סיום</span>
+            <div className="pill-input">{formatTime(endDateTime)}</div>
+            <div className="pill-input">{formatDate(endDateTime)}</div>
           </div>
         </div>
 
-        <div className="counter-row">
-          <span className="counter-label">סה״כ ימים</span>
-          <div className="counter-controls">
-            <button className="counter-btn" onClick={() => updateDays(-1)}>−</button>
-            <span className="count-value">{totalDays}</span>
-            <button className="counter-btn" onClick={() => updateDays(1)}>+</button>
+        <div className="total-block">
+          <span className="field-label">סה״כ זמן לחיוב</span>
+          <div className="total-counter">
+            <button onClick={() => updateHours(-1)}>−</button>
+            <span>{remainingHours} שעות</span>
+            <button onClick={() => updateHours(1)}>+</button>
+          </div>
+          <div className="total-counter second-counter">
+            <button onClick={() => updateDays(-1)}>−</button>
+            <span>{totalDays} ימים</span>
+            <button onClick={() => updateDays(1)}>+</button>
           </div>
         </div>
-      </div>
 
-      {error && <div className="panel-error">{error}</div>}
-      <button className="confirm-btn-large" onClick={() => {
-            setError(null);
-            if (includesSaturday(startDateTime, endDateTime)) {
-              setError('לא ניתן להתחיל או שההזמנה נמשכת לשבת. בחרי זמנים אחרים.');
-              return;
-            }
-            const payload = {
-              selectedCar: selectedCar || null,
-              route: {
-                start: startDateTime.toISOString(),
-                end: endDateTime.toISOString(),
-                totalDays,
-                totalHours: totalDays * 24 + remainingHours
-              }
-            };
-            onConfirm && onConfirm(payload);
-          }}>
-            {selectedCar ? 'בחר רכב זה' : 'אישור והמשך'}
-          </button>
+        {error && <p className="panel-error">{error}</p>}
+        <button className="route-confirm" onClick={handleConfirm}>
+          {selectedCar ? 'אשר והמשך לבחירת כיסוי' : 'אשר והמשך'}
+        </button>
+      </div>
     </div>
   );
 };
