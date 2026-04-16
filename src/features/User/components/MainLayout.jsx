@@ -2,7 +2,7 @@ import React from 'react';
 import logoImg from '../../../assets/top_icon.png';
 import '../Style/MainLayout.css';
 
-const MainLayout = ({ children, userName, onLogoClick, onRegisterClick, onNewOrderClick, onProfileClick }) => {
+const MainLayout = ({ children, currentUser, onLogoClick, onRegisterClick, onNewOrderClick, onProfileClick }) => {
   return (
     <div className="city-car-wrapper">
       <nav className="top-navbar">
@@ -10,13 +10,15 @@ const MainLayout = ({ children, userName, onLogoClick, onRegisterClick, onNewOrd
           <div className="nav-right">
             <img src={logoImg} alt="City Car" className="main-logo" 
                  style={{cursor: 'pointer'}} onClick={onLogoClick} />
-            <span className="user-greeting">שלום, {userName || 'אורח'}</span>
+            <span className="user-greeting">שלום, {currentUser?.firstName || 'אורח'}</span>
           </div>
           <div className="nav-left">
             <span className="phone-info">* 2319 | 0-2319-2319</span>
             <div className="nav-buttons">
               <button className="btn-white-outline" onClick={onNewOrderClick}>הזמנה חדשה</button>
-              <button className="btn-white-outline" onClick={onRegisterClick}>הרשמה</button>
+              {!currentUser && onRegisterClick && (
+                <button className="btn-white-outline" onClick={onRegisterClick}>הרשמה</button>
+              )}
             </div>
           </div>
         </div>

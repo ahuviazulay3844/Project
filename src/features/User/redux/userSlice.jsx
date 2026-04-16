@@ -3,30 +3,41 @@ import { userApi } from './userApi';
 
 const initialState = {
   token: localStorage.getItem('token') || null,
+  currentUser: null
 };
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
+    setUser: (state, action) => {
+      state.currentUser = action.payload;
+    },
     logout: (state) => {
       state.token = null;
+      state.currentUser = null;
       localStorage.removeItem('token');
-      // גורם לכל ה-API להימחק מהזיכרון כדי למנוע דליפת נתונים של משתמש קודם
-      window.location.reload(); 
+      window.location.reload();
     },
   },
   extraReducers: (builder) => {
     builder.addMatcher(
       userApi.endpoints.loginUser.matchFulfilled,
       (state, { payload }) => {
-        // payload הוא ה-string שה-API מחזיר (הטוקן)
-        state.token = payload; 
-        localStorage.setItem('token', payload);
+        // אם השרת מחזיר אובייקט עם טוקן ומשתמש
+        const token = payload.token || payload; 
+        const user = payload.user || null;
+
+        state.token = token;
+        localStorage.setItem('token', token);
+        
+        if (user) {
+          state.currentUser = user;
+        }
       }
     );
   },
 });
 
 export default userSlice.reducer;
-export const { logout } = userSlice.actions;
+export const { logout, setUser } = userSlice.actions;

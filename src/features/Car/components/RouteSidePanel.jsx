@@ -40,11 +40,11 @@ const RouteSidePanel = ({ onClose, onConfirm, selectedCar }) => {
       start: now.toISOString(),
       end: endDateTime.toISOString(),
       totalDays,
-      totalHours: Math.max(1, Math.floor(diffMs / (3600 * 1000))),
-      selectedCar: selectedCar // שמירת הרכב לתוך ה-Draft לצורך סנכרון
+      totalHours: remainingHours, // שולח רק את השעות העודפות
+      selectedCar: selectedCar 
     };
     localStorage.setItem("routeDraft", JSON.stringify(payload));
-  }, [endDateTime, now, totalDays, diffMs, selectedCar]);
+  }, [endDateTime, now, totalDays, remainingHours, selectedCar]);
 
   const handleReset = () => {
     const resetDate = new Date(now.getTime() + 60 * 60 * 1000);
@@ -78,15 +78,13 @@ const RouteSidePanel = ({ onClose, onConfirm, selectedCar }) => {
       setError('לא ניתן להחזיר רכב בשבת.');
       return;
     }
-    onConfirm({
-      selectedCar: selectedCar || null,
-      route: {
-        start: now.toISOString(),
-        end: endDateTime.toISOString(),
-        totalDays,
-        totalHours: Math.max(1, Math.floor(diffMs / (3600 * 1000)))
-      }
-    });
+   onConfirm({
+     selectedCar: selectedCar || null,
+     start: now.toISOString(),
+     end: endDateTime.toISOString(),
+     totalDays,
+     totalHours: remainingHours // השעות שמופיעות ליד ה"+" וה"-"
+   });
   };
 
   const formatTime = (d) => d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
@@ -109,8 +107,7 @@ const RouteSidePanel = ({ onClose, onConfirm, selectedCar }) => {
               <div className="car-info">
                 <div className="availability-text">רכב נבחר</div>
                 <h3 className="car-model-title">{selectedCar.Model || selectedCar.model}</h3>
-                {/* הצגת הרחוב/מיקום מה-DB */}
-                <p className="car-location">{selectedCar.startParking}</p>
+                <p className="car-location">{selectedCar.startParking || selectedCar.StartParking}</p>
               </div>
               <div className="car-img-side">
                 <img src={selectedCar.imageUrl || selectedCar.image || '/assets/default_car.png'} alt="car" />

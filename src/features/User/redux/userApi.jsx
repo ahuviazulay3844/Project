@@ -2,75 +2,109 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const userApi = createApi({
     reducerPath: "userApi",
-    // tagTypes עוזר לנו לרענן נתונים באופן אוטומטי (למשל אחרי התחברות)
     tagTypes: ['User'], 
     baseQuery: fetchBaseQuery({ 
-        baseUrl: "https://localhost:7034/api",
+        baseUrl: "https://localhost:7034/api/",
         prepareHeaders: (headers, { getState }) => {
-            // 1. ניסיון שליפת טוקן מהסטייט של Redux
-            const token = getState().user?.token; 
-            
-            // 2. גיבוי: אם אין בסטייט (למשל אחרי רענון דף), ננסה מה-LocalStorage
-            const backupToken = localStorage.getItem('token');
-            
-            const finalToken = token || backupToken;
-
-            if (finalToken) {
-                // חשוב: לוודא שאין כפילות של המילה Bearer
-                const authHeader = finalToken.startsWith('Bearer ') 
-                    ? finalToken 
-                    : `Bearer ${finalToken}`;
+            const token = getState().user?.token || localStorage.getItem('token');
+            if (token) {
+                const authHeader = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
                 headers.set('authorization', authHeader);
             }
             return headers;
         },
     }),
     endpoints: (builder) => ({
-        // התחברות - מחזירה string (הטוקן)
+        // התחברות
         loginUser: builder.mutation({
             query: (credentials) => ({
                 url: "Users/login", 
                 method: "POST",
                 body: credentials,
             }),
-            // מציין שכל מי שצורך את נתוני המשתמש צריך להתרענן
             invalidatesTags: ['User'],
         }),
 
-        // הרשמה (הוספת משתמש חדש)
+        // הרשמה (POST)
         registerUser: builder.mutation({
             query: (newUser) => ({
-                url: "Users/add", // שימי לב: ב-Controller שלך זה בדרך כלל "add" או POST על הבסיס
+                url: "Users/register", 
                 method: "POST",
                 body: newUser,
             }),
         }),
 
-        // שליחת קוד אימות למייל
+        // שליפת כל המשתמשים (לאדמין)
+        getAllUsers: builder.query({
+            query: () => "Users",
+            providesTags: ['User'],
+        }),
+
+        // שליפת משתמש לפי ID
+        getUserById: builder.query({
+            query: (id) => `Users/${id}`,
+            providesTags: (result, error, id) => [{ type: 'User', id }],
+        }),
+
+        // עדכון פרטי משתמש
+        updateUser: builder.mutation({
+            query: ({ id, ...data }) => ({
+                url: `Users/${id}`,
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: ['User'],
+        }),
+
+        // מחיקת משתמש
+        deleteUser: builder.mutation({
+            query: (id) => ({
+                url: `Users/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ['User'],
+        }),
+
+        // שינוי סיסמה
+        changePassword: builder.mutation({
+            query: ({ userId, oldPassword, newPassword }) => ({
+                url: `Users/change-password`,
+                method: "PATCH",
+                params: { userId, oldPassword, newPassword }
+            }),
+        }),
+
+        // חסימה/שחרור משתמש
+        toggleBlockUser: builder.mutation({
+            query: (userId) => ({
+                url: `Users/toggle-block/${userId}`,
+                method: "PATCH",
+            }),
+            invalidatesTags: ['User'],
+        }),
+
+        // המשתמש הנוכחי
+        getCurrentUser: builder.query({
+            query: () => "Users/current",
+            providesTags: ['User'],
+        }),
+
+        // שליחת קוד אימות להרשמה
         sendVerificationCode: builder.mutation({
             query: (email) => ({
                 url: `Users/request-registration-code`,
                 method: 'POST',
-                params: { email: email.trim().toLowerCase() }, // שימוש ב-params במקום שרשור ידני ב-URL
+                params: { email },
             }),
         }),
 
-        // בדיקת קוד האימות
+        // אימות קוד הרשמה
         verifyRegistrationCode: builder.mutation({
             query: ({ email, code }) => ({
                 url: `Users/verify-registration-code`,
                 method: 'POST',
-                params: { 
-                    email: email.trim().toLowerCase(), 
-                    code: code.trim() 
-                },
+                params: { email, code },
             }),
-        }),
-
-        // שליפת המשתמש המחובר כרגע
-        getCurrentUser: builder.query({
-            query: () => "Users/current",
-            providesTags: ['User'], // קושר את השאילתה לתג 'User'
         }),
     }),
 });
@@ -78,7 +112,13 @@ export const userApi = createApi({
 export const { 
     useLoginUserMutation, 
     useRegisterUserMutation,
+    useGetAllUsersQuery,
+    useGetUserByIdQuery,
+    useUpdateUserMutation,
+    useDeleteUserMutation,
+    useChangePasswordMutation,
+    useToggleBlockUserMutation,
+    useGetCurrentUserQuery,
     useSendVerificationCodeMutation,
-    useVerifyRegistrationCodeMutation,
-    useGetCurrentUserQuery 
+    useVerifyRegistrationCodeMutation 
 } = userApi;

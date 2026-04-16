@@ -1,9 +1,10 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, MarkerF, MarkerClusterer } from '@react-google-maps/api';
 import '../Style/GoogleMapWithClusters.css';
 import RouteSidePanel from './RouteSidePanel.jsx';
 import CoverageSidePanel from './CoverageSidePanel.jsx';
 import CarSelectionList from './CarSelectionList.jsx';
+import CreateOrder from '../../Order/components/CreateOrder.jsx'; 
 import { useGetClosestCarsQuery } from '../redux/carApi.jsx';
 
 const whiteMinimalStyle = [
@@ -28,6 +29,7 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
     region: 'IL'
   });
 
+  const [notification, setNotification] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [userLocation, setUserLocation] = useState(null);
   const [selectedCar, setSelectedCar] = useState(null);
@@ -36,8 +38,8 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
   const [originSelection, setOriginSelection] = useState(null); 
   const [showGridFull, setShowGridFull] = useState(false);
   const [sortedCars, setSortedCars] = useState([]);
-  const [_selectedCarId, setSelectedCarId] = useState(null);
   const [shouldFetchClosest, setShouldFetchClosest] = useState(false);
+  const [orderPayload, setOrderPayload] = useState(null);
 
   const mapRef = useRef(null);
 
@@ -50,13 +52,12 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
           mapRef.current?.panTo(coords);
           mapRef.current?.setZoom(16);
         },
-        () => setNotification('יש לאשר הרשאות מיקום בדפדפן (ההרשאות נחוצות).')
+        () => setNotification('יש לאשר הרשאות מיקום בדפדפן.')
       );
     }
   };
 
-  const [notification, setNotification] = useState(null);
-  React.useEffect(() => {
+  useEffect(() => {
     if (!notification) return;
     const t = setTimeout(() => setNotification(null), 4000);
     return () => clearTimeout(t);
@@ -86,83 +87,73 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
     { skip: !shouldFetchClosest || !userLocation }
   );
 
-  React.useEffect(() => {
-    if (closestData && Array.isArray(closestData)) {
+  useEffect(() => {
+    if (closestData && Array.isArray(closestData) && sortedCars.length === 0) {
       setSortedCars(closestData.map((c, idx) => ({ ...c, id: c.Id || c.id || idx })));
       setShowGridFull(true);
     }
-  }, [closestData]);
+  }, [closestData, sortedCars.length]);
 
   if (!isLoaded) return <div className="loading-map">טוען...</div>;
 
   return (
     <div className="map-wrapper">
       <div className="map-inner-container">
-
-        {/* צד שמאל: תפריט שלבים */}
         <div className="left-steps-panel">
           <div className="steps-container">
             <div className="steps-title">ביצוע הזמנה</div>
-            {[1, 2, 3].map(step => {
-              const labels = ['מסלולים זמינים', 'בחירת רכב', 'בחירת כיסויים'];
-              const isCompleted = completedSteps.includes(step);
-              const isActive = currentStep === step;
-
-              return (
-                <div
-                  key={step}
-                  className={`step-pill ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
-                  onClick={() => {
-                    if (step === 1 || step === 2 || completedSteps.includes(step - 1)) {
-                      setCurrentStep(step);
-                      if (step === 1) setShowSidePanel(true);
-                      if (step === 2) {
-                        setShowGridFull(true);
-                        if (userLocation) {
-                          setShouldFetchClosest(true);
-                        } else if (navigator.geolocation) {
-                          navigator.geolocation.getCurrentPosition(
-                            (pos) => {
-                              const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                              setUserLocation(coords);
-                              setShouldFetchClosest(true);
-                            },
-                            () => {
-                              setShowGridFull(true);
-                            },
-                            { enableHighAccuracy: true }
-                          );
-                        } else {
-                          setShowGridFull(true);
-                        }
-                      }
+            {[1, 2, 3].map(step => (
+              <div
+                key={step}
+                className={`step-pill ${currentStep === step ? 'active' : ''} ${completedSteps.includes(step) ? 'completed' : ''}`}
+                onClick={() => {
+                  if (step === 1 || completedSteps.includes(step - 1)) {
+                    setCurrentStep(step);
+                    if (step === 1) {
+                        setShowSidePanel(true);
+                        setShowGridFull(false);
                     }
-                  }}
-                >
-                  <div className="step-circle">{isCompleted ? '✓' : ''}</div>
-                  <div className="step-text">
-                    <span className="step-number">שלב {step}</span>
-                    <span className="step-label">{labels[step - 1]}</span>
-                  </div>
+                    if (step === 2) {
+                       setShowGridFull(true);
+                       if (userLocation) setShouldFetchClosest(true);
+                    }
+                  }
+                }}
+              >
+                <div className="step-circle">{completedSteps.includes(step) ? '✓' : ''}</div>
+                <div className="step-text">
+                  <span className="step-number">שלב {step}</span>
+                  <span className="step-label">{['מסלולים', 'בחירת רכב', 'כיסויים'][step-1]}</span>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
 
         <div className="main-display-area">
           <div className="map-and-grid">
-            {currentStep === 3 ? (
+            {completedSteps.includes(3) ? (
+              <div className="grid-full">
+                <CreateOrder 
+                  selectedCar={selectedCar}
+                  orderDetails={orderPayload}
+                  hasWaiver={JSON.parse(localStorage.getItem("coverage_waiver"))}
+                  onBack={() => {
+                    setCompletedSteps(prev => prev.filter(s => s !== 3));
+                    setCurrentStep(3);
+                  }}
+                />
+              </div>
+            ) : currentStep === 3 ? (
               <div className="grid-full">
                 <CoverageSidePanel
                   selectedCar={selectedCar}
-                  onClose={() => { setCurrentStep(2); }}
+                  onClose={() => setCurrentStep(2)}
                   onConfirm={(payload) => {
+                    localStorage.setItem("coverage_waiver", JSON.stringify(payload.hasWaiver));
+                    // מיזוג נתונים קריטי: שומר על זמני הנסיעה משלב 1 ומוסיף את פרטי הכיסוי
+                    setOrderPayload(prev => ({ ...prev, ...payload })); 
                     setCompletedSteps(prev => [...new Set([...prev, 3])]);
-                    try {
-                      if (typeof onRouteConfirm === 'function') onRouteConfirm(payload);
-                    } catch (e) { console.error('onRouteConfirm error', e); }
-                    setCurrentStep(4);
                   }}
                 />
               </div>
@@ -172,10 +163,9 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
                   cars={sortedCars.length ? sortedCars : processedCars}
                   onSelectCar={(car) => {
                     setSelectedCar(car);
-                    setSelectedCarId(car.id);
                     setCompletedSteps(prev => [...new Set([...prev, 2])]);
                     setCurrentStep(3);
-                    if (typeof onCarSelect === 'function') onCarSelect(car);
+                    if (onCarSelect) onCarSelect(car);
                   }}
                 />
               </div>
@@ -189,7 +179,13 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
                   options={{ styles: whiteMinimalStyle, disableDefaultUI: true }}
                 >
                   {userLocation && (
-                    <MarkerF position={userLocation} icon={{ url: '/assets/my_position_icon.png', scaledSize: new window.google.maps.Size(30, 40) }} />
+                    <MarkerF 
+                      position={userLocation} 
+                      icon={{ 
+                        url: '/assets/my_position_icon.png', 
+                        scaledSize: new window.google.maps.Size(30, 40) 
+                      }} 
+                    />
                   )}
                   <MarkerClusterer>
                     {(clusterer) =>
@@ -198,14 +194,20 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
                           key={car.id}
                           position={car.position}
                           clusterer={clusterer}
-                          onClick={() => { setSelectedCar(car); setSelectedCarId(car.id); setOriginSelection('map'); setShowSidePanel(true); }}
-                          icon={{ url: car.carIcon, scaledSize: new window.google.maps.Size(25, 45) }}
+                          onClick={() => { 
+                            setSelectedCar(car); 
+                            setOriginSelection('map'); 
+                            setShowSidePanel(true); 
+                          }}
+                          icon={{ 
+                            url: car.carIcon, 
+                            scaledSize: new window.google.maps.Size(25, 45) 
+                          }}
                         />
                       ))
                     }
                   </MarkerClusterer>
                 </GoogleMap>
-
                 <div className="custom-zoom-controls">
                   <button onClick={() => mapRef.current?.setZoom(mapRef.current.getZoom() + 1)}>+</button>
                   <button onClick={() => mapRef.current?.setZoom(mapRef.current.getZoom() - 1)}>-</button>
@@ -222,56 +224,27 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
           <div className="route-panel-overlay">
             <RouteSidePanel
               selectedCar={selectedCar}
-              onClose={() => { setShowSidePanel(false); setSelectedCar(null); setOriginSelection(null); }}
-              onConfirm={async (payload) => {
+              onClose={() => { setShowSidePanel(false); setOriginSelection(null); }}
+              onConfirm={(payload) => {
+                setOrderPayload(payload); 
                 setCompletedSteps(prev => [...new Set([...prev, 1])]);
                 setCurrentStep(2);
                 setShowSidePanel(false);
-                try {
-                  if (typeof onRouteConfirm === 'function') {
-                    onRouteConfirm(payload);
-                  }
-
-                  if (originSelection === 'grid') {
-                    if (payload.selectedCar) {
-                      setSelectedCar(payload.selectedCar);
-                      setSelectedCarId(payload.selectedCar.id);
-                    }
-                    if (payload.selectedCar && payload.selectedCar.position) {
-                      const origin = payload.selectedCar.position;
-                      setUserLocation(origin);
-                      setShouldFetchClosest(true);
-                    } else if (userLocation) {
-                      setShouldFetchClosest(true);
-                    } else {
-                      setSortedCars(processedCars);
-                      setShowGridFull(true);
-                    }
-                  } else if (originSelection === 'map') {
-
-                    if (payload.selectedCar) {
-                      setSelectedCarId(payload.selectedCar.id);
-                      setCompletedSteps(prev => [...new Set([...prev, 2])]);
-                      setCurrentStep(3);
-                      if (typeof onCarSelect === 'function') {
-                        onCarSelect(payload.selectedCar);
-                      }
-                    }
-                    setShowGridFull(false);
-                  } else {
-                    setShowGridFull(false);
-                  }
-                } catch (e) {
-                  console.error('Error handling route confirm', e);
-                } finally {
-                  setOriginSelection(null);
+                if (onRouteConfirm) onRouteConfirm(payload);
+                
+                // אם הרכב נבחר ישירות מהמפה, אנחנו מדלגים על בחירת הרכב (שלב 2) ועוברים ישר לכיסויים
+                if (originSelection === 'map') {
+                   setCompletedSteps(prev => [...new Set([...prev, 1, 2])]);
+                   setCurrentStep(3);
+                } else {
+                   setShowGridFull(true);
                 }
               }}
             />
           </div>
         )}
-
       </div>
+      {notification && <div className="notification-toast">{notification}</div>}
     </div>
   );
 };

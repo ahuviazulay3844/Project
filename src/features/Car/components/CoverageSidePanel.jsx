@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../Style/CoverageSidePanel.css';
 
 export default function CoverageSidePanel({ selectedCar: propCar, onClose, onConfirm }) {  
-  // 1. טעינת הזמנים - נשמרים ב-localStorage ומתעדכנים אוטומטית
+  // 1. טעינת הזמנים
   const [routeDraft, setRouteDraft] = useState(() => {
     try {
       const raw = localStorage.getItem('routeDraft');
@@ -12,17 +12,18 @@ export default function CoverageSidePanel({ selectedCar: propCar, onClose, onCon
     }
   });
 
-  // 2. טעינת הכיסוי (V) - עכשיו הוא יבדוק בזיכרון אם כבר בחרת משהו קודם
-  const [waiver, setWaiver] = useState(() => {
-    return localStorage.getItem('coverage_waiver') === 'true';
-  });
+  // 2. תיקון: אתחול קשיח ל-false. 
+  // אם את רוצה שזה יתחיל תמיד כבוקסי ריק, פשוט נגדיר false בלי לבדוק ב-localStorage.
+  const [waiver, setWaiver] = useState(false); 
 
-  // 3. שמירת הבחירה של ה-V בזיכרון בכל פעם שהיא משתנה
+  // 3. שמירת הבחירה בזיכרון רק אם המשתמש שינה אותה
   useEffect(() => {
     localStorage.setItem('coverage_waiver', waiver);
   }, [waiver]);
 
+  // ניקוי ה-localStorage בטעינה הראשונה כדי לוודא שאין שאריות מהעבר
   useEffect(() => {
+    localStorage.removeItem('coverage_waiver');
     const handleStorageChange = () => {
       const raw = localStorage.getItem('routeDraft');
       if (raw) setRouteDraft(JSON.parse(raw));
@@ -33,7 +34,7 @@ export default function CoverageSidePanel({ selectedCar: propCar, onClose, onCon
   }, []);
 
   const activeCar = propCar || routeDraft?.selectedCar;
-
+  
   const calculateFinalHours = () => {
     if (!routeDraft?.start || !routeDraft?.end) return 0;
     const start = new Date(routeDraft.start);
@@ -57,8 +58,7 @@ export default function CoverageSidePanel({ selectedCar: propCar, onClose, onCon
   const remainingHours = billableHours % 24;
   const waiverCost = (fullDays * 50) + (remainingHours * 3);
 
-  const isCarSelected = !!(activeCar?.id || activeCar?.Id || activeCar?.model || activeCar?.Model);
-
+  const isCarSelected = !!(activeCar?.id || activeCar?.Id);
   const blocked = (() => {
     if (!routeDraft?.end) return true;
     const end = new Date(routeDraft.end);
@@ -108,6 +108,7 @@ export default function CoverageSidePanel({ selectedCar: propCar, onClose, onCon
                 </div>
             </div>
           </div>
+          <p className="waiver-disclaimer">במידה ולא ייבחר כיסוי, תיוחל השתתפות עצמית כחוק.</p>
         </div>
 
         {blocked && (
@@ -118,7 +119,7 @@ export default function CoverageSidePanel({ selectedCar: propCar, onClose, onCon
         )}
 
         <button className={`confirm-btn ${!canProgress ? 'disabled' : ''}`} disabled={!canProgress} onClick={handleFinalConfirm}>
-          {!isCarSelected ? 'בחר רכב תחילה' : blocked ? 'מועד לא זמין' : ` אישור ${waiver ? `(₪${waiverCost})` : ''}`}
+          {!isCarSelected ? 'בחר רכב תחילה' : blocked ? 'מועד לא זמין' : `אישור ${waiver ? `(₪${waiverCost})` : 'ללא כיסוי'}`}
         </button>
       </div>
     </div>

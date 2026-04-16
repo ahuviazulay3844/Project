@@ -1,12 +1,22 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import '../Style/AuthPage.css'; // נוסיף את העיצוב מיד בהמשך
+import { useDispatch } from 'react-redux';
+import { 
+    useLoginUserMutation, 
+    useRegisterUserMutation, 
+    userApi // ייבוא ה-api עצמו כדי להשתמש ב-initiate
+} from '../redux/userApi';
+import { setUser } from '../redux/userSlice.jsx';
+import '../Style/AuthPage.css';
 
-const AuthPage = () => {
-    const [isLogin, setIsLogin] = useState(true); // מעבר בין מצב התחברות להרשמה
+const AuthPage = ({ onLoginSuccess }) => {
+    const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({ email: '', pass: '', firstName: '', lastName: '' });
     const [message, setMessage] = useState({ text: '', type: '' });
-    const [loading, setLoading] = useState(false);
+
+    const dispatch = useDispatch();
+
+    const [loginUser, { isLoading: isLoginLoading }] = useLoginUserMutation();
+    const [registerUser, { isLoading: isRegLoading }] = useRegisterUserMutation();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -14,44 +24,45 @@ const AuthPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
         setMessage({ text: '', type: '' });
-
+        
         try {
             if (isLogin) {
-                // לוגיקת התחברות
-                const response = await axios.post('https://localhost:xxxx/api/User/login', {
-                    email: formData.email,
-                    pass: formData.pass
-                });
+                // התחברות - שליחת אובייקט עם email ו-pass כפי שמוגדר ב-API שלך
+                const result = await loginUser({ 
+                    email: formData.email.trim().toLowerCase(), 
+                    pass: formData.pass 
+                }).unwrap();
                 
-                if (response.data) {
-                    localStorage.setItem('token', response.data);
-                    setMessage({ text: 'התחברת בהצלחה! מעביר לדף הבית...', type: 'success' });
-                    // window.location.href = '/home';
+                if (result) {
+                    // שמירת טוקן
+                    const token = typeof result === 'string' ? result : result.token;
+                    localStorage.setItem('token', token);
+
+                    // שליפת המשתמש הנוכחי (Users/current) באופן ידני
+                    const userAction = await dispatch(userApi.endpoints.getCurrentUser.initiate());
+                    const user = userAction.data;
+
+                    if (user) {
+                        dispatch(setUser(user));
+                        setMessage({ text: 'התחברת בהצלחה!', type: 'success' });
+                        setTimeout(() => onLoginSuccess(), 500);
+                    }
                 }
             } else {
-                // לוגיקת הרשמה
-                const response = await axios.post('https://localhost:xxxx/api/User/add', {
-                    email: formData.email,
-                    password: formData.pass,
-                    firstName: formData.firstName,
-                    lastName: formData.lastName
-                });
+                // הרשמה - שליחת אובייקט newUser
+                await registerUser({
+                    email: formData.email.trim().toLowerCase(),
+                    password: formData.pass, 
+                    firstName: formData.firstName.trim(),
+                    lastName: formData.lastName.trim()
+                }).unwrap();
 
-                if (response.status === 200) {
-                    setMessage({ text: 'נרשמת בהצלחה! כעת ניתן להתחבר', type: 'success' });
-                    setIsLogin(true); // מעביר אותו להתחברות אחרי הרשמה
-                }
+                setMessage({ text: 'נרשמת בהצלחה! כעת ניתן להתחבר', type: 'success' });
+                setTimeout(() => setIsLogin(true), 2000);
             }
         } catch (error) {
-            if (error.response && error.response.status === 400 && !isLogin) {
-                setMessage({ text: 'משתמש עם אימייל זה כבר קיים. אנא בצע התחברות.', type: 'error' });
-            } else {
-                setMessage({ text: 'שגיאה בביצוע הפעולה. בדוק את הפרטים.', type: 'error' });
-            }
-        } finally {
-            setLoading(false);
+            setMessage({ text: error?.data?.message || 'שגיאה בביצוע הפעולה', type: 'error' });
         }
     };
 
@@ -59,7 +70,7 @@ const AuthPage = () => {
         <div className="auth-container">
             <div className="auth-card">
                 <div className="auth-header">
-                    <img src="/city-car-logo.png" alt="City Car" className="logo" />
+                    <img src="/logo.png" alt="City Car" className="logo" />
                     <h2>{isLogin ? 'ברוכים הבאים לסיטי קאר' : 'יצירת חשבון חדש'}</h2>
                 </div>
 
@@ -70,20 +81,24 @@ const AuthPage = () => {
                             <input type="text" name="lastName" placeholder="שם משפחה" onChange={handleChange} required />
                         </div>
                     )}
+
                     <input type="email" name="email" placeholder="אימייל" onChange={handleChange} required />
                     <input type="password" name="pass" placeholder="סיסמה" onChange={handleChange} required />
 
-                    {message.text && <div className={`message ${message.type}`}>{message.text}</div>}
+                    {message.text && (
+                        <div className={`message-banner ${message.type}`}>
+                            {message.text}
+                        </div>
+                    )}
 
-                    <button type="submit" className="main-btn" disabled={loading}>
-                        {loading ? 'מבצע...' : (isLogin ? 'התחברות' : 'הרשמה')}
+                    <button type="submit" className="main-btn" disabled={isLoginLoading || isRegLoading}>
+                        {isLoginLoading || isRegLoading ? 'מבצע...' : (isLogin ? 'התחברות' : 'הרשמה')}
                     </button>
                 </form>
 
                 <div className="auth-footer">
-                    <span>{isLogin ? 'אין לך חשבון?' : 'כבר רשום במערכת?'}</span>
-                    <button className="link-btn" onClick={() => setIsLogin(!isLogin)}>
-                        {isLogin ? 'להרשמה' : 'להתחברות'}
+                    <button onClick={() => setIsLogin(!isLogin)} type="button">
+                        {isLogin ? 'עדיין אין לך חשבון? להרשמה' : 'כבר רשום? להתחברות'}
                     </button>
                 </div>
             </div>
@@ -91,4 +106,4 @@ const AuthPage = () => {
     );
 };
 
-export default AuthPage;
+export default AuthPage;6
