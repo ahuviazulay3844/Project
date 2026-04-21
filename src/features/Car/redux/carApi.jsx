@@ -27,10 +27,10 @@ export const carApi = createApi({
             providesTags: (result, error, id) => [{ type: 'Cars', id }],
         }),
 
-        getClosestCars: builder.query({
-            query: ({ lat, lng }) => `Cars/closest?lat=${lat}&lng=${lng}`,
-            providesTags: ['Cars'],
-        }),
+ getClosestCars: builder.query({
+    query: ({ lat, lng }) => `Cars/closest?lat=${lat}&lng=${lng}`,
+    providesTags: ['Cars'],
+}),
 
         getAvailableCars: builder.query({
             query: ({ start, end, regionId }) => 

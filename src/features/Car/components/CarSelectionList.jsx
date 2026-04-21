@@ -2,15 +2,12 @@ import React, { useState } from "react";
 import "../Style/CarSelectionList.css";
 
 const CarSelectionList = ({ cars, onSelectCar }) => {
-  // State לניהול הטאב הנבחר: 'all' עבור רשימת תחנות, 'favorites' עבור מועדפות
   const [activeTab, setActiveTab] = useState('all');
 
   if (!cars || cars.length === 0) return (
     <div className="no-cars">לא נמצאו רכבים זמינים לזמן שנבחר.</div>
   );
 
-  // סינון הרכבים: אם הטאב הוא 'favorites', נציג רק רכבים שהם isPopular
-  // שים לב: ב-C# הגדרת IsPopular, ב-JS זה לרוב יגיע כ-isPopular (אות קטנה)
   const filteredCars = activeTab === 'favorites' 
     ? cars.filter(car => car.isPopular || car.IsPopular) 
     : cars;
@@ -19,18 +16,8 @@ const CarSelectionList = ({ cars, onSelectCar }) => {
     <div className="car-selection-wrapper">
       <div className="selection-header">
         <div className="tab-switcher">
-          <button 
-            className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveTab('all')}
-          >
-            רשימת תחנות
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'favorites' ? 'active' : ''}`}
-            onClick={() => setActiveTab('favorites')}
-          >
-            תחנות מועדפות
-          </button>
+          <button className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>רשימת תחנות</button>
+          <button className={`tab-btn ${activeTab === 'favorites' ? 'active' : ''}`} onClick={() => setActiveTab('favorites')}>תחנות מועדפות</button>
         </div>
         <div className="filter-actions">
            <button className="icon-btn">🔍</button>
@@ -56,11 +43,17 @@ const CarSelectionList = ({ cars, onSelectCar }) => {
                     <div className="car-image-container">
                       <img src={car.imageUrl || car.ImageUrl || '/assets/default_car.png'} alt={car.model} />
                     </div>
+                    
+                    {(car.Distance !== undefined || car.distance !== undefined) && (
+                      <div className="card-distance" style={{ color: '#6200ee', fontWeight: 'bold', fontSize: '0.85rem', marginTop: '5px' }}>
+                          כ-{(car.Distance ?? car.distance).toFixed(1)} ק"מ ממך
+                      </div>
+                    )}
                   </div>
               </div>
             ))
           ) : (
-            <div className="no-cars">אין רכבים פופולריים להצגה כרגע.</div>
+            <div className="no-cars">אין רכבים להצגה בסינון זה.</div>
           )}
         </div>
       </div>

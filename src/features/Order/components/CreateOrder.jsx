@@ -4,44 +4,37 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import '../Style/CreateOrder.css';
 
-const CreateOrder = ({ selectedCar, orderDetails, hasWaiver, onBack, onGoToStep }) => {
+const CreateOrder = ({ selectedCar, orderDetails, onBack, onGoToStep }) => {
     const [createOrder, { isLoading }] = useCreateOrderMutation();
     const navigate = useNavigate();
     const currentUser = useSelector((state) => state.user.currentUser);
-    const token = localStorage.getItem('token');
 
     const carBrand = selectedCar?.Brand || selectedCar?.brand || "רכב";
     const carModel = selectedCar?.Model || selectedCar?.model || "לא נבחר";
     const station = selectedCar?.startParking || selectedCar?.StartParking || "תחנה ראשית";
     
-    const startTime = orderDetails?.start || orderDetails?.startTime;
-    const endTime = orderDetails?.end || orderDetails?.expectedEndTime || orderDetails?.endTime;
-    
-    const daysFromUser = orderDetails?.totalDays || 0;
-    const hoursFromUser = orderDetails?.totalHours || 0;
-    const waiverCost = hasWaiver ? (daysFromUser * 50) + (hoursFromUser * 3) : 0;
+    const startTime = orderDetails?.startTime || orderDetails?.start;
+    const endTime = orderDetails?.endTime || orderDetails?.end;
+    const days = orderDetails?.totalDays || Math.floor((orderDetails?.billableHours || 0) / 24);
+    const hours = orderDetails?.totalHours || (orderDetails?.billableHours || 0) % 24;
+    const hasWaiver = orderDetails?.hasWaiver;
+    const waiverCost = hasWaiver ? (days * 50) + (hours * 3) : 0;
 
     const handleBooking = async () => {
-        if (!currentUser && token) {
-            alert("מזהה משתמש... אנא נסה ללחוץ שוב בעוד רגע.");
-            return;
-        }
-
         if (!currentUser) {
-            alert("נראה שאינך מחובר. אנא התחבר כדי לבצע הזמנה.");
+            alert("נראה שאינך מחובר.");
             return;
         }
 
         const orderDto = {
-            // שולח את ה-ID הנכון מהמשתמש המחובר
             userId: currentUser.id || currentUser.Id, 
-            startTime: new Date(startTime).toISOString(),
-            expectedEndTime: new Date(endTime).toISOString(),
-            carId: Number(selectedCar.id || selectedCar.Id),
+            startTime: startTime ? new Date(startTime).toISOString() : null,
+            expectedEndTime: endTime ? new Date(endTime).toISOString() : null,
+            carId: Number(selectedCar?.id || selectedCar?.Id),
             wantsInsuranceUpgrade: Boolean(hasWaiver),
-            pricingType: daysFromUser > 0 ? "ByDay" : "ByHour",
-            totalDays: Number(daysFromUser),
-            totalHours: Number(hoursFromUser),
+            pricingType: days > 0 ? "ByDay" : "ByHour",
+            totalDays: Number(days),
+            totalHours: Number(hours),
             status: 1 
         };
 
@@ -54,10 +47,10 @@ const CreateOrder = ({ selectedCar, orderDetails, hasWaiver, onBack, onGoToStep 
         }
     };
 
-    const formatDateTime = (dateStr) => {
-        if (!dateStr) return '---';
-        return new Date(dateStr).toLocaleString('he-IL', {
-            hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: '2-digit'
+    const formatDateTime = (date) => {
+        if (!date) return '---';
+        return new Date(date).toLocaleString('he-IL', {
+            hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit'
         });
     };
 
@@ -66,14 +59,12 @@ const CreateOrder = ({ selectedCar, orderDetails, hasWaiver, onBack, onGoToStep 
             <h2 className="order-title">סיכום פרטי הזמנה</h2>
             <div className="order-details-card">
                 <div className="detail-row">
-                    <span className="detail-label">מזמין ההזמנה:</span>
-                    <span className="detail-value">
-                        {currentUser?.firstName || 'טוען...'} {currentUser?.lastName || ''}
-                    </span>
+                    <span className="detail-label">מזמין:</span>
+                    <span className="detail-value">{currentUser?.firstName} {currentUser?.lastName}</span>
                 </div>
                 <div className="order-divider"></div>
                 <div className="detail-row clickable" onClick={() => onGoToStep(2)}>
-                    <span className="detail-label">רכב נבחר:</span>
+                    <span className="detail-label">רכב:</span>
                     <span className="detail-value link-text">{carBrand} {carModel}</span>
                 </div>
                 <div className="detail-row">
@@ -81,39 +72,28 @@ const CreateOrder = ({ selectedCar, orderDetails, hasWaiver, onBack, onGoToStep 
                     <span className="detail-value">{station}</span>
                 </div>
                 <div className="order-divider"></div>
+                
+                {/* פיצול ל-2 שורות זמן כפי שביקשת */}
                 <div className="detail-row clickable" onClick={() => onGoToStep(1)}>
-                    <span className="detail-label">תחילת נסיעה:</span>
+                    <span className="detail-label">זמן איסוף:</span>
                     <span className="detail-value link-text" dir="ltr">{formatDateTime(startTime)}</span>
                 </div>
                 <div className="detail-row clickable" onClick={() => onGoToStep(1)}>
-                    <span className="detail-label">סיום נסיעה:</span>
+                    <span className="detail-label">זמן החזרה:</span>
                     <span className="detail-value link-text" dir="ltr">{formatDateTime(endTime)}</span>
                 </div>
+
                 <div className="order-divider"></div>
-                <div className="detail-row">
-                    <span className="detail-label">זמן לחיוב:</span>
-                    <span className="detail-value">
-                        {daysFromUser > 0 ? `${daysFromUser} ימים ` : ''}
-                        {hoursFromUser > 0 ? `${hoursFromUser} שעות` : ''}
-                        {daysFromUser === 0 && hoursFromUser === 0 ? 'שעה אחת' : ''}
-                    </span>
-                </div>
                 <div className="detail-row clickable" onClick={() => onGoToStep(3)}>
-                    <span className="detail-label">כיסוי ביטוחי:</span>
+                    <span className="detail-label">ביטוח:</span>
                     <span className="detail-value link-text">
-                        {hasWaiver ? `ביטול השתתפות עצמית (₪${waiverCost})` : 'ללא כיסוי'}
+                        {hasWaiver ? `ביטול השתתפות (₪${waiverCost})` : 'בסיסי'}
                     </span>
                 </div>
-                <div className="order-divider"></div>
-                <p className="order-note">* החיוב הסופי יבוצע בסיום הנסיעה בהתאם לנתוני השימוש בפועל.</p>
             </div>
             <div className="order-actions">
                 <button className="order-btn-secondary" onClick={onBack}>חזור</button>
-                <button 
-                    className="order-btn-primary" 
-                    onClick={handleBooking} 
-                    disabled={isLoading || (token && !currentUser)}
-                >
+                <button className="order-btn-primary" onClick={handleBooking} disabled={isLoading}>
                     {isLoading ? "מעבד..." : "אישור הזמנה"}
                 </button>
             </div>

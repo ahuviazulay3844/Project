@@ -1,0 +1,224 @@
+.orders-container {
+  padding: 20px;
+  direction: rtl;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.orders-title {
+  color: #4b1b7a; /* הסגול של הלוגו */
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+/* חיפוש */
+.search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 350px;
+}
+
+.orders-search-input {
+  width: 100%;
+  padding: 10px 40px 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  outline: none;
+  font-size: 0.95rem;
+  transition: border-color 0.3s;
+}
+
+.orders-search-input:focus {
+  border-color: #4b1b7a;
+}
+
+.search-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+}
+
+/* רשימת כרטיסים */
+.orders-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.order-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  display: flex;
+  overflow: hidden;
+  transition: transform 0.2s;
+  border: 1px solid #eee;
+}
+
+.order-card:hover {
+  transform: translateY(-3px);
+}
+
+.order-card-accent {
+  width: 6px;
+  background-color: #00bcd4; /* התכלת של האתר */
+}
+
+.order-main-content {
+  padding: 15px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.order-car-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.order-car-model {
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #333;
+}
+
+.order-address {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.order-dates {
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.date-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.date-label {
+  color: #888;
+}
+
+.date-val {
+  color: #333;
+  font-weight: 600;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px dashed #eee;
+}
+
+/* סטטוסים */
+.order-status {
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-active { background: #e1f5fe; color: #0288d1; }
+.status-completed { background: #e8f5e9; color: #2e7d32; }
+.status-cancelled { background: #ffebee; color: #c62828; }
+
+.price-val {
+  font-weight: 800;
+  color: #4b1b7a;
+  font-size: 1.1rem;
+}
+
+.no-orders {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 50px;
+  color: #999;
+}
+/* צבעי סטטוס לפי ה-Enum */
+.status-pending { background: #fff3e0; color: #ef6c00; } /* כתום לממתינה */
+.status-active { background: #e1f5fe; color: #0288d1; }  /* כחול לפעילה */
+.status-completed { background: #e8f5e9; color: #2e7d32; } /* ירוק להושלמה */
+.status-cancelled { background: #ffebee; color: #c62828; } /* אדום לבוטלה */
+
+.order-card-accent.status-pending { background-color: #ef6c00; }
+.order-card-accent.status-active { background-color: #0288d1; }
+.order-card-accent.status-completed { background-color: #2e7d32; }
+.order-card-accent.status-cancelled { background-color: #c62828; }
+
+.order-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.order-id {
+  font-size: 0.8rem;
+  color: #999;
+  font-weight: bold;
+}
+
+.paid-tag { color: #2e7d32; font-size: 0.85rem; font-weight: bold; }
+.unpaid-tag { color: #c62828; font-size: 0.85rem; font-weight: bold; }
+
+.order-pricing-type {
+  font-size: 0.85rem;
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  width: fit-content;
+  margin-top: 4px;
+}
+/* שיפור מראה הכרטיסים */
+.order-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 15px;
+    border: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    min-width: 280px;
+}
+
+/* כותרת דגם הרכב */
+.order-car-model {
+    color: #4b1b7a;
+    font-size: 1.3rem;
+    text-align: center;
+    margin: 10px 0;
+}
+
+/* יישור תגיות המחיר והתשלום */
+.order-footer {
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.price-val {
+    font-size: 1.2rem;
+    color: #4b1b7a;
+    font-weight: 900;
+}

@@ -37,11 +37,16 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
   const [showSidePanel, setShowSidePanel] = useState(false);
   const [originSelection, setOriginSelection] = useState(null); 
   const [showGridFull, setShowGridFull] = useState(false);
-  const [sortedCars, setSortedCars] = useState([]);
   const [shouldFetchClosest, setShouldFetchClosest] = useState(false);
   const [orderPayload, setOrderPayload] = useState(null);
 
   const mapRef = useRef(null);
+
+  // קריאה לשרת - תתבצע רק כשיש מיקום ו-shouldFetchClosest הוא true
+  const { data: closestCarsFromServer, isFetching } = useGetClosestCarsQuery(
+    { lat: userLocation?.lat, lng: userLocation?.lng },
+    { skip: !shouldFetchClosest || !userLocation }
+  );
 
   const handleLocationClick = () => {
     if (navigator.geolocation) {
@@ -49,6 +54,7 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
         (pos) => {
           const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           setUserLocation(coords);
+          setShouldFetchClosest(true); // מאפשר את הקריאה לשרת
           mapRef.current?.panTo(coords);
           mapRef.current?.setZoom(16);
         },
@@ -57,42 +63,29 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
     }
   };
 
-  useEffect(() => {
-    if (!notification) return;
-    const t = setTimeout(() => setNotification(null), 4000);
-    return () => clearTimeout(t);
-  }, [notification]);
-
   const processedCars = useMemo(() => {
-    return (carsList || [])
-      .filter(car => {
-        const lat = parseFloat(car.Latitude || car.latitude || car.lat);
-        const lng = parseFloat(car.Longitude || car.longitude || car.lng);
-        return !isNaN(lat) && !isNaN(lng) && lat !== 0;
-      })
+    // שליפת הנתונים מהשדה הנכון (אם השרת עוטף ב-data או מחזיר מערך ישיר)
+    const rawData = closestCarsFromServer?.data || closestCarsFromServer;
+    const sourceList = (Array.isArray(rawData) && rawData.length > 0) 
+      ? rawData 
+      : carsList;
+
+    return (sourceList || [])
+      .filter(car => car.Latitude || car.latitude)
       .map((car, index) => ({
         ...car,
         id: car.Id || car.id || index,
         position: {
-          lat: parseFloat(car.Latitude || car.latitude || car.lat),
-          lng: parseFloat(car.Longitude || car.longitude || car.lng)
+          lat: parseFloat(car.Latitude || car.latitude),
+          lng: parseFloat(car.Longitude || car.longitude)
         },
-        isAvailable: car.Status?.includes("פנוי") || car.isAvailable !== false,
+        // בדיקת מרחק גמישה לשמות שדות (D גדולה או קטנה)
+        distanceVal: car.Distance ?? car.distance ?? 999,
+        isAvailable: car.Status?.toString().includes("Available") || car.isAvailable !== false,
         carIcon: carIcons[Math.abs(car.Id || index) % carIcons.length]
-      }));
-  }, [carsList]);
-
-  const { data: closestData } = useGetClosestCarsQuery(
-    { lat: userLocation?.lat, lng: userLocation?.lng },
-    { skip: !shouldFetchClosest || !userLocation }
-  );
-
-  useEffect(() => {
-    if (closestData && Array.isArray(closestData) && sortedCars.length === 0) {
-      setSortedCars(closestData.map((c, idx) => ({ ...c, id: c.Id || c.id || idx })));
-      setShowGridFull(true);
-    }
-  }, [closestData, sortedCars.length]);
+      }))
+      .sort((a, b) => a.distanceVal - b.distanceVal);
+  }, [carsList, closestCarsFromServer]);
 
   if (!isLoaded) return <div className="loading-map">טוען...</div>;
 
@@ -109,13 +102,15 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
                 onClick={() => {
                   if (step === 1 || completedSteps.includes(step - 1)) {
                     setCurrentStep(step);
-                    if (step === 1) {
-                        setShowSidePanel(true);
-                        setShowGridFull(false);
-                    }
-                    if (step === 2) {
-                       setShowGridFull(true);
-                       if (userLocation) setShouldFetchClosest(true);
+                    if (step === 1) { setShowSidePanel(true); setShowGridFull(false); }
+                    if (step === 2) { 
+                      setShowGridFull(true); 
+                      // ת אם אין מיקום, נבקש אותו אקטיבית במעבר לשלב 2
+                      if (!userLocation) {
+                        handleLocationClick();
+                      } else {
+                        setShouldFetchClosest(true);
+                      }
                     }
                   }
                 }}
@@ -133,25 +128,21 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
         <div className="main-display-area">
           <div className="map-and-grid">
             {completedSteps.includes(3) ? (
-              <div className="grid-full">
-                <CreateOrder 
-                  selectedCar={selectedCar}
-                  orderDetails={orderPayload}
-                  hasWaiver={JSON.parse(localStorage.getItem("coverage_waiver"))}
-                  onBack={() => {
-                    setCompletedSteps(prev => prev.filter(s => s !== 3));
-                    setCurrentStep(3);
-                  }}
-                />
-              </div>
+               <div className="grid-full">
+                 <CreateOrder 
+                   selectedCar={selectedCar}
+                   orderDetails={orderPayload}
+                   onBack={() => { setCompletedSteps(prev => prev.filter(s => s !== 3)); setCurrentStep(3); }}
+                   onGoToStep={(s) => setCurrentStep(s)}
+                 />
+               </div>
             ) : currentStep === 3 ? (
               <div className="grid-full">
                 <CoverageSidePanel
                   selectedCar={selectedCar}
+                  orderDetails={orderPayload}
                   onClose={() => setCurrentStep(2)}
                   onConfirm={(payload) => {
-                    localStorage.setItem("coverage_waiver", JSON.stringify(payload.hasWaiver));
-                    // מיזוג נתונים קריטי: שומר על זמני הנסיעה משלב 1 ומוסיף את פרטי הכיסוי
                     setOrderPayload(prev => ({ ...prev, ...payload })); 
                     setCompletedSteps(prev => [...new Set([...prev, 3])]);
                   }}
@@ -159,59 +150,47 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
               </div>
             ) : showGridFull ? (
               <div className="grid-full">
-                <CarSelectionList
-                  cars={sortedCars.length ? sortedCars : processedCars}
-                  onSelectCar={(car) => {
-                    setSelectedCar(car);
-                    setCompletedSteps(prev => [...new Set([...prev, 2])]);
-                    setCurrentStep(3);
-                    if (onCarSelect) onCarSelect(car);
-                  }}
-                />
+                {isFetching ? <div className="loading-overlay">מחשב רכבים קרובים...</div> : (
+                  <CarSelectionList
+                    cars={processedCars} 
+                    onSelectCar={(car) => {
+                      setSelectedCar(car);
+                      setCompletedSteps(prev => [...new Set([...prev, 2])]);
+                      setCurrentStep(3);
+                      if (onCarSelect) onCarSelect(car);
+                    }}
+                  />
+                )}
               </div>
             ) : (
               <div className="map-view">
-                <GoogleMap
-                  mapContainerClassName="google-map-instance"
-                  onLoad={map => mapRef.current = map}
-                  center={processedCars[0]?.position || { lat: 32.05, lng: 34.95 }}
-                  zoom={14}
-                  options={{ styles: whiteMinimalStyle, disableDefaultUI: true }}
-                >
-                  {userLocation && (
-                    <MarkerF 
-                      position={userLocation} 
-                      icon={{ 
-                        url: '/assets/my_position_icon.png', 
-                        scaledSize: new window.google.maps.Size(30, 40) 
-                      }} 
-                    />
-                  )}
+               <GoogleMap
+               mapContainerClassName="google-map-instance"
+               onLoad={map => mapRef.current = map}
+               center={userLocation || processedCars[0]?.position || { lat: 32.05, lng: 34.95 }}
+               zoom={14}
+               options={{ 
+               styles: whiteMinimalStyle, 
+               disableDefaultUI: true, 
+               zoomControl: true,
+               // כאן אנחנו קובעים איפה הכפתורים יופיעו
+               zoomControlOptions: {
+                 // LEFT_BOTTOM יניח אותם בצד שמאל למטה, הרחק מהסרגלים שבדרך כלל בימין
+                 position: window.google?.maps?.ControlPosition?.LEFT_BOTTOM 
+               }
+            }}
+               >
+                  {userLocation && <MarkerF position={userLocation} icon={{ url: '/assets/my_position_icon.png', scaledSize: new window.google.maps.Size(30, 40) }} />}
                   <MarkerClusterer>
-                    {(clusterer) =>
-                      processedCars.map((car) => (
-                        <MarkerF
-                          key={car.id}
-                          position={car.position}
-                          clusterer={clusterer}
-                          onClick={() => { 
-                            setSelectedCar(car); 
-                            setOriginSelection('map'); 
-                            setShowSidePanel(true); 
-                          }}
-                          icon={{ 
-                            url: car.carIcon, 
-                            scaledSize: new window.google.maps.Size(25, 45) 
-                          }}
+                    {(clusterer) => processedCars.map((car) => (
+                        <MarkerF key={car.id} position={car.position} clusterer={clusterer} 
+                          onClick={() => { setSelectedCar(car); setOriginSelection('map'); setShowSidePanel(true); }}
+                          icon={{ url: car.carIcon, scaledSize: new window.google.maps.Size(25, 45) }}
                         />
                       ))
                     }
                   </MarkerClusterer>
                 </GoogleMap>
-                <div className="custom-zoom-controls">
-                  <button onClick={() => mapRef.current?.setZoom(mapRef.current.getZoom() + 1)}>+</button>
-                  <button onClick={() => mapRef.current?.setZoom(mapRef.current.getZoom() - 1)}>-</button>
-                </div>
                 <button className="my-location-floating-btn" onClick={handleLocationClick}>
                   <div className="location-outer-circle"><div className="location-inner-dot"></div></div>
                 </button>
@@ -221,27 +200,26 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
         </div>
 
         {showSidePanel && (
-          <div className="route-panel-overlay">
-            <RouteSidePanel
-              selectedCar={selectedCar}
-              onClose={() => { setShowSidePanel(false); setOriginSelection(null); }}
-              onConfirm={(payload) => {
-                setOrderPayload(payload); 
-                setCompletedSteps(prev => [...new Set([...prev, 1])]);
-                setCurrentStep(2);
-                setShowSidePanel(false);
-                if (onRouteConfirm) onRouteConfirm(payload);
-                
-                // אם הרכב נבחר ישירות מהמפה, אנחנו מדלגים על בחירת הרכב (שלב 2) ועוברים ישר לכיסויים
-                if (originSelection === 'map') {
-                   setCompletedSteps(prev => [...new Set([...prev, 1, 2])]);
-                   setCurrentStep(3);
-                } else {
-                   setShowGridFull(true);
-                }
-              }}
-            />
-          </div>
+          <RouteSidePanel
+            selectedCar={selectedCar}
+            initialData={orderPayload} 
+            onClose={() => { setShowSidePanel(false); setOriginSelection(null); }}
+            onConfirm={(payload) => {
+              setOrderPayload(payload); 
+              setCompletedSteps(prev => [...new Set([...prev, 1])]);
+              setShowSidePanel(false);
+              if (originSelection === 'map') { 
+                setCompletedSteps(prev => [...new Set([...prev, 1, 2])]); 
+                setCurrentStep(3); 
+              } 
+              else { 
+                setCurrentStep(2); 
+                setShowGridFull(true); 
+                if (!userLocation) handleLocationClick();
+                else setShouldFetchClosest(true);
+              }
+            }}
+          />
         )}
       </div>
       {notification && <div className="notification-toast">{notification}</div>}
