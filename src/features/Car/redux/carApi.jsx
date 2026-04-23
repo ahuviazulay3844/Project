@@ -143,6 +143,16 @@ export const carApi = createApi({
             }),
             invalidatesTags: ['Cars'],
         }),
+updateCarLock: builder.mutation({
+  query: ({ id, isLocked }) => ({
+    url: `Cars/${id}/toggle-lock`,
+    method: 'PATCH',
+    // כאן אנחנו שולחים אובייקט JSON תקין
+    body: { isLocked: isLocked }, 
+    headers: { 'Content-Type': 'application/json' },
+  }),
+  invalidatesTags: ['Cars'],
+}),
     }),
 });
 export const { 
@@ -164,5 +174,6 @@ export const {
     useUpdateMileageMutation,          // עדכון קילומטראז'
     useUpdateCarStatusMutation,        // שינוי סטטוס רכב ידני
     useSendToMaintenanceMutation,      // שליחה לטיפול/תחזוקה
-    useReleaseFromMaintenanceMutation  // החזרה מתחזוקה לפעיל
+    useReleaseFromMaintenanceMutation , // החזרה מתחזוקה לפעיל
+    useUpdateCarLockMutation,          // שינוי סטטוס נעילה של רכב  
 } = carApi;

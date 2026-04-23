@@ -1,45 +1,40 @@
-.orders-container {
-  padding: 20px;
+.orders-page-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
+  padding: 40px 20px;
   direction: rtl;
-  max-width: 1000px;
+}
+
+.orders-container {
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .orders-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
+  align-items: flex-end;
+  margin-bottom: 40px;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 20px;
 }
 
 .orders-title {
-  color: #4b1b7a; /* הסגול של הלוגו */
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1e293b;
   margin: 0;
-  font-size: 1.8rem;
-  font-weight: 700;
 }
 
-/* חיפוש */
+.subtitle {
+  color: #64748b;
+  font-size: 1.1rem;
+}
+
 .search-wrapper {
   position: relative;
-  flex: 1;
-  max-width: 350px;
-}
-
-.orders-search-input {
   width: 100%;
-  padding: 10px 40px 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 25px;
-  outline: none;
-  font-size: 0.95rem;
-  transition: border-color 0.3s;
-}
-
-.orders-search-input:focus {
-  border-color: #4b1b7a;
+  max-width: 350px;
 }
 
 .search-icon {
@@ -47,178 +42,191 @@
   right: 15px;
   top: 50%;
   transform: translateY(-50%);
-  color: #888;
+  color: #94a3b8;
 }
 
-/* רשימת כרטיסים */
-.orders-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.order-card {
+.orders-search-input {
+  width: 100%;
+  padding: 14px 45px 14px 15px;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
   background: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 25px;
+}
+
+.order-glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-active-glow {
+  border: 2px solid #6366f1;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.order-number { font-weight: bold; color: #94a3b8; font-size: 0.9rem; }
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.status-active { background: #dcfce7; color: #166534; }
+.status-completed { background: #f1f5f9; color: #475569; }
+.status-pending { background: #fff7ed; color: #9a3412; }
+
+.car-main-info { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+
+.car-image-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.car-actual-image {
+  width: 110px;
+  height: 70px;
+  object-fit: cover;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  display: flex;
-  overflow: hidden;
-  transition: transform 0.2s;
-  border: 1px solid #eee;
+  border: 2px solid white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.order-card:hover {
-  transform: translateY(-3px);
-}
-
-.order-card-accent {
-  width: 6px;
-  background-color: #00bcd4; /* התכלת של האתר */
-}
-
-.order-main-content {
-  padding: 15px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.order-car-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.order-car-model {
-  font-weight: 800;
-  font-size: 1.15rem;
-  color: #333;
-}
-
-.order-address {
-  font-size: 0.85rem;
-  color: #666;
-}
-
-.order-dates {
-  background: #f9f9f9;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-}
-
-.date-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-
-.date-label {
-  color: #888;
-}
-
-.date-val {
-  color: #333;
-  font-weight: 600;
-}
-
-.order-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: auto;
-  padding-top: 10px;
-  border-top: 1px dashed #eee;
-}
-
-/* סטטוסים */
-.order-status {
-  padding: 4px 12px;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.status-active { background: #e1f5fe; color: #0288d1; }
-.status-completed { background: #e8f5e9; color: #2e7d32; }
-.status-cancelled { background: #ffebee; color: #c62828; }
-
-.price-val {
-  font-weight: 800;
-  color: #4b1b7a;
-  font-size: 1.1rem;
-}
-
-.no-orders {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 50px;
-  color: #999;
-}
-/* צבעי סטטוס לפי ה-Enum */
-.status-pending { background: #fff3e0; color: #ef6c00; } /* כתום לממתינה */
-.status-active { background: #e1f5fe; color: #0288d1; }  /* כחול לפעילה */
-.status-completed { background: #e8f5e9; color: #2e7d32; } /* ירוק להושלמה */
-.status-cancelled { background: #ffebee; color: #c62828; } /* אדום לבוטלה */
-
-.order-card-accent.status-pending { background-color: #ef6c00; }
-.order-card-accent.status-active { background-color: #0288d1; }
-.order-card-accent.status-completed { background-color: #2e7d32; }
-.order-card-accent.status-cancelled { background-color: #c62828; }
-
-.order-top-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.order-id {
-  font-size: 0.8rem;
-  color: #999;
-  font-weight: bold;
-}
-
-.paid-tag { color: #2e7d32; font-size: 0.85rem; font-weight: bold; }
-.unpaid-tag { color: #c62828; font-size: 0.85rem; font-weight: bold; }
-
-.order-pricing-type {
-  font-size: 0.85rem;
-  background: #f0f0f0;
+.license-plate-badge {
+  background: #facc15;
+  color: #1e293b;
   padding: 2px 8px;
   border-radius: 4px;
-  width: fit-content;
-  margin-top: 4px;
-}
-/* שיפור מראה הכרטיסים */
-.order-card {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 15px;
-    padding: 15px;
-    border: none;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    min-width: 280px;
+  font-weight: 800;
+  border: 1.5px solid #1e293b;
+  font-size: 0.7rem;
+  margin-top: -8px;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* כותרת דגם הרכב */
-.order-car-model {
-    color: #4b1b7a;
-    font-size: 1.3rem;
-    text-align: center;
-    margin: 10px 0;
+.car-model-name { font-size: 1.3rem; font-weight: 800; color: #1e293b; margin: 0; }
+.pricing-tag { font-size: 0.8rem; color: #6366f1; font-weight: 600; }
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 16px;
+  margin-bottom: 20px;
 }
 
-/* יישור תגיות המחיר והתשלום */
-.order-footer {
-    border-top: 1px solid #eee;
-    padding-top: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.detail-item { display: flex; align-items: center; gap: 8px; }
+.detail-item label { display: block; font-size: 0.7rem; color: #94a3b8; }
+.detail-item span { font-size: 0.85rem; font-weight: 700; color: #334155; }
+
+.car-control-section { border-top: 1px solid #f1f5f9; padding-top: 20px; }
+.car-remote-controls { display: flex; flex-direction: column; gap: 10px; }
+
+.lock-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  justify-content: center;
+  color: #475569;
 }
 
-.price-val {
-    font-size: 1.2rem;
-    color: #4b1b7a;
-    font-weight: 900;
+.status-dot { width: 8px; height: 8px; border-radius: 50%; }
+.status-dot.unlocked { background: #10b981; box-shadow: 0 0 8px #10b981; }
+.status-dot.locked { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+
+.btn-control {
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+  color: white;
+}
+
+.lock-action { background: #1e293b; }
+.unlock-action { background: #10b981; }
+
+.finish-action-large {
+  width: 100%;
+  margin-top: 10px;
+  background: linear-gradient(45deg, #ef4444, #dc2626);
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+}
+
+.finish-action-large:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4);
+}
+
+.card-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.pay-pill {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pay-pill.paid { background: #dcfce7; color: #166534; }
+.pay-pill.unpaid { background: #fef2f2; color: #991b1b; }
+.amount { font-size: 1.4rem; font-weight: 900; color: #1e293b; }
+
+.btn-spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin-and-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes spin-and-pulse {
+  0% { transform: rotate(0deg) scale(0.8); opacity: 0.6; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 1; }
+  100% { transform: rotate(360deg) scale(0.8); opacity: 0.6; }
 }
