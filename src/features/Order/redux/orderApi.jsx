@@ -13,6 +13,7 @@ export const orderApi = createApi({
         },
     }),
     tagTypes: ['Orders'],
+    refetchOnMountOrArgChange: true,// שורה חדשה: מאלץ רענון נתונים בכל פעם שהפרמטרים משתנים או שהקומפוננטה עולה
     endpoints: (builder) => ({
         
         // --- Queries (שליפת נתונים) ---
@@ -36,26 +37,32 @@ export const orderApi = createApi({
             query: () => "Orders/count",
         }),
 
-        getTotalRevenue: builder.query({
-            query: ({ start, end }) => {
-                let url = 'Orders/revenue';
-                const params = new URLSearchParams();
-                if (start) params.append('start', start);
-                if (end) params.append('end', end);
-                return `${url}?${params.toString()}`;
-            },
-        }),
-
+getTotalRevenue: builder.query({
+    query: ({ start, end }) => {
+        let url = 'Orders/revenue';
+        const params = new URLSearchParams();
+        
+        // פוליש: המרה ל-ISO אם אלו אובייקטים של תאריך
+        if (start) params.append('start', start instanceof Date ? start.toISOString() : start);
+        if (end) params.append('end', end instanceof Date ? end.toISOString() : end);
+        
+        return `${url}?${params.toString()}`;
+    },
+}),
         getOrdersByDate: builder.query({
             query: (date) => `Orders/by-date/${date}`,
             providesTags: ['Orders'],
         }),
 
-        getOrdersByDateRange: builder.query({
-            query: ({ start, end }) => `Orders/range?start=${start}&end=${end}`,
-            providesTags: ['Orders'],
-        }),
-
+getOrdersByDateRange: builder.query({
+    query: ({ start, end }) => {
+        const s = start instanceof Date ? start.toISOString() : start;
+        const e = end instanceof Date ? end.toISOString() : end;
+        
+        return `Orders/range?start=${s}&end=${e}`;
+    },
+    providesTags: ['Orders'],
+}),
         getOrdersByUserEmail: builder.query({
             query: (email) => `Orders/by-email/${email}`,
             providesTags: ['Orders'],
@@ -120,14 +127,19 @@ export const orderApi = createApi({
                 method: 'PUT',
             }),
         }),
-
-        finishOrder: builder.mutation({
-            query: ({ id, mileage, fuelTime }) => ({
-                url: `Orders/${id}/finish?mileage=${mileage}&fuelTime=${fuelTime}`,
-                method: 'PATCH',
-            }),
-            invalidatesTags: ['Orders'],
-        }),
+finishOrder: builder.mutation({
+    query: ({ id, mileage, fuelTime }) => {
+        // וידוא שהערכים הם מספרים ושאינם undefined
+        const safeMileage = Math.floor(Number(mileage) || 0);
+        const safeFuelTime = Math.floor(Number(fuelTime) || 0);
+        
+        return {
+            url: `Orders/${id}/finish?mileage=${safeMileage}&fuelTime=${safeFuelTime}`,
+            method: 'PATCH',
+        };
+    },
+    invalidatesTags: (result, error, { id }) => [{ type: 'Orders', id }, 'Orders'],
+}),
 
         updateProgress: builder.mutation({
             query: (id) => ({
