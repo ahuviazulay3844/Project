@@ -1,12 +1,17 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useGetOrdersByUserIdQuery, useFinishOrderMutation } from '../redux/orderApi.jsx';
 import { useUpdateCarLockMutation, useGetAllCarsQuery } from '../../Car/redux/carApi.jsx'; 
-import { Lock, Unlock, Search, CheckCircle2, Flag, Gauge, FileCheck, Clock, Timer, ChevronLeft, CalendarDays, ClipboardList } from 'lucide-react';
+// הוספתי כאן את Clock כדי למנוע את השגיאה שראית בצילום המסך
+import { Lock, Unlock, Search, CheckCircle2, Flag, FileCheck, ChevronLeft, CalendarDays, ClipboardList, AlertTriangle, Loader2, Clock } from 'lucide-react';
 import '../Style/UserOrders.css';
 
-const UserOrders = ({ userId }) => {
+const UserOrders = () => {
   const navigate = useNavigate();
+  const currentUser = useSelector((state) => state.user.currentUser);
+  const userId = currentUser?.id;
+
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [yearFilter, setYearFilter] = useState('all');
@@ -17,22 +22,36 @@ const UserOrders = ({ userId }) => {
     return () => clearInterval(timer);
   }, []);
 
-  const { data: orders = [], isLoading: ordersLoading } = useGetOrdersByUserIdQuery(userId, { skip: !userId, pollingInterval: 5000 });
+  const { data: orders = [], isLoading: ordersLoading } = useGetOrdersByUserIdQuery(userId, { 
+    skip: !userId, 
+    pollingInterval: 5000 
+  });
+
   const { data: cars = [], isLoading: carsLoading } = useGetAllCarsQuery();
   const [updateCarLock] = useUpdateCarLockMutation();
-  const [finishOrder] = useFinishOrderMutation();
+  const [finishOrder, { isLoading: isFinishing }] = useFinishOrderMutation();
 
-  const handleFinish = async (orderId, isLocked, distance) => {
-    if (!isLocked) { alert("יש לנעול את הרכב לפני סיום!"); return; }
-    try { 
-      await finishOrder({ orderId, reportedMileage: distance || 0 }).unwrap(); 
-      // הוספת ניווט לדף הפירוט לאחר סיום מוצלח
-      navigate(`/order-details/${orderId}`);
-    } 
-    catch (err) { console.error(err); }
+  const calculateLateMinutes = (expectedEnd, actualEnd, status) => {
+    if (status === 0) return 0;
+    const end = status === 2 ? new Date(actualEnd) : currentTime;
+    const expected = new Date(expectedEnd);
+    const diff = Math.floor((end - expected) / 60000);
+    return diff > 0 ? diff : 0;
   };
 
-  // לוגיקת סינון משולבת
+  const handleFinish = async (orderId, isLocked, distance) => {
+    if (!isLocked) { 
+      alert("יש לנעול את הרכב לפני סיום!"); 
+      return; 
+    }
+    try { 
+      await finishOrder({ id: orderId, mileage: distance || 0, fuelTime: 0 }).unwrap(); 
+      navigate(`/order-details/${orderId}`);
+    } catch (err) { 
+      console.error("שגיאה בסיום נסיעה:", err);
+    }
+  };
+
   const filteredOrders = useMemo(() => {
     return [...orders]
       .sort((a,b) => b.id - a.id)
@@ -40,13 +59,10 @@ const UserOrders = ({ userId }) => {
         const matchesSearch = o.carModel?.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.toString().includes(searchTerm);
         const matchesStatus = statusFilter === 'all' || o.status.toString() === statusFilter;
         const orderYear = new Date(o.startTime).getFullYear().toString();
-        const matchesYear = yearFilter === 'all' || orderYear === yearFilter;
-        
-        return matchesSearch && matchesStatus && matchesYear;
+        return matchesSearch && matchesStatus && (yearFilter === 'all' || orderYear === yearFilter);
       });
   }, [orders, searchTerm, statusFilter, yearFilter]);
 
-  // רשימת שנים דינמית מההזמנות
   const availableYears = useMemo(() => {
     const years = orders.map(o => new Date(o.startTime).getFullYear());
     return [...new Set(years)].sort((a, b) => b - a);
@@ -69,127 +85,111 @@ const UserOrders = ({ userId }) => {
           </div>
         </header>
 
-        {/* שורת מסננים על רקע לבן */}
+        {/* בר סינונים עם ניגודיות גבוהה */}
         <div className="filters-bar-white">
           <div className="filter-group-main">
             <label><Search size={14} /> חיפוש</label>
-            <input 
-              type="text" 
-              placeholder="חפש דגם או הזמנה..." 
-              className="filter-input-white" 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} 
-            />
+            <input type="text" placeholder="חפש דגם..." className="filter-input-white" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
-
           <div className="filter-group-main">
             <label><ClipboardList size={14} /> סטטוס</label>
             <select className="filter-select-white" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="all">כל הסטטוסים</option>
+              <option value="all">הכל</option>
+              <option value="0">ממתינה</option>
               <option value="1">בנסיעה</option>
               <option value="2">הושלמה</option>
             </select>
           </div>
-
           <div className="filter-group-main">
             <label><CalendarDays size={14} /> שנה</label>
             <select className="filter-select-white" value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
               <option value="all">כל השנים</option>
-              {availableYears.map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
+              {availableYears.map(year => <option key={year} value={year}>{year}</option>)}
             </select>
           </div>
         </div>
 
         <div className="orders-grid">
-          {filteredOrders.map((order) => {
+          {filteredOrders.length === 0 ? <p className="no-orders">לא נמצאו נסיעות</p> : filteredOrders.map((order) => {
             const isActive = order.status === 1;
-            const isCompleted = order.status === 2;
+            const isPending = order.status === 0;
+            const isFinished = order.status === 2;
             const carData = cars.find(c => c.id === order.carId);
-            
+            const lateMinutes = calculateLateMinutes(order.expectedEndTime, order.endTime, order.status);
+
             return (
-              <div key={order.id} className={`order-glass-card ${isActive ? 'card-active-glow' : ''}`}>
+              <div key={order.id} className={`order-glass-card ${isActive ? 'card-active-glow' : ''} ${isPending ? 'card-pending' : ''}`}>
                 <div className="card-header">
                   <span className="order-number"># {order.id}</span>
-                  <span className={`status-badge ${isActive ? 'status-active' : 'status-completed'}`}>
-                    {isActive ? <CheckCircle2 size={14}/> : <FileCheck size={14}/>}
-                    {isActive ? 'בנסיעה' : 'הושלמה'}
+                  <span className={`status-badge ${isActive ? 'status-active' : isPending ? 'status-pending' : 'status-completed'}`}>
+                    {isActive ? <CheckCircle2 size={14}/> : isPending ? <Clock size={14}/> : <FileCheck size={14}/>}
+                    {isActive ? 'בנסיעה' : isPending ? 'ממתינה' : 'הושלמה'}
                   </span>
                 </div>
 
-                <div className="card-body">
-                  <div className="car-main-info">
-                    <div className="car-image-section">
-                      <img src={carData?.imageUrl} alt="" className="car-actual-image" />
-                      <div className="license-plate-badge">{carData?.licensePlate}</div>
-                    </div>
-                    <div className="car-text-info">
-                      <h3 className="car-model-name">{order.carModel}</h3>
-                      <span className="pricing-tag">מסלול {order.pricingType === 'Daily' ? 'יומי' : 'שעתי'}</span>
-                    </div>
+                <div className="car-main-info">
+                  <div className="car-image-section">
+                    <img src={carData?.imageUrl} alt="" className="car-actual-image" />
+                    <div className="license-plate-badge">{carData?.licensePlate}</div>
                   </div>
-
-                  <div className="details-grid-four">
-                    <div className="detail-item">
-                      <label><Clock size={12}/> איסוף</label>
-                      <span className="dark-text">{formatTime(order.startTime)}</span>
-                    </div>
-                    <div className="detail-item">
-                      <label><Timer size={12}/> החזרה</label>
-                      <span className="dark-text">{formatTime(order.expectedEndTime)}</span>
-                    </div>
-                    <div className="detail-item">
-                      <label><CheckCircle2 size={12}/> בפועל</label>
-                      <span className="dark-text">{isCompleted ? formatTime(order.endTime) : '--:--'}</span>
-                    </div>
-                    <div className="detail-item">
-                      <label><Gauge size={12}/> ק"מ</label>
-                      <span className="dark-text">{order.distanceDrivenKm || 0}</span>
-                    </div>
+                  <div className="car-text-info">
+                    <h3 className="car-model-name">{order.carModel}</h3>
+                    <span className="pricing-tag">מסלול {order.pricingType === 'Daily' ? 'יומי' : 'שעתי'}</span>
                   </div>
-
-                  {isCompleted && (
-                    <div className="order-analysis-section">
-                      <div className="analysis-title">סיכום נסיעה</div>
-                      {order.lateFee > 0 && (
-                        <div className="analysis-row danger">
-                          <span>קנס איחור:</span>
-                          <strong>₪{Math.round(order.lateFee)}</strong>
-                        </div>
-                      )}
-                      <button className="btn-details-link" onClick={() => navigate(`/order-details/${order.id}`)}>
-                        פירוט מלא (נזקים, קבלה) <ChevronLeft size={14} />
-                      </button>
-                    </div>
-                  )}
-
-                  {isActive && (
-                    <div className="car-control-section">
-                      <div className="lock-status-indicator">
-                        <span className={`status-dot ${carData?.isLocked ? 'locked' : 'unlocked'}`}></span>
-                        <span className="dark-text">{carData?.isLocked ? 'הרכב נעול' : 'הרכב פתוח'}</span>
-                      </div>
-                      <div className="car-remote-controls">
-                        <button className={`btn-control ${carData?.isLocked ? 'unlock-action' : 'lock-action'}`}
-                          onClick={() => updateCarLock({ id: order.carId, isLocked: !carData?.isLocked })}>
-                          {carData?.isLocked ? <Unlock size={18} /> : <Lock size={18} />}
-                          <span>{carData?.isLocked ? 'פתח רכב' : 'נעל רכב'}</span>
-                        </button>
-                        <button className="btn-control finish-action-large" 
-                          onClick={() => handleFinish(order.id, carData?.isLocked, order.distanceDrivenKm)}>
-                          <Flag size={18} /> <span>סיום נסיעה</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
-                <div className="card-footer">
-                  <div className={`pay-pill ${order.isPaid ? 'paid' : 'unpaid'}`}>
-                    {order.isPaid ? 'שולם' : 'ממתין לתשלום'}
+                <div className="details-grid-four">
+                  <div className="detail-item"><label>איסוף</label><span className="dark-text">{formatTime(order.startTime)}</span></div>
+                  <div className="detail-item"><label>החזרה</label><span className="dark-text">{formatTime(order.expectedEndTime)}</span></div>
+                  <div className="detail-item"><label>בפועל</label><span className="dark-text">{isFinished ? formatTime(order.endTime) : '--:--'}</span></div>
+                  <div className="detail-item"><label>ק"מ</label><span className="dark-text">{order.distanceDrivenKm || 0}</span></div>
+                </div>
+
+                {/* התראת איחור מהבהבת */}
+                {lateMinutes > 0 && (
+                  <div className={`late-warning-box ${isFinished ? 'past-late' : 'active-late'}`}>
+                    <AlertTriangle className="blink-icon" size={18} />
+                    <div className="late-text">
+                      <span>{isActive ? 'איחור פעיל:' : 'איחור סופי:'}</span>
+                      <strong className="text-danger">{lateMinutes} דק' (₪{lateMinutes})</strong>
+                    </div>
                   </div>
-                  <div className="amount dark-text">₪{Math.round(order.totalPrice || 0)}</div>
+                )}
+
+                {isActive && (
+                  <div className="car-control-section">
+                    <div className="lock-status-indicator">
+                      {/* העיגול המהבהב שביקשת */}
+                      <span className={`status-dot ${carData?.isLocked ? 'locked' : 'unlocked'}`}></span>
+                      <span className={`lock-text-display ${carData?.isLocked ? 'locked-text' : 'unlocked-text'}`}>
+                        {carData?.isLocked ? 'נעול' : 'פתוח'}
+                      </span>
+                    </div>
+                    <div className="car-remote-controls">
+                      <button className={`btn-control ${carData?.isLocked ? 'unlock-action' : 'lock-action'}`}
+                        onClick={() => updateCarLock({ id: order.carId, isLocked: !carData?.isLocked })}>
+                        {carData?.isLocked ? <Unlock size={16} /> : <Lock size={16} />}
+                        {carData?.isLocked ? 'פתח' : 'נעל'}
+                      </button>
+                      <button className="btn-control finish-action-large" 
+                        disabled={isFinishing}
+                        onClick={() => handleFinish(order.id, carData?.isLocked, order.distanceDrivenKm)}>
+                        {isFinishing ? <Loader2 size={16} className="spinner-icon" /> : <Flag size={16} />}
+                        <span>{isFinishing ? 'מעבד...' : 'סיום'}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {isFinished && (
+                  <button className="btn-details-link" onClick={() => navigate(`/order-details/${order.id}`)}>
+                    צפה בפרטי הנסיעה <ChevronLeft size={14} />
+                  </button>
+                )}
+
+                <div className="card-footer">
+                  <div className={`pay-pill ${order.isPaid ? 'paid' : 'unpaid'}`}>{order.isPaid ? 'שולם' : 'חויב'}</div>
+                  <div className="amount-display">₪{Math.round(order.totalPrice || 0)}</div>
                 </div>
               </div>
             );
