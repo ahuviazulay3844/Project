@@ -1,22 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import logoImg from '../../../assets/top_icon.png';
 import '../Style/MainLayout.css';
-import UserOrders from '../../Order/components/UserOrders.jsx'; 
-import PriceList from '../../Car/components/PriceList.jsx'; 
 
-const MainLayout = ({ children, currentUser, onLogoClick, onRegisterClick, onNewOrderClick, onProfileClick }) => {
-  // ניהול המצב: 'map' (ברירת מחדל), 'orders', או 'pricing'
-  const [activeView, setActiveView] = useState('map');
-
-  const handleLogoClick = () => {
-    setActiveView('map');
-    if (onLogoClick) onLogoClick();
-  };
-
-  const handleNewOrder = () => {
-    setActiveView('map');
-    if (onNewOrderClick) onNewOrderClick();
-  };
+const MainLayout = ({ 
+  children, 
+  currentUser, 
+  activeView,
+  onLogoClick, 
+  onRegisterClick, 
+  onNewOrderClick, 
+  onLoginClick, // הוספתי את זה כאן - חובה כדי שהכפתור יעבוד
+  onProfileClick,
+  onOrdersClick,
+  onPricingClick 
+}) => {
 
   return (
     <div className="city-car-wrapper">
@@ -28,16 +25,23 @@ const MainLayout = ({ children, currentUser, onLogoClick, onRegisterClick, onNew
               alt="City Car" 
               className="main-logo" 
               style={{ cursor: 'pointer' }} 
-              onClick={handleLogoClick} 
+              onClick={onLogoClick} 
             />
             <span className="user-greeting">שלום, {currentUser?.firstName || 'אורח'}</span>
           </div>
           <div className="nav-left">
             <span className="phone-info">* 2319 | 0-2319-2319</span>
             <div className="nav-buttons">
-              <button className="btn-white-outline" onClick={handleNewOrder}>הזמנה חדשה</button>
-              {!currentUser && onRegisterClick && (
-                <button className="btn-white-outline" onClick={onRegisterClick}>הרשמה</button>
+              <button className="btn-white-outline" onClick={onNewOrderClick}>הזמנה חדשה</button>
+              
+              {/* מציג הרשמה והתחברות רק אם המשתמש לא מחובר */}
+              {!currentUser && (
+                <>
+                  {onRegisterClick && (
+                    <button className="btn-white-outline" onClick={onRegisterClick}>הרשמה</button>
+                  )}
+                  <button className="btn-white-outline" onClick={onLoginClick}>התחברות</button>
+                </>
               )}
             </div>
           </div>
@@ -45,19 +49,23 @@ const MainLayout = ({ children, currentUser, onLogoClick, onRegisterClick, onNew
       </nav>
 
       <aside className="right-sidebar">
-        <div className="sidebar-item" onClick={onProfileClick}>👤 <span>אזור אישי</span></div>
+        <div 
+          className={`sidebar-item ${activeView === 'profile' ? 'active' : ''}`} 
+          onClick={onProfileClick}
+        >
+          👤 <span>אזור אישי</span>
+        </div>
         
         <div 
           className={`sidebar-item ${activeView === 'orders' ? 'active' : ''}`} 
-          onClick={() => setActiveView('orders')}
+          onClick={onOrdersClick}
         >
           🚗 <span>הזמנות</span>
         </div>
 
-        {/* קישור למחירון */}
         <div 
           className={`sidebar-item ${activeView === 'pricing' ? 'active' : ''}`} 
-          onClick={() => setActiveView('pricing')}
+          onClick={onPricingClick}
         >
           ₪ <span>מחירון</span>
         </div>
@@ -67,13 +75,7 @@ const MainLayout = ({ children, currentUser, onLogoClick, onRegisterClick, onNew
       </aside>
 
       <div className="main-scroll-area">
-        {activeView === 'orders' ? (
-          <UserOrders userId={currentUser?.id || currentUser?.Id} />
-        ) : activeView === 'pricing' ? (
-          <PriceList /> /* הצגת המחירון */
-        ) : (
-          children /* הצגת המפה / תוכן ראשי */
-        )}
+        {children}
       </div>
     </div>
   );

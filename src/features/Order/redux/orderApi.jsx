@@ -13,6 +13,7 @@ export const orderApi = createApi({
         },
     }),
     tagTypes: ['Orders'],
+    refetchOnMountOrArgChange: true,// שורה חדשה: מאלץ רענון נתונים בכל פעם שהפרמטרים משתנים או שהקומפוננטה עולה
     endpoints: (builder) => ({
         
         // --- Queries (שליפת נתונים) ---
@@ -36,26 +37,32 @@ export const orderApi = createApi({
             query: () => "Orders/count",
         }),
 
-        getTotalRevenue: builder.query({
-            query: ({ start, end }) => {
-                let url = 'Orders/revenue';
-                const params = new URLSearchParams();
-                if (start) params.append('start', start);
-                if (end) params.append('end', end);
-                return `${url}?${params.toString()}`;
-            },
-        }),
-
+getTotalRevenue: builder.query({
+    query: ({ start, end }) => {
+        let url = 'Orders/revenue';
+        const params = new URLSearchParams();
+        
+        // פוליש: המרה ל-ISO אם אלו אובייקטים של תאריך
+        if (start) params.append('start', start instanceof Date ? start.toISOString() : start);
+        if (end) params.append('end', end instanceof Date ? end.toISOString() : end);
+        
+        return `${url}?${params.toString()}`;
+    },
+}),
         getOrdersByDate: builder.query({
             query: (date) => `Orders/by-date/${date}`,
             providesTags: ['Orders'],
         }),
 
-        getOrdersByDateRange: builder.query({
-            query: ({ start, end }) => `Orders/range?start=${start}&end=${end}`,
-            providesTags: ['Orders'],
-        }),
-
+getOrdersByDateRange: builder.query({
+    query: ({ start, end }) => {
+        const s = start instanceof Date ? start.toISOString() : start;
+        const e = end instanceof Date ? end.toISOString() : end;
+        
+        return `Orders/range?start=${s}&end=${e}`;
+    },
+    providesTags: ['Orders'],
+}),
         getOrdersByUserEmail: builder.query({
             query: (email) => `Orders/by-email/${email}`,
             providesTags: ['Orders'],
@@ -99,13 +106,14 @@ export const orderApi = createApi({
             invalidatesTags: ['Orders'],
         }),
 
-        submitStartReport: builder.mutation({
-            query: ({ id, isDirty, isDamaged, comments }) => ({
-                url: `Orders/${id}/submit-start-report?isDirty=${isDirty}&isDamaged=${isDamaged}&comments=${encodeURIComponent(comments || "")}`,
-                method: 'POST',
-            }),
-            invalidatesTags: ['Orders'],
-        }),
+submitStartReport: builder.mutation({
+    query: ({ id, report }) => ({
+        url: `Orders/${id}/submit-start-report`,
+        method: 'POST',
+        body: report, // כאן ה-DTO נשלח כ-JSON מלא
+    }),
+    invalidatesTags: ['Orders'],
+}),
 
         unlockCar: builder.mutation({
             query: (id) => ({
@@ -120,21 +128,28 @@ export const orderApi = createApi({
                 method: 'PUT',
             }),
         }),
+finishOrder: builder.mutation({
+    query: ({ id, mileage, fuelTime }) => {
+        // וידוא שהערכים הם מספרים ושאינם undefined
+        const safeMileage = Math.floor(Number(mileage) || 0);
+        const safeFuelTime = Math.floor(Number(fuelTime) || 0);
+        
+        return {
+            url: `Orders/${id}/finish?mileage=${safeMileage}&fuelTime=${safeFuelTime}`,
+            method: 'PATCH',
+        };
+    },
+    invalidatesTags: (result, error, { id }) => [{ type: 'Orders', id }, 'Orders'],
+}),
 
-        finishOrder: builder.mutation({
-            query: ({ id, mileage, fuelTime }) => ({
-                url: `Orders/${id}/finish?mileage=${mileage}&fuelTime=${fuelTime}`,
-                method: 'PATCH',
-            }),
-            invalidatesTags: ['Orders'],
-        }),
-
-        updateProgress: builder.mutation({
-            query: (id) => ({
-                url: `Orders/${id}/update-progress`,
-                method: 'POST',
-            }),
-        }),
+updateProgress: builder.mutation({
+    query: (id) => ({
+        url: `Orders/${id}/update-progress`,
+        method: 'POST',
+    }),
+    // הוסף שורה זו כדי ש-RTK יבין שצריך לרענן את רשימת ההזמנות
+    invalidatesTags: ['Orders'], 
+}),
 
         markAsPaid: builder.mutation({
             query: (orderId) => ({
@@ -143,6 +158,20 @@ export const orderApi = createApi({
             }),
             invalidatesTags: ['Orders'],
         }),
+
+        getClosestCars: builder.query({
+          query: ({ lat, lon, start, end }) => {
+            let url = `Cars/closest?userLat=${lat}&userLon=${lon}`;
+            if (start) url += `&start=${encodeURIComponent(start)}`;
+            if (end) url += `&end=${encodeURIComponent(end)}`;
+            return url;
+          },
+          providesTags: ['Cars'],
+        }),
+ checkUserOverlap: builder.query({
+        query: ({ userId, start, end }) => 
+            `Orders/check-user-overlap?userId=${userId}&start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
+    }),
     }),
 });
 
@@ -165,5 +194,6 @@ export const {
     useLockCarMutation,
     useFinishOrderMutation,
     useUpdateProgressMutation,
-    useMarkAsPaidMutation 
+    useMarkAsPaidMutation ,
+    useLazyCheckUserOverlapQuery
 } = orderApi;

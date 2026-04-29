@@ -1,174 +1,156 @@
-/* פונט מודרני - וודא שאתה מייבא אותו ב-HTML או ב-CSS הראשי */
-@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap');
-
-.pricing-container {
-    padding: 80px 20px;
-    max-width: 1300px;
-    margin: 0 auto;
-    font-family: 'Assistant', sans-serif;
+/* ניקוי והסתרת גלילה */
+.catalog-wrapper {
     direction: rtl;
-    background: linear-gradient(180deg, #fbfaff 0%, #ffffff 100%);
+    padding: 80px 40px;
+    background-color: #fcfcfd;
+    min-height: 100vh;
+    font-family: 'Assistant', sans-serif;
+    overflow-y: auto;
+    scrollbar-width: none;
 }
+.catalog-wrapper::-webkit-scrollbar { display: none; }
 
-.pricing-header {
+.catalog-header {
     text-align: center;
-    margin-bottom: 60px;
+    margin-bottom: 70px;
 }
 
-.pricing-header h1 {
-    background: linear-gradient(45deg, #4b0082, #8a2be2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 3.2rem;
+.brand-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: #5d299a;
+    color: white;
+    border-radius: 50px;
+    font-size: 0.75rem;
     font-weight: 800;
-    letter-spacing: -1px;
     margin-bottom: 15px;
 }
 
-.pricing-header p {
-    color: #6b7280;
-    font-size: 1.2rem;
-    max-width: 600px;
+.catalog-header h1 {
+    font-size: 3rem;
+    color: #111827;
+    font-weight: 900;
+    margin: 0;
+}
+
+/* הגריד */
+.catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 40px;
+    max-width: 1300px;
     margin: 0 auto;
 }
 
-.pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 40px;
-    padding: 20px;
-}
-
-.pricing-card {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
-    border-radius: 24px;
-    padding: 40px 30px;
-    /* צל רך רב-שכבתי */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.05);
-    text-align: center;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 1px solid rgba(75, 0, 130, 0.08);
-    position: relative;
+/* הכרטיס החדש */
+.car-catalog-card {
+    background: white;
+    border-radius: 40px;
+    padding: 40px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 10px 50px rgba(0,0,0,0.02);
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
     display: flex;
     flex-direction: column;
 }
 
-.pricing-card:hover {
-    transform: translateY(-15px) scale(1.02);
-    box-shadow: 0 30px 60px -12px rgba(75, 0, 130, 0.15);
-    border-color: rgba(75, 0, 130, 0.2);
+.car-catalog-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 30px 60px rgba(93, 41, 154, 0.08);
+    border-color: #e2e8f0;
 }
 
-/* תגית פופולרי משודרגת */
-.card-badge.popular {
-    background: linear-gradient(90deg, #ff9800, #f57c00);
-    top: -15px;
-    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
-    border-radius: 12px;
-    padding: 8px 30px;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-}
-
-.car-image-container {
-    height: 160px;
-    perspective: 1000px;
-    margin-bottom: 25px;
-}
-
-.car-render-img {
-    max-width: 110%;
-    max-height: 140px;
-    filter: drop-shadow(0 15px 12px rgba(0,0,0,0.12));
-}
-
-/* קטגוריה ודגם */
-.car-category-label {
-    background: #f0ebff;
-    color: #4b0082;
-    padding: 6px 18px;
-    font-size: 0.8rem;
-    letter-spacing: 0.5px;
-}
-
-.car-model-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-top: 15px;
-}
-
-/* מחירים - דגש ויזואלי */
-.main-price {
+.car-visual {
+    height: 180px;
+    margin-bottom: 30px;
     display: flex;
-    align-items: baseline;
     justify-content: center;
-    margin-top: 10px;
+    align-items: center;
 }
 
-.amount {
-    font-size: 3.5rem;
+.car-visual img {
+    max-width: 100%;
+    max-height: 160px;
+    object-fit: contain;
+    filter: drop-shadow(0 20px 20px rgba(0,0,0,0.1));
+}
+
+.category-label {
+    color: #5d299a;
     font-weight: 800;
-    color: #111827;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
 }
 
-.currency {
+.car-title {
     font-size: 1.8rem;
-    color: #4b0082;
+    color: #0f172a;
+    margin: 5px 0;
+    font-weight: 900;
 }
 
-.secondary-price {
-    background: #f9fafb;
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 8px;
-    font-size: 1rem;
+.meta-info {
+    color: #94a3b8;
+    font-size: 0.95rem;
     margin-bottom: 30px;
 }
 
-/* רשימת תכונות נקייה */
-.features-list {
-    border-top: 1px dashed #e5e7eb;
+/* מטריצת מחירים */
+.price-matrix {
+    display: flex;
+    background: #f8fafc;
+    border-radius: 24px;
+    padding: 20px;
+    margin-bottom: 30px;
+    justify-content: space-between;
+}
+
+.matrix-item {
+    text-align: center;
+    flex: 1;
+}
+
+.matrix-item.highlighted {
+    border-right: 1px solid #e2e8f0;
+    border-left: 1px solid #e2e8f0;
+}
+
+.matrix-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.matrix-value {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #1e293b;
+}
+
+/* מפרט טכני */
+.tech-specs {
+    border-top: 1px solid #f1f5f9;
     padding-top: 25px;
 }
 
-.feature-item {
-    color: #4b5563;
-    font-weight: 500;
+.spec-line {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
 }
 
-.feature-dot {
-    background: linear-gradient(#4b0082, #8a2be2);
-    box-shadow: 0 0 8px rgba(75, 0, 130, 0.3);
-}
-
-.category-desc {
-    font-style: italic;
-    margin-top: 15px;
-}
-
-/* כפתור הנעה לפעולה (CTA) עוצמתי */
-.pricing-cta {
-    margin-top: auto;
-    padding: 16px;
-    background: #4b0082;
-    color: white;
-    border: none;
-    border-radius: 16px;
+.spec-icon {
+    margin-left: 12px;
     font-size: 1.1rem;
-    box-shadow: 0 10px 20px -10px rgba(75, 0, 130, 0.5);
-    transition: all 0.3s;
 }
 
-.pricing-cta:hover {
-    background: #3a0066;
-    transform: scale(1.03);
-    box-shadow: 0 15px 25px -10px rgba(75, 0, 130, 0.6);
+.spec-text {
+    font-size: 0.95rem;
+    color: #475569;
 }
 
-/* התאמה למובייל */
-@media (max-width: 768px) {
-    .pricing-header h1 { font-size: 2.2rem; }
-    .pricing-grid { gap: 20px; }
+.spec-text strong {
+    color: #0f172a;
 }

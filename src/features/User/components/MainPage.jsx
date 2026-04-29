@@ -3,53 +3,77 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useGetAllCarsQuery } from '../../Car/redux/carApi.jsx';
 import { useGetCurrentUserQuery } from '../redux/userApi';
 import { setUser } from '../redux/userSlice';
-
+import { useNavigate } from 'react-router-dom';
 import MainLayout from './MainLayout.jsx';
 import HomeContent from './HomeContent.jsx';
 import Register from './Register.jsx';
 import AuthPage from './AuthPage.jsx';
 import PersonalArea from './PersonalArea.jsx';
 import GoogleMapWithClusters from '../../Car/components/GoogleMapWithClusters.jsx';
+import UserOrders from '../../Order/components/UserOrders.jsx'; 
+import PriceList from '../../Car/components/PriceList.jsx'; 
 
 const MainPage = () => {
   const [activeView, setActiveView] = useState('home');
+  const navigate = useNavigate();
   const currentUser = useSelector((state) => state.user.currentUser);
   const dispatch = useDispatch();
   const token = localStorage.getItem('token');
 
-  // שליפת המשתמש אם יש טוקן אך אין משתמש ב-Redux (למשל אחרי ריענון)
   const { data: userFromServer, isLoading: isUserLoading } = useGetCurrentUserQuery(undefined, {
     skip: !token || !!currentUser,
   });
-
-  useEffect(() => {
+useEffect(() => {
     if (userFromServer && !currentUser) {
-      dispatch(setUser(userFromServer));
+        dispatch(setUser(userFromServer));
+        
+        // תיקון: אם המערכת זיהתה אוטומטית שזה מנהל, נעביר אותו לדף הניהול
+        if (userFromServer.userType === 1 || userFromServer.userType === 'Admin') {
+            navigate('/admin');
+        }
     }
-  }, [userFromServer, currentUser, dispatch]);
+}, [userFromServer, currentUser, dispatch, navigate]);
 
   const { data: cars = [], isLoading: carsLoading, isError } = useGetAllCarsQuery();
 
   const renderContent = () => {
     switch (activeView) {
       case 'register': return <Register onStepClick={(step) => setActiveView(step)} />;
-      case 'auth': return <AuthPage onLoginSuccess={() => setActiveView('map')} />;
-      case 'profile': return <PersonalArea />; 
+   case 'auth': 
+  return (
+    <AuthPage 
+      onLoginSuccess={() => {
+        setActiveView('map');
+      }} 
+    />
+  );      case 'profile': return <PersonalArea />; 
       case 'map':
         if (carsLoading) return <div className="loading-msg">טוען רכבים...</div>;
         return <GoogleMapWithClusters carsList={cars} />;
-      default: return <HomeContent isLoading={carsLoading} isError={isError} cars={cars || []} />;
+      case 'pricing': return <PriceList />;
+      case 'orders': return <UserOrders userId={currentUser?.id || currentUser?.Id} />;
+      default: return (
+        <HomeContent 
+          isLoading={carsLoading} 
+          isError={isError} 
+          cars={cars || []} 
+          onViewPrices={() => setActiveView('pricing')} 
+        />
+      );
     }
   };
   
-  // משתמש מחובר אם יש אובייקט ב-Redux או אם אנחנו כרגע בטעינה שלו מהשרת
   const isUserLoggedIn = !!currentUser || (!!token && isUserLoading);
 
   return (
     <MainLayout 
       currentUser={currentUser}
+      activeView={activeView}
       onLogoClick={() => setActiveView('home')}
       onRegisterClick={!isUserLoggedIn ? () => setActiveView('register') : null}
+      onLoginClick={() => setActiveView('auth')}
+      onOrdersClick={() => setActiveView('orders')}
+      onPricingClick={() => setActiveView('pricing')}
       onNewOrderClick={() => {
         if (isUserLoggedIn) {
           setActiveView('map');

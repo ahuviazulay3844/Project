@@ -17,20 +17,33 @@ export const carApi = createApi({
         
         // --- Queries (שליפת נתונים) ---
 
-        getAllCars: builder.query({
-            query: () => "Cars",
-            providesTags: ['Cars'],
-        }),
+    getAllCars: builder.query({
+    query: () => "Cars",
+    providesTags: (result) =>
+        result
+            ? [...result.map(({ id }) => ({ type: 'Cars', id })), { type: 'Cars', id: 'LIST' }]
+            : [{ type: 'Cars', id: 'LIST' }],
+
+}),
+
 
         getCarById: builder.query({
             query: (id) => `Cars/${id}`,
             providesTags: (result, error, id) => [{ type: 'Cars', id }],
         }),
+getClosestCars: builder.query({
+    query: ({ lat, lng, start, end }) => {
 
- getClosestCars: builder.query({
-    query: ({ lat, lng }) => `Cars/closest?lat=${lat}&lng=${lng}`,
+        let url = `Cars/closest?lat=${lat}&lng=${lng}`;
+
+        if (start) url += `&start=${encodeURIComponent(start)}`;
+        if (end) url += `&end=${encodeURIComponent(end)}`;
+
+        return url;
+    },
     providesTags: ['Cars'],
 }),
+
 
         getAvailableCars: builder.query({
             query: ({ start, end, regionId }) => 

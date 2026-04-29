@@ -1,0 +1,510 @@
+/* Container ראשי */
+.details-container-new {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+    direction: rtl;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* סרגל ניווט עליון (Breadcrumbs) */
+.breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 25px;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.text-link-btn {
+    background: none;
+    border: none;
+    color: #4f46e5;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0;
+}
+
+.text-link-btn:hover {
+    text-decoration: underline;
+}
+
+/* הכרטיס המרכזי */
+.order-details-card {
+    background: #ffffff;
+    border-radius: 30px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+}
+
+/* Header של הכרטיס */
+.order-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px 40px;
+    background: #fcfdfe;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.order-id-tag {
+    display: inline-block;
+    background: #e0e7ff;
+    color: #4338ca;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.car-name-title {
+    font-size: 2.2rem;
+    color: #0f172a;
+    font-weight: 800;
+    margin: 0;
+}
+
+.close-details-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 10px 20px;
+    border-radius: 14px;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.close-details-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+/* מבנה ה-Layout המרכזי (שני צדדים) */
+.order-main-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 40px;
+    padding: 40px;
+}
+
+/* צד שמאל: ויזואליה */
+.order-visual-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.car-image-big-wrapper {
+    position: relative;
+    width: 100%;
+    text-align: center;
+}
+
+.car-image-big {
+    max-width: 100%;
+    height: auto;
+    border-radius: 24px;
+    filter: drop-shadow(0 15px 30px rgba(0,0,0,0.1));
+}
+
+.plate-number-display {
+    display: inline-block;
+    background: #1e293b;
+    color: #fbbf24;
+    padding: 6px 20px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    border: 2px solid #fbbf24;
+    margin-top: -15px;
+    position: relative;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+.quick-stats {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    justify-content: center;
+}
+
+.stat-box {
+    background: #f8fafc;
+    padding: 15px 25px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #334155;
+    font-weight: 700;
+    border: 1px solid #f1f5f9;
+}
+
+/* סטטוס תשלום */
+.status-pill-large {
+    padding: 15px 30px;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 1rem;
+}
+
+.status-pill-large.paid { background: #dcfce7; color: #166534; }
+.status-pill-large.unpaid { background: #fee2e2; color: #991b1b; }
+
+/* צד ימין: נתונים */
+.order-info-side .info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.info-card {
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    padding: 25px;
+    border-radius: 25px;
+}
+
+.info-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #1e293b;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+/* זמני נסיעה */
+.time-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.time-point label {
+    display: block;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.time-point strong {
+    font-size: 1.1rem;
+    color: #0f172a;
+}
+
+.total-duration-tag {
+    background: #f1f5f9;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: #475569;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* עיצוב כספי */
+.financial {
+    background: linear-gradient(135deg, #ffffff 0%, #fcfdff 100%);
+    border: 1px solid #e0e7ff;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: #64748b;
+}
+
+.price-row.penalty {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.final-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px dashed #e2e8f0;
+}
+
+.final-price-row span:first-child {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: #0f172a;
+}
+
+.price-big {
+    font-size: 2.5rem;
+    color: #4f46e5;
+    font-weight: 900;
+}
+
+/* ביטוח */
+.insurance-text {
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Loader & Error states */
+.loader-full-page, .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 20px;
+    text-align: center;
+}
+/* מודאל תשלום */
+.payment-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.payment-modal {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+  direction: rtl;
+}
+
+.payment-modal h2 {
+  margin-bottom: 20px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.credit-card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.input-group input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.card-extra-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pay-now-btn {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.3s;
+}
+
+.pay-now-btn:hover {
+  background: #43a047;
+}
+
+.pay-now-btn:disabled {
+  background: #ccc;
+}
+/* --- עיצוב המודאל (Payment Modal) --- */
+.payment-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.7); /* רקע כהה שקוף */
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    padding: 20px;
+}
+
+.payment-modal-card {
+    background: white;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: modalSlideUp 0.3s ease-out;
+}
+
+@keyframes modalSlideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.payment-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    background: #f8fafc;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.header-lock-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #1e293b;
+}
+
+.header-lock-title h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+
+.close-modal-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.2s;
+}
+
+.close-modal-btn:hover { color: #ef4444; }
+
+.payment-form { padding: 25px; }
+
+.payment-summary-mini {
+    background: #eef2ff;
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    color: #4338ca;
+}
+
+.form-group { margin-bottom: 18px; display: flex; flex-direction: column; gap: 6px; }
+
+.form-group label { font-size: 0.85rem; font-weight: 600; color: #64748b; }
+
+.input-with-icon { position: relative; }
+
+.payment-form input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.payment-form input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.inner-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #cbd5e1;
+}
+
+.form-row-double { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+.confirm-payment-btn {
+    width: 100%;
+    background: #4f46e5;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+}
+
+.confirm-payment-btn:hover { background: #4338ca; }
+.confirm-payment-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+
+.pci-note {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 15px;
+}
+
+/* שאר ה-CSS הקודם שלך (שדות ה-Details) נשאר אותו דבר */
+.pay-now-action-btn {
+    width: 100%;
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    margin-top: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}ז
+
+.spinner-icon { animation: spin 1s linear infinite; color: #4f46e5; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* רספונסיביות */
+@media (max-width: 900px) {
+    .order-main-layout { grid-template-columns: 1fr; }
+    .order-header-section { flex-direction: column; text-align: center; gap: 20px; }
+    .car-name-title { font-size: 1.8rem; }
+}

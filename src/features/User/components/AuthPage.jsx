@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom'; 
 import { 
     useLoginUserMutation, 
     useRegisterUserMutation, 
-    userApi // ייבוא ה-api עצמו כדי להשתמש ב-initiate
+    userApi 
 } from '../redux/userApi';
 import { setUser } from '../redux/userSlice.jsx';
 import '../Style/AuthPage.css';
@@ -14,7 +15,7 @@ const AuthPage = ({ onLoginSuccess }) => {
     const [message, setMessage] = useState({ text: '', type: '' });
 
     const dispatch = useDispatch();
-
+    const navigate = useNavigate(); 
     const [loginUser, { isLoading: isLoginLoading }] = useLoginUserMutation();
     const [registerUser, { isLoading: isRegLoading }] = useRegisterUserMutation();
 
@@ -28,29 +29,39 @@ const AuthPage = ({ onLoginSuccess }) => {
         
         try {
             if (isLogin) {
-                // התחברות - שליחת אובייקט עם email ו-pass כפי שמוגדר ב-API שלך
                 const result = await loginUser({ 
                     email: formData.email.trim().toLowerCase(), 
                     pass: formData.pass 
                 }).unwrap();
                 
                 if (result) {
-                    // שמירת טוקן
                     const token = typeof result === 'string' ? result : result.token;
                     localStorage.setItem('token', token);
 
-                    // שליפת המשתמש הנוכחי (Users/current) באופן ידני
+                    // שליפת המשתמש
                     const userAction = await dispatch(userApi.endpoints.getCurrentUser.initiate());
                     const user = userAction.data;
 
                     if (user) {
+                        console.log("User Type Received:", user.userType); // בדיקה ב-Console
+                        
                         dispatch(setUser(user));
                         setMessage({ text: 'התחברת בהצלחה!', type: 'success' });
-                        setTimeout(() => onLoginSuccess(), 500);
+                        
+                        // בדיקה גמישה: בודק גם מספר וגם מחרוזת
+                        const isAdmin = user.userType == 1 || 
+                                        user.userType === 'Admin' || 
+                                        user.userType === '1';
+
+                        if (isAdmin) {
+                            console.log("Redirecting to Admin Dashboard...");
+                            navigate('/admin');
+                        } else {
+                            setTimeout(() => onLoginSuccess(), 500);
+                        }
                     }
                 }
             } else {
-                // הרשמה - שליחת אובייקט newUser
                 await registerUser({
                     email: formData.email.trim().toLowerCase(),
                     password: formData.pass, 
@@ -62,6 +73,7 @@ const AuthPage = ({ onLoginSuccess }) => {
                 setTimeout(() => setIsLogin(true), 2000);
             }
         } catch (error) {
+            console.error("Login Error:", error);
             setMessage({ text: error?.data?.message || 'שגיאה בביצוע הפעולה', type: 'error' });
         }
     };
@@ -106,4 +118,4 @@ const AuthPage = ({ onLoginSuccess }) => {
     );
 };
 
-export default AuthPage;6
+export default AuthPage;
