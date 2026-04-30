@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { 
     useGetAllCarsQuery, 
     useSendToMaintenanceMutation, 
@@ -14,14 +14,13 @@ const FleetManagement = () => {
 
     const handleMaintenance = async (carId, currentStatus) => {
         try {
-            // בדיקה האם הרכב זמין (לפי מחרוזת או לפי ה-Enum 0 מה-DB)
             if (currentStatus === 'Available' || currentStatus === 0) {
                 await sendToMaintenance(carId).unwrap();
             } else {
                 await releaseFromMaintenance(carId).unwrap();
             }
         } catch (err) {
-            console.error("Maintenance update failed:", err);
+            console.error('Maintenance update failed:', err);
         }
     };
 
@@ -29,21 +28,39 @@ const FleetManagement = () => {
         try {
             await updateLock({ id: carId, isLocked: !currentLockStatus }).unwrap();
         } catch (err) {
-            console.error("Lock toggle failed:", err);
+            console.error('Lock toggle failed:', err);
         }
     };
 
-    if (isLoading) return <div className="loader">טוען רכבים...</div>;
-    if (isError) return <div className="error">שגיאה בטעינת הנתונים מהשרת</div>;
+    const summary = useMemo(() => {
+        const active = cars.filter(car => car.status === 'Available' || car.status === 0).length;
+        const maintenance = cars.filter(car => !(car.status === 'Available' || car.status === 0)).length;
+        const lowFuel = cars.filter(car => car.fuelLevel !== undefined && Number(car.fuelLevel) < 30).length;
+        return { active, maintenance, lowFuel };
+    }, [cars]);
+
+    if (isLoading) return <div className="admin-loading">טוען רכבים...</div>;
+    if (isError) return <div className="admin-error">שגיאה בטעינת הנתונים מהשרת</div>;
 
     return (
-        <div className="admin-section">
-            <h3>ניהול צי רכבים - מרכז שליטה</h3>
-            <table className="admin-table">
+        <div className="admin-section admin-page">
+            <div className="page-hero-bar">
+                <div>
+                    <h3>ניהול צי רכבים</h3>
+                    <p>הצגת סטטוס מלא של כל הרכבים וצפייה ברכבים עם דלק נמוך.</p>
+                </div>
+                <div className="page-hero-metrics">
+                    <span>פעילים: {summary.active}</span>
+                    <span>בתיקון: {summary.maintenance}</span>
+                    <span>דלק נמוך: {summary.lowFuel}</span>
+                </div>
+            </div>
+            <table className="admin-table admin-table-purple">
                 <thead>
                     <tr>
                         <th>רכב</th>
                         <th>דגם</th>
+                        <th>דלק</th>
                         <th>סטטוס</th>
                         <th>נעילה</th>
                         <th>פעולות</th>
@@ -54,6 +71,11 @@ const FleetManagement = () => {
                         <tr key={car.id}>
                             <td>{car.plateNumber || car.id}</td>
                             <td>{car.model}</td>
+                            <td>
+                                <span className={`status-badge ${car.fuelLevel >= 40 ? 'available' : car.fuelLevel >= 15 ? 'status-warning' : 'repair'}`}>
+                                    {car.fuelLevel !== undefined ? `${car.fuelLevel}%` : 'לא ידוע'}
+                                </span>
+                            </td>
                             <td>
                                 <span className={`status-badge ${car.status === 'Available' || car.status === 0 ? 'available' : 'repair'}`}>
                                     {car.status === 'Available' || car.status === 0 ? '✅ פעיל' : '🛠️ בטיפול'}
@@ -69,7 +91,7 @@ const FleetManagement = () => {
                             </td>
                             <td>
                                 <button 
-                                    className={car.status === 'Available' || car.status === 0 ? 'btn-repair' : 'btn-return'}
+                                    className={`btn-action ${car.status === 'Available' || car.status === 0 ? 'btn-repair' : 'btn-return'}`}
                                     onClick={() => handleMaintenance(car.id, car.status)}
                                 >
                                     {car.status === 'Available' || car.status === 0 ? '🔧 שלח לתיקון' : '✅ החזר לשירות'}
