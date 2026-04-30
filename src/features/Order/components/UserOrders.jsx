@@ -23,6 +23,7 @@ const UserOrders = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [yearFilter, setYearFilter] = useState('all');
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [errorMessage, setErrorMessage] = useState(null);
 
   // עדכון מהשרת כל 3 שניות - כדי לראות הזמנות חדשות מיד
   const { data: orders = [], isLoading: ordersLoading, refetch } = useGetOrdersByUserIdQuery(userId, { 
@@ -76,25 +77,29 @@ const UserOrders = () => {
 
     try {
       await submitStartReport({ id: order.id, report: reportData }).unwrap();
+      setErrorMessage(null);
       refetch(); 
       alert("הדיווח התקבל, הרכב נפתח. נסיעה טובה!");
     } catch (err) {
       console.error("שגיאה בהתחלת נסיעה:", err);
+      setErrorMessage(err.data?.message || "שגיאה בהתחלת נסיעה");
     }
   };
 
   const handleFinish = async (orderId, carId, distance) => {
     const car = cars.find(c => c.id === carId);
     if (!car || car.isLocked === false) { 
-      alert("⚠️ לא ניתן לסיים נסיעה! עליך לנעול את הרכב תחילה."); 
+      setErrorMessage("⚠️ לא ניתן לסיים נסיעה! עליך לנעול את הרכב תחילה."); 
       return; 
     }
     try { 
+      setErrorMessage(null);
       await finishOrder({ id: orderId, mileage: distance || 0, fuelTime: 0 }).unwrap(); 
       await refetch(); 
       navigate(`/order-details/${orderId}`);
     } catch (err) { 
       console.error("שגיאה בסיום נסיעה:", err);
+      setErrorMessage(err.data?.message || "שגיאה בסיום נסיעה");
     }
   };
 
@@ -129,6 +134,7 @@ const UserOrders = () => {
             <h2 className="orders-title">הנסיעות שלי</h2>
             <p className="subtitle">ניהול ומעקב בזמן אמת</p>
           </div>
+          {errorMessage && <div className="error-box">{errorMessage}</div>}
         </header>
 
         <div className="filters-bar-white">

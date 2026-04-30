@@ -9,7 +9,7 @@ import {
 import { setUser } from '../redux/userSlice.jsx';
 import '../Style/AuthPage.css';
 
-const AuthPage = ({ onLoginSuccess }) => {
+const AuthPage = ({ onLoginSuccess, onClose }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({ email: '', pass: '', firstName: '', lastName: '' });
     const [message, setMessage] = useState({ text: '', type: '' });
@@ -81,8 +81,9 @@ const AuthPage = ({ onLoginSuccess }) => {
     return (
         <div className="auth-container">
             <div className="auth-card">
+                <button className="auth-close-btn" onClick={onClose}>✕</button>
                 <div className="auth-header">
-                    <img src="/logo.png" alt="City Car" className="logo" />
+                    <img src="/src/assets/top_icon.png" alt="City Car" className="auth-logo" />
                     <h2>{isLogin ? 'ברוכים הבאים לסיטי קאר' : 'יצירת חשבון חדש'}</h2>
                 </div>
 

@@ -45,6 +45,7 @@ useEffect(() => {
       onLoginSuccess={() => {
         setActiveView('map');
       }} 
+      onClose={() => setActiveView('home')}
     />
   );      case 'profile': return <PersonalArea />; 
       case 'map':
@@ -72,7 +73,13 @@ useEffect(() => {
       onLogoClick={() => setActiveView('home')}
       onRegisterClick={!isUserLoggedIn ? () => setActiveView('register') : null}
       onLoginClick={() => setActiveView('auth')}
-      onOrdersClick={() => setActiveView('orders')}
+      onOrdersClick={() => {
+        if (isUserLoggedIn) {
+          setActiveView('orders');
+        } else {
+          setActiveView('auth');
+        }
+      }}
       onPricingClick={() => setActiveView('pricing')}
       onNewOrderClick={() => {
         if (isUserLoggedIn) {
@@ -81,7 +88,13 @@ useEffect(() => {
           setActiveView('auth');
         }
       }} 
-      onProfileClick={() => setActiveView('profile')} 
+      onProfileClick={() => {
+        if (isUserLoggedIn) {
+          setActiveView('profile');
+        } else {
+          setActiveView('auth');
+        }
+      }}
     >
       {renderContent()}
     </MainLayout>

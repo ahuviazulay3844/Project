@@ -28,20 +28,23 @@ const RouteSidePanel = ({ onClose, onConfirm, initialData, selectedCar }) => {
       : new Date(now.getTime() + ONE_HOUR_MS)
   );
 
+  const [errorMessage, setErrorMessage] = useState(null);
   const [checkOverlap, { isFetching }] = useLazyCheckUserOverlapQuery();
 
   const handleReset = (e) => {
     e.stopPropagation();
+    setErrorMessage(null);
     setStartDateTime(now);
     setEndDateTime(new Date(now.getTime() + ONE_HOUR_MS));
   };
 
-  const { totalDays, remainingHours } = useMemo(() => {
+  const { totalDays, remainingHours, remainingMinutes } = useMemo(() => {
     const diffMs = endDateTime - startDateTime;
-    const totalHrs = Math.max(1, Math.floor(diffMs / ONE_HOUR_MS));
+    const totalMins = Math.max(60, Math.floor(diffMs / 60000));
     return {
-      totalDays: Math.floor(totalHrs / 24),
-      remainingHours: totalHrs % 24,
+      totalDays: Math.floor(totalMins / 1440),
+      remainingHours: Math.floor((totalMins % 1440) / 60),
+      remainingMinutes: totalMins % 60,
     };
   }, [startDateTime, endDateTime]);
 
@@ -63,7 +66,12 @@ const RouteSidePanel = ({ onClose, onConfirm, initialData, selectedCar }) => {
 
     if (isStart) {
       setStartDateTime(newDate);
-      if (newDate.getTime() + ONE_HOUR_MS > endDateTime.getTime()) {
+      const minuteDelta = newDate.getMinutes() - startDateTime.getMinutes();
+      const candidateEnd = new Date(endDateTime.getTime() + minuteDelta * 60000);
+
+      if (candidateEnd.getTime() >= newDate.getTime() + ONE_HOUR_MS) {
+        setEndDateTime(candidateEnd);
+      } else if (newDate.getTime() + ONE_HOUR_MS > endDateTime.getTime()) {
         setEndDateTime(new Date(newDate.getTime() + ONE_HOUR_MS));
       }
     } else {
@@ -76,8 +84,9 @@ const RouteSidePanel = ({ onClose, onConfirm, initialData, selectedCar }) => {
   };
 
  const handleConfirm = async () => {
+    setErrorMessage(null);
     if (!loggedInUserId) {
-      alert("יש להתחבר למערכת כדי לבצע הזמנה");
+      setErrorMessage("יש להתחבר למערכת כדי לבצע הזמנה");
       return;
     }
 
@@ -96,7 +105,7 @@ const RouteSidePanel = ({ onClose, onConfirm, initialData, selectedCar }) => {
       }).unwrap();
 
       if (res?.hasOverlap === true) {
-        alert("❌ יש לך כבר הזמנה קיימת בטווח הזה");
+        setErrorMessage("❌ יש לך כבר הזמנה קיימת בטווח הזה");
         return;
       }
 
@@ -123,6 +132,10 @@ const RouteSidePanel = ({ onClose, onConfirm, initialData, selectedCar }) => {
             {selectedCar ? "פרטי רכב" : "מתי יוצאים?"}
           </h2>
         </div>
+
+        {errorMessage && (
+          <div className="error-box">{errorMessage}</div>
+        )}
 
         {selectedCar && (
           <div className="car-selection-header">
@@ -196,7 +209,7 @@ const RouteSidePanel = ({ onClose, onConfirm, initialData, selectedCar }) => {
             </button>
             <div className="val-box">
               <strong>{remainingHours}</strong>
-              <span>שעות</span>
+              <span>{remainingMinutes ? `שעות + ${remainingMinutes} דק׳` : 'שעות'}</span>
             </div>
             <button
               className="wide-btn"

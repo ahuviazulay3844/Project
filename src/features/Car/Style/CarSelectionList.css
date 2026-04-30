@@ -160,6 +160,21 @@
 
 .status-free { color: #10b981; border-right: 4px solid #10b981; }
 .status-busy { color: #ef4444; }
+.status-partial { color: #f59e0b; }
+.status-maintenance { color: #8b5cf6; }
+
+.popular-tag {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.2);
+}
 
 .car-details { padding: 20px; }
 
@@ -225,6 +240,13 @@
 .order-button:hover:not(:disabled) {
     background: #4a1d82;
     box-shadow: 0 8px 20px rgba(93, 41, 154, 0.3);
+}
+
+.order-button.btn-disabled {
+    background: #cbd5e1;
+    color: #64748b;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .car-card.disabled {

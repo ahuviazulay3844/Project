@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import "../Style/CarSelectionList.css";
+import CarAvailabilityModal from "./CarAvailabilityModal";
 
-const CarSelectionList = ({ cars, onSelectCar }) => {
+const CarSelectionList = ({ cars, onSelectCar, onEditTime, selectedTime }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [maxDistance, setMaxDistance] = useState(2);
   const [seats, setSeats] = useState("");
   const [category, setCategory] = useState("");
+  const [selectedCarForModal, setSelectedCarForModal] = useState(null);
 
-  // פונקציית עזר לניהול סטטוסים - מחזירה אובייקט עם הגדרות תצוגה
   const getStatusInfo = (status) => {
-    // נרמול הסטטוס למספר (למקרה שמגיע כמחרוזת מהשרת)
-const s = Number(status);
+    const s = Number(status);
     switch (s) {
       case 0: return { label: "פנוי", class: "status-free", icon: "✅", canOrder: true };
       case 1: return { label: "פנוי חלקית", class: "status-partial", icon: "⏳", canOrder: true };
@@ -35,7 +35,6 @@ const s = Number(status);
         <p>מציג רכבים קרובים ברדיוס של עד {maxDistance} ק"מ</p>
       </header>
 
-      {/* פילטרים */}
       <div className="filters-section">
         <div className="search-wrapper">
           <span className="input-icon">🔍</span>
@@ -58,7 +57,6 @@ const s = Number(status);
         </div>
       </div>
 
-      {/* רשימת רכבים */}
       <div className="cars-grid">
         {filteredCars?.length > 0 ? (
           filteredCars.map((car) => {
@@ -66,7 +64,11 @@ const s = Number(status);
             const canOrder = statusInfo.canOrder;
 
             return (
-              <div key={car.id} className={`car-card ${!canOrder ? 'disabled-card' : ''}`} onClick={() => canOrder && onSelectCar(car)}>
+              <div 
+                key={car.id} 
+                className={`car-card ${!canOrder ? 'disabled-card' : ''}`} 
+                onClick={() => setSelectedCarForModal(car)} // פותח מודל תמיד
+              >
                 <div className="car-image-wrapper">
                   <img src={car.imageUrl || '/default-car.png'} alt={car.model} />
                   <div className={`status-badge-overlay ${statusInfo.class}`}>
@@ -88,8 +90,14 @@ const s = Number(status);
                     <div className="spec-item"><span className="spec-label">💺 מושבים</span><span className="spec-val">{car.seats}</span></div>
                   </div>
 
-                  <button className={`order-button ${!canOrder ? 'btn-disabled' : ''}`} disabled={!canOrder}>
-                    {Number(car.status) === 1 ? "הזמן בשעות הפנויות" : !canOrder ? "לא ניתן להזמנה" : "הזמן נסיעה עכשיו"}
+                  <button 
+                    className={`order-button ${!canOrder ? 'btn-disabled' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCarForModal(car);
+                    }}
+                  >
+                    {Number(car.status) === 2 ? "מתי יתפנה?" : !canOrder ? "לא זמין" : "בחר רכב זה"}
                   </button>
                 </div>
               </div>
@@ -99,6 +107,22 @@ const s = Number(status);
           <div className="no-results-msg"><p>לא נמצאו רכבים מתאימים.</p></div>
         )}
       </div>
+
+      {selectedCarForModal && (
+        <CarAvailabilityModal
+          car={selectedCarForModal}
+          selectedTime={selectedTime}
+          onClose={() => setSelectedCarForModal(null)}
+          onEditTime={(car) => {
+            onEditTime(car);
+            setSelectedCarForModal(null);
+          }}
+          onConfirmSelection={(car) => {
+            onSelectCar(car);
+            setSelectedCarForModal(null);
+          }}
+        />
+      )}
     </div>
   );
 };

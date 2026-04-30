@@ -39,12 +39,14 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
     const [currentStep, setCurrentStep] = useState(1);
     const [userLocation, setUserLocation] = useState(null);
     const [selectedCar, setSelectedCar] = useState(null);
+    const [pendingSelectedCar, setPendingSelectedCar] = useState(null);
     const [completedSteps, setCompletedSteps] = useState([]);
     const [showSidePanel, setShowSidePanel] = useState(false);
     const [originSelection, setOriginSelection] = useState(null);
     const [showGridFull, setShowGridFull] = useState(false);
     const [shouldFetchClosest, setShouldFetchClosest] = useState(false);
     const [orderPayload, setOrderPayload] = useState(null);
+    const [editingTimeFromCarModal, setEditingTimeFromCarModal] = useState(false);
 
     const mapRef = useRef(null);
 
@@ -174,6 +176,12 @@ const { data: closestCarsFromServer, isFetching } = useGetClosestCarsQuery(
                                 ) : (
                                     <CarSelectionList
                                         cars={processedCars}
+                                        selectedTime={orderPayload}
+                                        onEditTime={(car) => {
+                                            setSelectedCar(car);
+                                            setEditingTimeFromCarModal(true);
+                                            setShowSidePanel(true);
+                                        }}
                                         onSelectCar={(car) => {
                                             setSelectedCar(car);
                                             setCompletedSteps(prev => [...new Set([...prev, 2])]);
@@ -217,7 +225,7 @@ const { data: closestCarsFromServer, isFetching } = useGetClosestCarsQuery(
                                                 position={car.position}
                                                 clusterer={clusterer}
                                                 onClick={() => {
-                                                    setSelectedCar(car);
+                                                    setPendingSelectedCar(car);
                                                     setOriginSelection('map');
                                                     setShowSidePanel(true);
                                                 }}
@@ -243,17 +251,31 @@ const { data: closestCarsFromServer, isFetching } = useGetClosestCarsQuery(
                 {/* Side Panel for Route Selection */}
                 {showSidePanel && (
                     <RouteSidePanel
-                        selectedCar={selectedCar}
+                        selectedCar={originSelection === 'map' ? pendingSelectedCar : selectedCar}
                         initialData={orderPayload}
-                        onClose={() => { setShowSidePanel(false); setOriginSelection(null); }}
+                        onClose={() => { 
+                            setShowSidePanel(false); 
+                            setOriginSelection(null);
+                            setEditingTimeFromCarModal(false);
+                            if (originSelection === 'map') {
+                                setPendingSelectedCar(null);
+                            }
+                        }}
                         onConfirm={(payload) => {
                             setOrderPayload(payload);
                             setCompletedSteps(prev => [...new Set([...prev, 1])]);
                             setShowSidePanel(false);
+                            setEditingTimeFromCarModal(false);
                             
                             if (originSelection === 'map') {
+                                setSelectedCar(pendingSelectedCar);
+                                setPendingSelectedCar(null);
+                                setOriginSelection(null);
                                 setCompletedSteps(prev => [...new Set([...prev, 1, 2])]);
                                 setCurrentStep(3);
+                            } else if (editingTimeFromCarModal) {
+                                // Editing time from car modal - stay on step 2
+                                setCurrentStep(2);
                             } else {
                                 setCurrentStep(2);
                                 setShowGridFull(true);

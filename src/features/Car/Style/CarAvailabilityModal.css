@@ -1,0 +1,307 @@
+.availability-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  direction: rtl;
+}
+
+.availability-modal {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 20px;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+  background: #e0e0e0;
+  transform: rotate(90deg);
+}
+
+/* Car Header Section */
+.modal-car-header {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+.modal-car-image {
+  width: 90px;
+  height: 70px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.modal-car-info {
+  flex: 1;
+}
+
+.modal-car-info h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.modal-car-location {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.modal-car-price {
+  margin: 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6B46C1;
+}
+
+/* Status Section */
+.modal-status-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.status-badge-large {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 2px solid;
+  border-radius: 12px;
+  background: #f9f9f9;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.status-icon {
+  font-size: 20px;
+}
+
+.status-text {
+  color: #1a1a1a;
+}
+
+/* Availability Section */
+.modal-availability-section {
+  background: #f5f9ff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-right: 4px solid #4B7BF5;
+}
+
+.modal-availability-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.availability-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e7ff;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: left;
+}
+
+.no-time-selected {
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+  padding: 10px;
+  margin: 0;
+}
+
+/* Car Specs */
+.modal-specs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.spec-item-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.spec-icon {
+  font-size: 18px;
+}
+
+.spec-name {
+  font-size: 11px;
+  color: #999;
+  font-weight: 500;
+}
+
+.spec-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* Action Buttons */
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.availability-warning-card {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 18px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+}
+
+.warning-title {
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: #92400e;
+}
+
+.warning-text {
+  margin: 0;
+  line-height: 1.75;
+  color: #78350f;
+  font-size: 0.96rem;
+}
+
+.btn-edit-time,
+.btn-confirm {
+  padding: 14px 16px;
+  border: none;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.btn-edit-time {
+  background: #f3f4f6;
+  color: #111827;
+  border: 1px solid #d1d5db;
+}
+
+.btn-edit-time:hover {
+  background: #e5e7eb;
+}
+
+.btn-confirm {
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  color: white;
+  border: none;
+}
+
+.btn-confirm:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(79, 70, 229, 0.28);
+}
+
+.btn-confirm:disabled {
+  background: #cbd5e1;
+  color: #475569;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .availability-modal {
+    width: 95%;
+    max-width: none;
+    border-radius: 12px;
+  }
+
+  .modal-car-image {
+    width: 80px;
+    height: 60px;
+  }
+
+  .modal-car-info h2 {
+    font-size: 16px;
+  }
+
+  .modal-specs {
+    grid-template-columns: 1fr 1fr;
+  }
+}
