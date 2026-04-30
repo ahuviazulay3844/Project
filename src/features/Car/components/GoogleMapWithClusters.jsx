@@ -49,7 +49,6 @@ const GoogleMapWithClusters = ({ carsList = [], onCarSelect, onRouteConfirm }) =
     const mapRef = useRef(null);
 
     // API Calls
-// חפש את הבלוק הזה בקוד שלך ותחליף אותו בזה:
 const { data: closestCarsFromServer, isFetching } = useGetClosestCarsQuery(
     { 
         lat: userLocation?.lat, 
