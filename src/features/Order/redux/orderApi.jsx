@@ -115,12 +115,13 @@ submitStartReport: builder.mutation({
     invalidatesTags: ['Orders'],
 }),
 
-        unlockCar: builder.mutation({
-            query: (id) => ({
-                url: `Orders/${id}/unlock`,
-                method: 'POST',
-            }),
-        }),
+    unlockCar: builder.mutation({
+    query: (id) => ({
+        url: `Orders/${id}/unlock`, 
+        method: 'POST',
+    }),
+    invalidatesTags: ['Orders', 'Cars'], 
+}),
 
         lockCar: builder.mutation({
             query: (id) => ({

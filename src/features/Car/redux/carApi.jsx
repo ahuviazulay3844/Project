@@ -156,15 +156,25 @@ getClosestCars: builder.query({
             }),
             invalidatesTags: ['Cars'],
         }),
+// updateCarLock: builder.mutation({
+//   query: ({ id, isLocked }) => ({
+//     url: `Cars/${id}/toggle-lock`,
+//     method: 'PATCH',
+//     // כאן אנחנו שולחים אובייקט JSON תקין
+//     body: { isLocked: isLocked }, 
+//     headers: { 'Content-Type': 'application/json' },
+//   }),
+//   invalidatesTags: ['Cars'],
+// }),
 updateCarLock: builder.mutation({
   query: ({ id, isLocked }) => ({
     url: `Cars/${id}/toggle-lock`,
     method: 'PATCH',
-    // כאן אנחנו שולחים אובייקט JSON תקין
-    body: { isLocked: isLocked }, 
+    body: { isLocked }, 
     headers: { 'Content-Type': 'application/json' },
   }),
-  invalidatesTags: ['Cars'],
+  // זה יגרום לכל מי שצופה ברכב הזה (כמו דף פרטי רכב) להתרענן
+  invalidatesTags: (result, error, { id }) => [{ type: 'Cars', id }, { type: 'Cars', id: 'LIST' }],
 }),
     }),
 });

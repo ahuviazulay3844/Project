@@ -4,45 +4,59 @@ import { useSelector } from 'react-redux';
 import { 
   useGetOrdersByUserIdQuery, 
   useFinishOrderMutation, 
-  useSubmitStartReportMutation 
+  useSubmitStartReportMutation,
+  useUnlockCarMutation,
 } from '../redux/orderApi.jsx';
+
 import { useUpdateCarLockMutation, useGetAllCarsQuery } from '../../Car/redux/carApi.jsx'; 
 import { 
   Lock, Unlock, Search, CheckCircle2, Flag, FileCheck, 
   ChevronLeft, CalendarDays, ClipboardList, AlertTriangle, 
-  Loader2, Clock, Car 
+  Loader2, Clock, Car, Check
 } from 'lucide-react';
 import '../Style/UserOrders.css';
+import CarInspectionModal from './CarInspectionModal'; 
 
 const UserOrders = () => {
   const navigate = useNavigate();
   const currentUser = useSelector((state) => state.user.currentUser);
   const userId = currentUser?.id;
-
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [yearFilter, setYearFilter] = useState('all');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
-  // עדכון מהשרת כל 3 שניות - כדי לראות הזמנות חדשות מיד
-  const { data: orders = [], isLoading: ordersLoading, refetch } = useGetOrdersByUserIdQuery(userId, { 
+  const [selectedOrderForInspection, setSelectedOrderForInspection] = useState(null);
+
+  const { data: orders = [], isLoading: ordersLoading, refetch: refetchOrders } = useGetOrdersByUserIdQuery(userId, { 
     skip: !userId, 
     pollingInterval: 3000 
   });
 
-  const { data: cars = [], isLoading: carsLoading } = useGetAllCarsQuery();
+  const { data: cars = [], isLoading: carsLoading, refetch: refetchCars } = useGetAllCarsQuery();
+  const [unlockCarOrder] = useUnlockCarMutation();
   const [updateCarLock] = useUpdateCarLockMutation();
   const [finishOrder, { isLoading: isFinishing }] = useFinishOrderMutation();
   const [submitStartReport, { isLoading: isStarting }] = useSubmitStartReportMutation();
 
-  // עדכון השעון הפנימי כל 10 שניות - כדי שהאיחור יקפוץ בטיימר של המשתמש
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 10000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 10000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (successMessage) {
+      const t = setTimeout(() => setSuccessMessage(null), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [successMessage]);
+
+  const refreshAllData = async () => {
+    await refetchOrders();
+    await refetchCars();
+  };
 
   const calculateLateMinutes = (expectedEnd, actualEnd, status) => {
     if (status === 0) return 0;
@@ -52,7 +66,6 @@ const UserOrders = () => {
     return diff > 0 ? diff : 0;
   };
 
-  // פונקציה שממירה דקות לפורמט של שעות ודקות
   const formatLateTime = (totalMinutes) => {
     if (totalMinutes < 60) return `${totalMinutes} דק'`;
     const hours = Math.floor(totalMinutes / 60);
@@ -60,29 +73,14 @@ const UserOrders = () => {
     return `${hours} שעות ו-${minutes} דק'`;
   };
 
-  const handleStartRide = async (order) => {
-    const confirmStart = window.confirm("האם ברצונך להתחיל את הנסיעה ולפתוח את הרכב?");
-    if (!confirmStart) return;
-
-    const reportData = {
-      carId: order.carId,
-      userId: userId,
-      orderId: order.id,
-      isCleanInside: true, 
-      isCleanOutside: true,
-      isAicConditionWorking: true,
-      anyNewDamage: false,
-      damageDescription: "נפתח דרך אפליקציית המשתמש"
-    };
-
+  const handleInspectionSubmit = async (reportData) => {
     try {
-      await submitStartReport({ id: order.id, report: reportData }).unwrap();
-      setErrorMessage(null);
-      refetch(); 
-      alert("הדיווח התקבל, הרכב נפתח. נסיעה טובה!");
+      await submitStartReport({ id: selectedOrderForInspection.id, report: reportData }).unwrap();
+      setSelectedOrderForInspection(null);
+      await refreshAllData();
+      setSuccessMessage("הדיווח נשלח בהצלחה! נסיעה טובה.");
     } catch (err) {
-      console.error("שגיאה בהתחלת נסיעה:", err);
-      setErrorMessage(err.data?.message || "שגיאה בהתחלת נסיעה");
+      setErrorMessage("שגיאה בשליחת הדיווח");
     }
   };
 
@@ -95,11 +93,10 @@ const UserOrders = () => {
     try { 
       setErrorMessage(null);
       await finishOrder({ id: orderId, mileage: distance || 0, fuelTime: 0 }).unwrap(); 
-      await refetch(); 
+      await refreshAllData();
       navigate(`/order-details/${orderId}`);
     } catch (err) { 
-      console.error("שגיאה בסיום נסיעה:", err);
-      setErrorMessage(err.data?.message || "שגיאה בסיום נסיעה");
+      setErrorMessage("שגיאה בסיום נסיעה");
     }
   };
 
@@ -135,6 +132,7 @@ const UserOrders = () => {
             <p className="subtitle">ניהול ומעקב בזמן אמת</p>
           </div>
           {errorMessage && <div className="error-box">{errorMessage}</div>}
+          {successMessage && <div className="success-toast"><Check size={18}/> {successMessage}</div>}
         </header>
 
         <div className="filters-bar-white">
@@ -161,18 +159,16 @@ const UserOrders = () => {
         </div>
 
         <div className="orders-grid">
-          {filteredOrders.length === 0 ? <p className="no-orders">לא נמצאו נסיעות</p> : filteredOrders.map((order) => {
+          {filteredOrders.map((order) => {
             const isActive = order.status === 1;
             const isPending = order.status === 0;
             const isFinished = order.status === 2;
             const carData = cars.find(c => c.id === order.carId);
             const lateMinutes = calculateLateMinutes(order.expectedEndTime, order.endTime, order.status);
-            
-            // אזעקה מ-65 דקות ומעלה
             const isOverdue = isActive && lateMinutes >= 65;
 
             return (
-              <div key={order.id} className={`order-glass-card ${isActive ? 'card-active-glow' : ''} ${isPending ? 'card-pending' : ''} ${isOverdue ? 'card-overdue-alarm' : ''}`}>
+              <div key={order.id} className={`order-glass-card ${isActive ? 'card-active-glow' : isPending ? 'card-pending' : ''} ${isOverdue ? 'card-overdue-alarm' : ''}`}>
                 <div className="card-header">
                   <span className="order-number"># {order.id}</span>
                   <span className={`status-badge ${isActive ? 'status-active' : isPending ? 'status-pending' : 'status-completed'}`}>
@@ -209,17 +205,6 @@ const UserOrders = () => {
                   </div>
                 )}
 
-                {isPending && (
-                   <div className="car-control-section">
-                      <button className="btn-control start-action-large" 
-                              onClick={() => handleStartRide(order)}
-                              disabled={isStarting}>
-                        {isStarting ? <Loader2 size={16} className="spinner-icon" /> : <Car size={16} />}
-                        <span>{isStarting ? 'פותח רכב...' : 'התחל נסיעה'}</span>
-                      </button>
-                   </div>
-                )}
-
                 {isActive && (
                   <div className="car-control-section">
                     <div className="lock-status-indicator">
@@ -228,9 +213,31 @@ const UserOrders = () => {
                         {carData?.isLocked ? 'נעול' : 'פתוח'}
                       </span>
                     </div>
+
+                    {(() => {
+                      if (order.isInspectionSubmitted || order.IsInspectionSubmitted) return null;
+                      const openTimeStr = order.actualOpeningTime || order.ActualOpeningTime;
+                      if (!openTimeStr) return null;
+                      const diff = (currentTime - new Date(openTimeStr)) / 60000;
+                      if (diff >= 0 && diff < 10) {
+                        return (
+                          <button className="btn-control inspection-action-highlight"
+                            style={{backgroundColor: '#f39c12', color: 'white', width: '100%', marginBottom: '10px', fontWeight: 'bold'}}
+                            onClick={() => setSelectedOrderForInspection(order)}>
+                            <ClipboardList size={20} /> <span>שאלון מצב רכב (נותרו {Math.ceil(10 - diff)} דק')</span>
+                          </button>
+                        );
+                      }
+                      return null;
+                    })()}
+
                     <div className="car-remote-controls">
                       <button className={`btn-control ${carData?.isLocked ? 'unlock-action' : 'lock-action'}`}
-                        onClick={() => updateCarLock({ id: order.carId, isLocked: !carData?.isLocked })}>
+                        onClick={async () => {
+                          if (carData?.isLocked) await unlockCarOrder(order.id).unwrap();
+                          else await updateCarLock({ id: order.carId, isLocked: true }).unwrap();
+                          await refreshAllData();
+                        }}>
                         {carData?.isLocked ? <Unlock size={16} /> : <Lock size={16} />}
                         {carData?.isLocked ? 'פתח' : 'נעל'}
                       </button>
@@ -238,7 +245,7 @@ const UserOrders = () => {
                         disabled={isFinishing}
                         onClick={() => handleFinish(order.id, order.carId, order.distanceDrivenKm)}>
                         {isFinishing ? <Loader2 size={16} className="spinner-icon" /> : <Flag size={16} />}
-                        <span>{isFinishing ? 'מעבד...' : 'סיום'}</span>
+                        <span>סיום</span>
                       </button>
                     </div>
                   </div>
@@ -259,6 +266,13 @@ const UserOrders = () => {
           })}
         </div>
       </div>
+
+      <CarInspectionModal 
+        isOpen={!!selectedOrderForInspection} 
+        onClose={() => setSelectedOrderForInspection(null)} 
+        isSubmitting={isStarting} 
+        onSubmit={handleInspectionSubmit} 
+      />
     </div>
   );
 };

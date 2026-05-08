@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCreateOrderMutation } from '../redux/orderApi.jsx';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { CheckCircle2, Loader2, ArrowRight, Calendar } from 'lucide-react';
 import '../Style/CreateOrder.css';
 
 const CreateOrder = ({ selectedCar, orderDetails, onBack, onGoToStep }) => {

@@ -3,6 +3,8 @@ import { Routes, Route } from 'react-router-dom';
 import MainPage from './features/User/components/MainPage.jsx';
 import OrderDetails from './features/Order/components/OrderDetails.jsx'; 
 import AdminDashboard from './features/Admin/components/AdminDashboard.jsx';
+import CarInspectionModal from './features/Order/components/CarInspectionModal.jsx'; 
+
 import './App.css';
 
 // App.jsx
