@@ -6,13 +6,14 @@ import {
   useFinishOrderMutation, 
   useSubmitStartReportMutation,
   useUnlockCarMutation,
+ useConfirmReplacementMutation,
 } from '../redux/orderApi.jsx';
 
-import { useUpdateCarLockMutation, useGetAllCarsQuery } from '../../Car/redux/carApi.jsx'; 
+import { useUpdateCarLockMutation, useGetAllCarsQuery, useExtendOrderMutation } from '../../Car/redux/carApi.jsx'; 
 import { 
   Lock, Unlock, Search, CheckCircle2, Flag, FileCheck, 
   ChevronLeft, CalendarDays, ClipboardList, AlertTriangle, 
-  Loader2, Clock, Car, Check
+  Loader2, Clock, Car, Check, RefreshCw, XCircle
 } from 'lucide-react';
 import '../Style/UserOrders.css';
 import CarInspectionModal from './CarInspectionModal'; 
@@ -40,7 +41,8 @@ const UserOrders = () => {
   const [updateCarLock] = useUpdateCarLockMutation();
   const [finishOrder, { isLoading: isFinishing }] = useFinishOrderMutation();
   const [submitStartReport, { isLoading: isStarting }] = useSubmitStartReportMutation();
-
+  const [extendOrder, { isLoading: isExtending }] = useExtendOrderMutation();
+  const [confirmReplacement] = useConfirmReplacementMutation();
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 10000);
     return () => clearInterval(timer);
@@ -84,6 +86,17 @@ const UserOrders = () => {
     }
   };
 
+  const handleExtendOrder = async (orderId) => {
+    try {
+      setErrorMessage(null);
+      await extendOrder(orderId).unwrap();
+      setSuccessMessage("הנסיעה הוארכה בשעה בהצלחה!");
+      await refreshAllData();
+    } catch (err) {
+      setErrorMessage(err.data?.message || "לא ניתן להאריך את הנסיעה - ייתכן שיש הזמנה אחרת.");
+    }
+  };
+
   const handleFinish = async (orderId, carId, distance) => {
     const car = cars.find(c => c.id === carId);
     if (!car || car.isLocked === false) { 
@@ -104,9 +117,9 @@ const UserOrders = () => {
     return [...orders]
       .sort((a,b) => b.id - a.id)
       .filter(o => {
-        const matchesSearch = o.carModel?.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.toString().includes(searchTerm);
+        const matchesSearch = (o.carModel || "").toLowerCase().includes(searchTerm.toLowerCase()) || o.id.toString().includes(searchTerm);
         const matchesStatus = statusFilter === 'all' || o.status.toString() === statusFilter;
-        const orderYear = new Date(o.startTime).getFullYear().toString();
+        const orderYear = o.startTime ? new Date(o.startTime).getFullYear().toString() : "";
         return matchesSearch && matchesStatus && (yearFilter === 'all' || orderYear === yearFilter);
       });
   }, [orders, searchTerm, statusFilter, yearFilter]);
@@ -166,6 +179,9 @@ const UserOrders = () => {
             const carData = cars.find(c => c.id === order.carId);
             const lateMinutes = calculateLateMinutes(order.expectedEndTime, order.endTime, order.status);
             const isOverdue = isActive && lateMinutes >= 65;
+            
+            // לוגיקת חסימה: אם ההזמנה ממתינה ויש קונפליקט נציג רק את כרטיס ההחלפה
+            const hasConflict = isPending && order.hasConflict;
 
             return (
               <div key={order.id} className={`order-glass-card ${isActive ? 'card-active-glow' : isPending ? 'card-pending' : ''} ${isOverdue ? 'card-overdue-alarm' : ''}`}>
@@ -177,78 +193,133 @@ const UserOrders = () => {
                   </span>
                 </div>
 
-                <div className="car-main-info">
-                  <div className="car-image-section">
-                    <img src={carData?.imageUrl} alt="" className="car-actual-image" />
-                    <div className="license-plate-badge">{carData?.licensePlate}</div>
-                  </div>
-                  <div className="car-text-info">
-                    <h3 className="car-model-name">{order.carModel}</h3>
-                    <span className="pricing-tag">מסלול {order.pricingType === 'Daily' ? 'יומי' : 'שעתי'}</span>
-                  </div>
-                </div>
+                {hasConflict ? (
+                  /* תצוגת חסימה לנהג ב' - מופיע במקום פרטי הרכב */
+                 <div className="reassigned-action-card conflict-mode">
+    <div className="reassigned-content">
+        <AlertTriangle className="blink-icon" size={24} color="#e67e22" />
+        <div>
+            <h4>הרכב המקורי טרם הוחזר</h4>
+            <p>הנהג הקודם מתעכב. הכנו לך רכב חלופי פנוי + <strong>שעה ראשונה חינם!</strong></p>
+        </div>
+    </div>
+    <div className="reassigned-buttons">
+        <button className="confirm-btn" onClick={async () => {
+    try {
+        await confirmReplacement({ id: order.id, accept: true }).unwrap();
+        setSuccessMessage("הרכב הוחלף בהצלחה!");
+        refreshAllData();
+    } catch (err) {
+        setErrorMessage("שגיאה בעיבוד הבקשה, נסה שנית.");
+    }
+}}>
+            <RefreshCw size={14}/> אשר רכב חלופי
+        </button>
+        <button className="cancel-btn-outline" onClick={async () => {
+            try {
+                await confirmReplacement({ id: order.id, accept: false }).unwrap();
+                refreshAllData();
+            } catch (err) {
+                setErrorMessage("שגיאה בעיבוד הבקשה, נסה שנית.");
+            }
+}}> 
+            <XCircle size={14}/> בטל הזמנה
+        </button>
+    </div>
+</div>
+                ) : (
+                  /* תצוגה רגילה - מופיעה אם אין קונפליקט */
+                  <>
+                    {isPending && order.isReassigned && (
+                      <div className="reassigned-action-card">
+                        <div className="reassigned-content">
+                          <RefreshCw className="spin-slow" size={20} color="#f39c12" />
+                          <div>
+                            <h4>הרכב הוחלף אוטומטית</h4>
+                            <p>עקב עיכוב, הועברת לרכב חלופי. זוכת ב-₪{order.discountAmount}</p>
+                          </div>
+                        </div>
+                        <div className="reassigned-buttons">
+                          <button className="confirm-btn" onClick={() => setSuccessMessage("השינוי אושר.")}><Check size={14}/> אשר</button>
+                        </div>
+                      </div>
+                    )}
 
-                <div className="details-grid-four">
-                  <div className="detail-item"><label>איסוף</label><span className="dark-text">{formatTime(order.startTime)}</span></div>
-                  <div className="detail-item"><label>החזרה</label><span className="dark-text">{formatTime(order.expectedEndTime)}</span></div>
-                  <div className="detail-item"><label>בפועל</label><span className="dark-text">{isFinished ? formatTime(order.endTime) : '--:--'}</span></div>
-                  <div className="detail-item"><label>ק"מ</label><span className="dark-text">{order.distanceDrivenKm || 0}</span></div>
-                </div>
-
-                {lateMinutes > 0 && (
-                  <div className={`late-warning-box ${isFinished ? 'past-late' : 'active-late'}`}>
-                    <AlertTriangle className="blink-icon" size={18} />
-                    <div className="late-text">
-                      <span>{isActive ? 'איחור פעיל:' : 'איחור סופי:'}</span>
-                      <strong className="text-danger">{formatLateTime(lateMinutes)} (₪{lateMinutes})</strong>
+                    <div className="car-main-info">
+                      <div className="car-image-section">
+                        <img src={carData?.imageUrl} alt="" className="car-actual-image" />
+                        <div className="license-plate-badge">{carData?.licensePlate}</div>
+                      </div>
+                      <div className="car-text-info">
+                        <h3 className="car-model-name">{order.carModel}</h3>
+                        <span className="pricing-tag">מסלול {order.pricingType === 'Daily' ? 'יומי' : 'שעתי'}</span>
+                      </div>
                     </div>
-                  </div>
-                )}
 
-                {isActive && (
-                  <div className="car-control-section">
-                    <div className="lock-status-indicator">
-                      <span className={`status-dot ${carData?.isLocked ? 'locked' : 'unlocked'}`}></span>
-                      <span className={`lock-text-display ${carData?.isLocked ? 'locked-text' : 'unlocked-text'}`}>
-                        {carData?.isLocked ? 'נעול' : 'פתוח'}
-                      </span>
+                    <div className="details-grid-four">
+                      <div className="detail-item"><label>איסוף</label><span className="dark-text">{formatTime(order.startTime)}</span></div>
+                      <div className="detail-item"><label>החזרה</label><span className="dark-text">{formatTime(order.expectedEndTime)}</span></div>
+                      <div className="detail-item"><label>בפועל</label><span className="dark-text">{isFinished ? formatTime(order.endTime) : '--:--'}</span></div>
+                      <div className="detail-item"><label>ק"מ</label><span className="dark-text">{order.distanceDrivenKm || 0}</span></div>
                     </div>
 
-                    {(() => {
-                      if (order.isInspectionSubmitted || order.IsInspectionSubmitted) return null;
-                      const openTimeStr = order.actualOpeningTime || order.ActualOpeningTime;
-                      if (!openTimeStr) return null;
-                      const diff = (currentTime - new Date(openTimeStr)) / 60000;
-                      if (diff >= 0 && diff < 10) {
-                        return (
-                          <button className="btn-control inspection-action-highlight"
-                            style={{backgroundColor: '#f39c12', color: 'white', width: '100%', marginBottom: '10px', fontWeight: 'bold'}}
-                            onClick={() => setSelectedOrderForInspection(order)}>
-                            <ClipboardList size={20} /> <span>שאלון מצב רכב (נותרו {Math.ceil(10 - diff)} דק')</span>
+                    {lateMinutes > 0 && (
+                      <div className={`late-warning-box ${isFinished ? 'past-late' : 'active-late'}`}>
+                        <AlertTriangle className="blink-icon" size={18} />
+                        <div className="late-text">
+                          <span>{isActive ? 'איחור פעיל:' : 'איחור סופי:'}</span>
+                          <strong className="text-danger">{formatLateTime(lateMinutes)} (₪{lateMinutes})</strong>
+                        </div>
+                      </div>
+                    )}
+
+                    {isActive && (
+                      <div className="car-control-section">
+                        {lateMinutes > 0 && (
+                          <button className="btn-control extend-action-btn" style={{backgroundColor: '#e74c3c', color: 'white', width: '100%', marginBottom: '10px'}} onClick={() => handleExtendOrder(order.id)} disabled={isExtending}>
+                            {isExtending ? <Loader2 size={16} className="spinner-icon" /> : <Clock size={16} />}
+                            <span>הארך נסיעה בשעה (₪)</span>
                           </button>
-                        );
-                      }
-                      return null;
-                    })()}
+                        )}
 
-                    <div className="car-remote-controls">
-                      <button className={`btn-control ${carData?.isLocked ? 'unlock-action' : 'lock-action'}`}
-                        onClick={async () => {
-                          if (carData?.isLocked) await unlockCarOrder(order.id).unwrap();
-                          else await updateCarLock({ id: order.carId, isLocked: true }).unwrap();
-                          await refreshAllData();
-                        }}>
-                        {carData?.isLocked ? <Unlock size={16} /> : <Lock size={16} />}
-                        {carData?.isLocked ? 'פתח' : 'נעל'}
-                      </button>
-                      <button className="btn-control finish-action-large" 
-                        disabled={isFinishing}
-                        onClick={() => handleFinish(order.id, order.carId, order.distanceDrivenKm)}>
-                        {isFinishing ? <Loader2 size={16} className="spinner-icon" /> : <Flag size={16} />}
-                        <span>סיום</span>
-                      </button>
-                    </div>
-                  </div>
+                        <div className="lock-status-indicator">
+                          <span className={`status-dot ${carData?.isLocked ? 'locked' : 'unlocked'}`}></span>
+                          <span className={`lock-text-display ${carData?.isLocked ? 'locked-text' : 'unlocked-text'}`}>{carData?.isLocked ? 'נעול' : 'פתוח'}</span>
+                        </div>
+
+                        {(() => {
+                          if (order.isInspectionSubmitted || order.IsInspectionSubmitted) return null;
+                          const openTimeStr = order.actualOpeningTime || order.ActualOpeningTime;
+                          if (!openTimeStr) return null;
+                          const diff = (currentTime - new Date(openTimeStr)) / 60000;
+                          if (diff >= 0 && diff < 10) {
+                            return (
+                              <button className="btn-control inspection-action-highlight" style={{backgroundColor: '#f39c12', color: 'white', width: '100%', marginBottom: '10px'}} onClick={() => setSelectedOrderForInspection(order)}>
+                                <ClipboardList size={20} /> <span>שאלון מצב רכב (נותרו {Math.ceil(10 - diff)} דק')</span>
+                              </button>
+                            );
+                          }
+                          return null;
+                        })()}
+
+                        <div className="car-remote-controls">
+                          <button className={`btn-control ${carData?.isLocked ? 'unlock-action' : 'lock-action'}`}
+                            onClick={async () => {
+                              if (carData?.isLocked) await unlockCarOrder(order.id).unwrap();
+                              else await updateCarLock({ id: order.carId, isLocked: true }).unwrap();
+                              await refreshAllData();
+                            }}>
+                            {carData?.isLocked ? <Unlock size={16} /> : <Lock size={16} />}
+                            {carData?.isLocked ? 'פתח' : 'נעל'}
+                          </button>
+                          <button className="btn-control finish-action-large" disabled={isFinishing} onClick={() => handleFinish(order.id, order.carId, order.distanceDrivenKm)}>
+                            {isFinishing ? <Loader2 size={16} className="spinner-icon" /> : <Flag size={16} />}
+                            <span>סיום</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {isFinished && (

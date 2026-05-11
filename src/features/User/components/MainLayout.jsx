@@ -9,7 +9,7 @@ const MainLayout = ({
   onLogoClick, 
   onRegisterClick, 
   onNewOrderClick, 
-  onLoginClick, // הוספתי את זה כאן - חובה כדי שהכפתור יעבוד
+  onLoginClick, 
   onProfileClick,
   onOrdersClick,
   onPricingClick 

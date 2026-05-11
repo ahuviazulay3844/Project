@@ -1,12 +1,11 @@
 import React from "react";
 import "../Style/Register.css";
-// הסרנו את ה-useNavigate ואת ה-Import של UploadDocuments כי הניהול עובר לאבא
 import personal_details from "../../../assets/imgi_9_step_personal_details.png";
 import upload_documents from "../../../assets/imgi_10_step_upload_files.png";
 import foreign_citizen from "../../../assets/imgi_11_step_foreign_citizen.png";
 import signature from "../../../assets/imgi_12_step_sign.png";
 
-const Register = ({ onStepClick }) => { // מקבלים את הפונקציה מה-MainPage
+const Register = ({ onStepClick, isForeign }) => { 
 
   return (
     <div className="register-page">
@@ -41,45 +40,46 @@ const Register = ({ onStepClick }) => { // מקבלים את הפונקציה מ
           />
         </svg>
 
-        {/* שלב 1: שאלות אישיות */}
-       <div className="step-item s1 clickable" onClick={() => onStepClick('questions')}>
-        <div className="circle-wrap"><img src={personal_details} alt="" /></div>
-        <div className="text-wrap">
-        <h3>פרטים אישיים</h3>
-       <ul>
-      <li>אימות אימייל</li> {/* עדכנתי לפי מה שביקשת קודם */}
-      <li>שם וכתובת</li>
-     </ul>
-    </div>
-     </div>
-
-        {/* שלב 2: העלאת מסמכים */}
-        <div className="step-item s2 clickable" onClick={() => onStepClick('upload')}>
-          <div className="circle-wrap"><img src={upload_documents} alt="" /></div>
+        {/* שלב 1: פרטים אישיים */}
+        <div className="step-item s1 clickable" onClick={() => onStepClick('questions')}>
+          <div className="circle-wrap"><img src={personal_details} alt="פרטים אישיים" /></div>
           <div className="text-wrap">
-            <h3>העלאת מסמכים</h3>
+            <h3>פרטים אישיים</h3>
+            <ul>
+              <li>אימות אימייל</li>
+              <li>שם וכתובת</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* שלב 2: העלאת רישיון */}
+        <div className="step-item s2 clickable" onClick={() => onStepClick('upload')}>
+          <div className="circle-wrap"><img src={upload_documents} alt="העלאת רישיון" /></div>
+          <div className="text-wrap">
+            <h3>העלאת רישיון</h3>
             <ul>
               <li>רישיון נהיגה</li>
               <li>סלפי עם רישיון</li>
             </ul>
           </div>
         </div>
-
-        {/* שלב 3: אזרח חו"ל */}
-        <div className="step-item s3 clickable" onClick={() => onStepClick('foreign')}>
-          <div className="circle-wrap"><img src={foreign_citizen} alt="" /></div>
+        
+        {/* שלב 3: אזרח חו"ל - מוצג תמיד אבל לחיץ רק אם רלוונטי או מדלג */}
+        <div className={`step-item s3 clickable ${!isForeign ? 'disabled-step' : ''}`} 
+             onClick={() => isForeign ? onStepClick('foreign') : alert("שלב זה מיועד לאזרחי חו\"ל בלבד")}>
+          <div className="circle-wrap"><img src={foreign_citizen} alt="אזרח חוץ" /></div>
           <div className="text-wrap">
-            <h3>אזרח חו"ל?</h3>
+            <h3>מסמכי זיהוי נוספים</h3>
             <ul>
               <li>דרכון וויזה</li>
-              <li>אישור כניסה</li>
+              <li>לאזרחי חו"ל בלבד</li>
             </ul>
           </div>
         </div>
 
         {/* שלב 4: חתימה */}
         <div className="step-item s4 clickable" onClick={() => onStepClick('signature')}>
-          <div className="circle-wrap"><img src={signature} alt="" /></div>
+          <div className="circle-wrap"><img src={signature} alt="חתימה" /></div>
           <div className="text-wrap">
             <h3>חתימה</h3>
             <ul>
@@ -89,9 +89,8 @@ const Register = ({ onStepClick }) => { // מקבלים את הפונקציה מ
         </div>
       </div>
 
-      {/* כפתור המשך - בדרך כלל מוביל לשלב הבא (העלאת מסמכים) */}
-      <button className="continue-btn" onClick={() => onStepClick('upload')}>
-        המשך
+      <button className="continue-btn" onClick={() => onStepClick('questions')}>
+        התחל הרשמה
       </button>
     </div>
   );

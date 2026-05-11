@@ -122,6 +122,14 @@ submitStartReport: builder.mutation({
     }),
     invalidatesTags: ['Orders', 'Cars'], 
 }),
+// תוסיפי את זה בתוך endpoints: (builder) => ({ ... })
+confirmReplacement: builder.mutation({
+    query: ({ id, accept }) => ({
+        url: `Orders/${id}/confirm-replacement?accept=${accept}`,
+        method: 'POST',
+    }),
+    invalidatesTags: ['Orders', 'Cars'], // מרענן את הרשימה מיד אחרי הלחיצה
+}),
 
         lockCar: builder.mutation({
             query: (id) => ({
@@ -196,5 +204,6 @@ export const {
     useFinishOrderMutation,
     useUpdateProgressMutation,
     useMarkAsPaidMutation ,
-    useLazyCheckUserOverlapQuery
+    useLazyCheckUserOverlapQuery,
+    useConfirmReplacementMutation,
 } = orderApi;

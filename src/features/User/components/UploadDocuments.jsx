@@ -67,7 +67,7 @@ const UploadDocuments = ({ onBack, onFinish, uploadData, setUploadData }) => {
             {uploadData[currentStep] ? (
               <img src={uploadData[currentStep]} alt="Preview" className="upload-preview-img" />
             ) : (
-              <span className="upload-link">{steps[currentStep].label}</span>
+              <span className="upload-link">{steps[currentStep]?.label}</span>
             )}
             <input id="file-upload" type="file" onChange={handleFileChange} accept="image/*" hidden />
           </label>

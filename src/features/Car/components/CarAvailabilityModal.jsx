@@ -26,14 +26,43 @@ const CarAvailabilityModal = ({ car, onClose, onEditTime, onConfirmSelection }) 
   };
 
   const statusInfo = getStatusInfo(car?.status);
-  const availabilityStart = car?.nextAvailableStart || car?.blockingOrderStart || car?.nextAvailabilityStart;
-  const availabilityEnd = car?.nextAvailableEnd || car?.blockingOrderEnd || car?.nextAvailabilityEnd;
+  
+  // שליפת הזמנים מה-API
+
+  // לוגיקת הצגת ההודעה החדשה
+  // שליפת הזמנים מה-API
+  const availabilityStart = car?.blockingOrderStart; // תחילת החסימה (הזמן שלו)
+  const availabilityEnd = car?.blockingOrderEnd;     // סוף החסימה (הזמן שלו + באפר)
   const isPartialOrBusy = Number(car?.status) === 1 || Number(car?.status) === 2;
 
-  const availabilityMessage = availabilityStart
-    ? `הרכב צפוי להיות פנוי ב-${formatTime(availabilityStart)} בתאריך ${formatDate(availabilityStart)}${availabilityEnd ? ` עד ${formatTime(availabilityEnd)} בתאריך ${formatDate(availabilityEnd)}` : ''}`
-    : 'הרכב כרגע לא פנוי. נסה לשנות את פרטי ההזמנה כדי לבדוק פניות חדשות.';
+  const getAvailabilityMessage = () => {
+    const now = new Date();
+    const busyFrom = availabilityStart ? new Date(availabilityStart) : null;
+    const busyUntil = availabilityEnd ? new Date(availabilityEnd) : null;
 
+    if (!busyUntil) return 'הרכב כרגע לא פנוי. נסה לשנות זמנים.';
+
+    // חישוב הפרש בשעות בין עכשיו לתחילת החסימה
+    const diffInHours = busyFrom ? (busyFrom - now) / (1000 * 60 * 60) : 0;
+
+    // --- מקרה 1: הרכב תפוס ממש עכשיו (סטטוס 2) ---
+    if (Number(car?.status) === 2) {
+      return `הרכב תפוס כרגע וצפוי להתפנות ב-${formatTime(busyUntil)} בתאריך ${formatDate(busyUntil)}.`;
+    }
+
+    // --- מקרה 2: הרכב פנוי חלקית (סטטוס 1) ---
+    if (Number(car?.status) === 1) {
+      // אם החסימה מתחילה בעוד פחות משעה (או שכבר התחילה)
+      if (diffInHours < 1) {
+        return `הרכב תפוס כרגע וצפוי להתפנות ב-${formatTime(busyUntil)} בתאריך ${formatDate(busyUntil)}.`;
+      } 
+      
+      // אם יש יותר משעה עד שהחסימה מתחילה (חלון זמן רלוונטי)
+      return `הרכב יהיה תפוס מ-${formatTime(busyFrom)} בתאריך ${formatDate(busyFrom)} עד ${formatTime(busyUntil)} בתאריך ${formatDate(busyUntil)}.`;
+    }
+
+    return 'הרכב כרגע לא פנוי.';
+  };
   return (
     <div className="availability-modal-overlay" onClick={onClose}>
       <div className="availability-modal" onClick={(e) => e.stopPropagation()}>
@@ -56,7 +85,7 @@ const CarAvailabilityModal = ({ car, onClose, onEditTime, onConfirmSelection }) 
         {isPartialOrBusy && (
           <div className="availability-warning-card">
             <div className="warning-title">⏳ מידע חשוב על הזמינות</div>
-            <p className="warning-text">{availabilityMessage}</p>
+            <p className="warning-text">{getAvailabilityMessage()}</p>
           </div>
         )}
 

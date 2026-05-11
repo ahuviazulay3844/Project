@@ -255,7 +255,97 @@
     font-size: 0.9rem;
     color: #a3a3a3;
 }
+/* --- בחירת אזרחות (Toggle) --- */
+.citizenship-toggle {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+    width: 100%;
+    max-width: 420px;
+}
 
+.toggle-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 25px;
+    border: 1.5px solid #7030a0;
+    background: transparent;
+    color: #7030a0;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.toggle-btn.active {
+    background: #7030a0;
+    color: white;
+    box-shadow: 0 4px 12px rgba(112, 48, 160, 0.2);
+}
+
+/* --- בחירת מדינה (Select) --- */
+.country-select {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-bottom: 2px solid #eee;
+    background: transparent;
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    outline: none;
+    cursor: pointer;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.country-select:focus {
+    border-bottom-color: #7030a0;
+}
+
+/* --- אנימציית כניסה לשלבים --- */
+.step-fade-in {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- שיפור כפתור חזור --- */
+.back-arrow-btn:hover {
+    background: #ffb82b;
+    transform: scale(1.1);
+}
+
+.arrow-icon {
+    font-size: 1.2rem;
+    color: #5d4037;
+    font-weight: bold;
+}
+
+/* --- התאמת שדות תאריך --- */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(30%) sepia(50%) saturate(1000%) hue-rotate(240deg) brightness(90%);
+}
+
+/* --- עיצוב הודעות טעינה בכפתור --- */
+button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
 @keyframes fadeInScale {
     from { opacity: 0; transform: scale(0.9); }
     to { opacity: 1; transform: scale(1); }

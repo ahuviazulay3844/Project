@@ -176,6 +176,15 @@ updateCarLock: builder.mutation({
   // זה יגרום לכל מי שצופה ברכב הזה (כמו דף פרטי רכב) להתרענן
   invalidatesTags: (result, error, { id }) => [{ type: 'Cars', id }, { type: 'Cars', id: 'LIST' }],
 }),
+// בתוך endpoints -> builder
+extendOrder: builder.mutation({
+    query: (orderId) => ({
+        url: `Orders/extend/${orderId}`, // הנתיב שיצרנו ב-Controller
+        method: 'POST',
+    }),
+    // זה יגרום לכל המערכת להתרענן ולראות את זמן הסיום החדש
+    invalidatesTags: ['Cars'], 
+}),
     }),
 });
 export const { 
@@ -198,5 +207,6 @@ export const {
     useUpdateCarStatusMutation,        // שינוי סטטוס רכב ידני
     useSendToMaintenanceMutation,      // שליחה לטיפול/תחזוקה
     useReleaseFromMaintenanceMutation , // החזרה מתחזוקה לפעיל
-    useUpdateCarLockMutation,          // שינוי סטטוס נעילה של רכב  
+    useUpdateCarLockMutation, 
+    useExtendOrderMutation,         // שינוי סטטוס נעילה של רכב  
 } = carApi;

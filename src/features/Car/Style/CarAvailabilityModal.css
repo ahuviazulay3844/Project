@@ -304,4 +304,63 @@
   .modal-specs {
     grid-template-columns: 1fr 1fr;
   }
+  /* עיצוב למכולה של אפשרויות הקונפליקט */
+.conflict-options-container {
+    background-color: #fff5f5; /* רקע אדמדם בהיר מאוד */
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #feb2b2;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* עיצוב כפתור החלפת רכב בתוך הקונפליקט */
+.conflict-options-container .btn-confirm {
+    transition: transform 0.2s, background-color 0.2s;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+}
+
+.conflict-options-container .btn-confirm:hover {
+    background-color: #15803d !important; /* ירוק כהה יותר בסימון */
+    transform: translateY(-2px);
+}
+
+/* עיצוב כפתור ביטול בתוך הקונפליקט */
+.conflict-options-container .btn-edit-time {
+    background: white;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.conflict-options-container .btn-edit-time:hover {
+    background: #fff5f5;
+    color: #c53030 !important;
+    border-color: #c53030 !important;
+}
+
+/* אנימציה קטנה כדי שההודעה תקפוץ לעין */
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.conflict-options-container {
+    animation: fadeInSlide 0.4s ease-out;
+}
+.btn-extend-trip {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-extend-trip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.btn-extend-trip:active {
+    transform: translateY(0);
+}
 }
