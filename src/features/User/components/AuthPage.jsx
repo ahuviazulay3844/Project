@@ -38,25 +38,22 @@ const AuthPage = ({ onLoginSuccess, onClose }) => {
                     const token = typeof result === 'string' ? result : result.token;
                     localStorage.setItem('token', token);
 
-                    // שליפת המשתמש
-                    const userAction = await dispatch(userApi.endpoints.getCurrentUser.initiate());
+                    // שליפת נתוני המשתמש המעודכנים מהשרת
+                    const userAction = await dispatch(userApi.endpoints.getCurrentUser.initiate(undefined, { forceRefetch: true }));
                     const user = userAction.data;
 
-                    if (user) {
-                        console.log("User Type Received:", user.userType); // בדיקה ב-Console
-                        
+                    if (user) {                        
                         dispatch(setUser(user));
                         setMessage({ text: 'התחברת בהצלחה!', type: 'success' });
                         
-                        // בדיקה גמישה: בודק גם מספר וגם מחרוזת
                         const isAdmin = user.userType == 1 || 
                                         user.userType === 'Admin' || 
                                         user.userType === '1';
 
                         if (isAdmin) {
-                            console.log("Redirecting to Admin Dashboard...");
                             navigate('/admin');
                         } else {
+                            // כאן מופעלת הלוגיקה של ה-MainPage שמעבירה לדף המיועד
                             setTimeout(() => onLoginSuccess(), 500);
                         }
                     }

@@ -102,7 +102,13 @@ getClosestCars: builder.query({
             }),
             invalidatesTags: ['Cars'],
         }),
-
+updateCarFuel: builder.mutation({
+  query: ({ id, fuelLevel }) => ({
+    url: `/Cars/${id}`,
+    method: 'PATCH', // או PUT, תלוי ב-Backend שלך
+    body: { fuelLevel },
+  }),
+}),
         deleteCar: builder.mutation({
             query: (id) => ({
                 url: `Cars/${id}`,
@@ -131,15 +137,24 @@ getClosestCars: builder.query({
             invalidatesTags: ['Cars'],
         }),
 
+        // updateCarStatus: builder.mutation({
+        //     query: ({ id, status }) => ({
+        //         url: `Cars/${id}/status`,
+        //         method: 'PATCH',
+        //         body: JSON.stringify(status),
+        //         headers: { 'Content-Type': 'application/json' },
+        //     }),
+        //     invalidatesTags: ['Cars'],
+        // }),
         updateCarStatus: builder.mutation({
-            query: ({ id, status }) => ({
-                url: `Cars/${id}/status`,
-                method: 'PATCH',
-                body: JSON.stringify(status),
-                headers: { 'Content-Type': 'application/json' },
-            }),
-            invalidatesTags: ['Cars'],
-        }),
+    query: ({ id, status }) => ({
+        url: `Cars/${id}/status`,
+        method: 'PATCH',
+        body: { status },
+        headers: { 'Content-Type': 'application/json' },
+    }),
+    invalidatesTags: ['Cars'],
+}),
 
         sendToMaintenance: builder.mutation({
             query: (carId) => ({

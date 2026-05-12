@@ -76,6 +76,7 @@
 
 .modal-car-info {
   flex: 1;
+  color: black;
 }
 
 .modal-car-info h2 {
@@ -186,6 +187,7 @@
   grid-template-columns: 1fr 1fr 1fr;
   gap: 12px;
   margin-bottom: 20px;
+  color: black;
 }
 
 .spec-item-modal {

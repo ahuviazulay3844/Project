@@ -86,7 +86,7 @@ getOrdersByDateRange: builder.query({
                 method: 'POST',
                 body: newOrder,
             }),
-            invalidatesTags: ['Orders'],
+            invalidatesTags: ['Orders', 'Cars'], // מרענן גם את רשימת הרכבים כדי לעדכן זמינות
         }),
 
         updateOrder: builder.mutation({
@@ -181,6 +181,14 @@ updateProgress: builder.mutation({
         query: ({ userId, start, end }) => 
             `Orders/check-user-overlap?userId=${userId}&start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
     }),
+    // הוסיפי לתוך ה-endpoints ב-orderApi.jsx
+reportRefuel: builder.mutation({
+    query: (id) => ({
+        url: `Orders/${id}/report-refuel`,
+        method: 'POST',
+    }),
+    invalidatesTags: ['Orders', 'Cars'], // מרענן גם את הרכב (לראות 100% דלק)
+}),
     }),
 });
 
@@ -206,4 +214,5 @@ export const {
     useMarkAsPaidMutation ,
     useLazyCheckUserOverlapQuery,
     useConfirmReplacementMutation,
+    useReportRefuelMutation,
 } = orderApi;

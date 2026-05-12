@@ -38,6 +38,10 @@ const PersonalQuestions = ({ onBack, onNext, userData, setUserData }) => {
             setError("חובה למלא שם פרטי ושם משפחה");
             return false;
         }
+        if (!userData.address?.trim()) {
+        setError("חובה למלא כתובת מגורים");
+        return false;
+    }
         if (userData.isForeignCitizen && !userData.countryOfOrigin) {
             setError("חובה לבחור מדינת מקור");
             return false;
@@ -159,6 +163,14 @@ const PersonalQuestions = ({ onBack, onNext, userData, setUserData }) => {
                                 <div className="input-wrapper">
                                     <input type="text" placeholder="שם משפחה" value={userData.lastName || ""} onChange={(e) => updateField('lastName', e.target.value)} />
                                 </div>
+                                <div className="input-wrapper">
+                                   <input 
+                                       type="text" 
+                                       placeholder="כתובת (עיר, רחוב ומספר)" 
+                                       value={userData.address || ""} 
+                                       onChange={(e) => updateField('address', e.target.value)} 
+                                   />
+                               </div>
                                 <div className="citizenship-toggle">
                                     <button type="button" className={`toggle-btn ${!userData.isForeignCitizen ? 'active' : ''}`} onClick={() => updateField('isForeignCitizen', false)}>ישראלי</button>
                                     <button type="button" className={`toggle-btn ${userData.isForeignCitizen ? 'active' : ''}`} onClick={() => updateField('isForeignCitizen', true)}>תושב חו"ל</button>

@@ -394,7 +394,171 @@
     z-index: 9999;
     animation: slideInDown 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
 }
+.fuel-gauge-container
+{
+    color: black;
+}
+.details-grid-four{
+    color: black    ;
+}
+/* --- הדגשת טקסט הזמנים בשחור --- */
+.emphasized-text {
+    color: #1a1a1a !important; /* שחור עמוק */
+    font-weight: 700 !important; /* עבה */
+    font-size: 0.95rem;
+}
 
+/* --- עיצוב מיכל הדלק --- */
+.fuel-gauge-container {
+    background: rgba(0, 0, 0, 0.04);
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.fuel-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: #4a5568;
+}
+
+.fuel-track-bg {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.fuel-fill-bar {
+    height: 100%;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+/* --- כפתור תדלוק --- */
+.refuel-btn-minimal {
+    width: 100%;
+    margin-top: 10px;
+    background: #ffffff;
+    border: 1px solid #10b981;
+    color: #10b981;
+    padding: 6px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.refuel-btn-minimal:hover {
+    background: #f0fdf4;
+    transform: translateY(-1px);
+}
+
+/* --- אנימציית סיבוב לטעינה --- */
+.spinner-icon {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* --- שיפור כרטיסיות --- */
+.order-glass-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.order-glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+}
+/* ניהול דלק */
+.fuel-gauge-wrapper {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+    color: black;
+}
+
+.fuel-gauge-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 13px;
+}
+
+.fuel-track {
+    height: 6px;
+    background: #eee;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.fuel-fill {
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+.fuel-fill.healthy { background: #2ecc71; }
+.fuel-fill.critical { background: #e74c3c; }
+
+/* כפתורים וצבעים */
+.urgency-bg {
+    background-color: #e74c3c !important;
+    color: white !important;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.inspection-action-btn {
+    background-color: #f39c12 !important;
+    color: white !important;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* קונפליקט ורכב חלופי */
+.conflict-mode {
+    border: 2px solid #e67e22;
+}
+
+.conflict-text h4 {
+    color: #e67e22;
+    font-weight: 900;
+    margin: 0;
+}
+
+.blink-icon {
+    color: #e67e22;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+.spinner-icon {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 @keyframes slideInDown {
     from { opacity: 0; transform: translate(-50%, -40px); }
     to { opacity: 1; transform: translate(-50%, 0); }

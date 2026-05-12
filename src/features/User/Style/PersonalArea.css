@@ -6,16 +6,18 @@
     font-family: 'Assistant', sans-serif;
 }
 
+/* כותרת משופרת עם ניגודיות גבוהה */
 .pa-header {
     text-align: center;
     margin-bottom: 50px;
-    color: #6F3293;
 }
 
 .pa-header h2 {
     font-size: 32px;
     font-weight: 800;
     margin: 0;
+    color: #ffffff !important; /* לבן בולט על רקע סגול */
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
 }
 
 .pa-header-info {
@@ -25,9 +27,10 @@
     gap: 15px;
     margin-top: 15px;
     font-size: 15px;
+    color: #ffffff !important;
 }
 
-.pa-separator { color: #ddd; }
+.pa-separator { color: rgba(255, 255, 255, 0.5); }
 .pa-header-icon { margin-left: 6px; font-size: 14px; }
 
 .pa-grid {
@@ -37,16 +40,18 @@
     margin-bottom: 35px;
 }
 
+/* שדה קלט - תיקון ניגודיות */
 .pa-field { position: relative; }
 
 .pa-field label {
     position: absolute;
     top: -10px;
     right: 30px;
-    background: white;
+    background: #6F3293; /* מתאים לרקע הסגול */
     padding: 0 10px;
     font-size: 13px;
-    color: #999;
+    color: #FFC107; /* צהוב בולט */
+    font-weight: bold;
     z-index: 2;
 }
 
@@ -58,16 +63,22 @@
 
 .pa-input-wrapper input {
     width: 100%;
-    padding: 14px 50px 14px 20px; /* רווח לימין בשביל האייקון */
-    border: 1px solid #ddd;
+    padding: 14px 50px 14px 20px;
+    background-color: rgba(255, 255, 255, 0.95); /* רקע בהיר מאוד לטקסט קריא */
+    border: 2px solid transparent;
     border-radius: 50px;
     font-size: 16px;
-    color: #555;
+    color: #333; /* טקסט כהה על רקע בהיר */
     outline: none;
-    transition: border 0.3s;
+    transition: 0.3s;
 }
 
-.pa-input-wrapper input:focus { border-color: #6F3293; }
+.pa-input-wrapper input:focus { 
+    border-color: #FFC107; 
+    background-color: #ffffff;
+}
+
+.pa-input-wrapper input::placeholder { color: #888; }
 
 .pa-field-icon {
     position: absolute;
@@ -76,39 +87,28 @@
     font-size: 18px;
 }
 
-.pa-full-row { margin-bottom: 25px; }
+.pa-full-row { grid-column: span 2; }
 
-.pa-label-center {
+/* כפתור שמירה */
+.pa-btn-save {
     display: block;
-    text-align: center;
-    font-weight: bold;
-    color: #6F3293;
-    margin-bottom: 10px;
-}
-
-.pa-pill-box {
-    border: 1px solid #ddd;
+    margin: 50px auto;
+    background: #FFC107;
+    border: none;
+    padding: 16px 130px;
     border-radius: 50px;
-    padding: 12px 25px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: white;
-}
-
-.pa-edit {
-    color: #6F3293;
-    text-decoration: underline;
-    font-weight: bold;
+    font-weight: 900;
+    font-size: 19px;
+    color: #222;
     cursor: pointer;
-    font-size: 14px;
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+    transition: 0.2s;
 }
 
-.pa-box-icon { color: #6F3293; font-size: 20px; }
+.pa-btn-save:hover:not(:disabled) { background: #e0ac06; transform: scale(1.02); }
+.pa-btn-save:disabled { opacity: 0.7; cursor: not-allowed; }
 
-.pa-status-group { display: flex; align-items: center; gap: 10px; }
-.pa-status-tag { font-size: 12px; color: #999; }
-
+/* כרטיסיות למטה */
 .pa-cards {
     display: flex;
     justify-content: center;
@@ -131,25 +131,30 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.04);
 }
 
-.pa-card:hover { transform: translateY(-3px); }
 .pa-card-i { font-size: 26px; color: #6F3293; margin-bottom: 12px; }
 .pa-card span { font-size: 13px; font-weight: bold; color: #6F3293; }
-
 .pa-card.active { border: 2.5px solid #FFC107; box-shadow: 0 4px 15px rgba(255,193,7,0.2); }
 
-.pa-btn-save {
-    display: block;
-    margin: 50px auto;
+/* עיצוב ה-Toast */
+.toast-success {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     background: #FFC107;
-    border: none;
-    padding: 16px 130px;
-    border-radius: 50px;
-    font-weight: 900;
-    font-size: 19px;
     color: #222;
-    cursor: pointer;
-    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
-    transition: 0.2s;
+    padding: 15px 40px;
+    border-radius: 50px;
+    font-weight: bold;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideDownFade 0.5s ease;
 }
 
-.pa-btn-save:hover { background: #e0ac06; transform: scale(1.02); }
+@keyframes slideDownFade {
+    from { opacity: 0; transform: translate(-50%, -20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}

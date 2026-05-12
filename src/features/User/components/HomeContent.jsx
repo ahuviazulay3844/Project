@@ -3,10 +3,11 @@ import darkCarImg from '../../../assets/background_dark_car.jpg';
 import carFeatureImg from '../../../assets/dacia.webp';
 import CarGallery from '../../Car/components/CarGallery.jsx';
 import '../Style/HomeContent.css';
-const HomeContent = ({ isLoading, isError, cars }) => {
+
+// שינוי 1: הוספת onViewPrices לרשימת ה-Props שהקומפוננטה מקבלת
+const HomeContent = ({ isLoading, isError, cars, onViewPrices }) => {
   
   useEffect(() => {
-    // האפקט הזה ירוץ רק כשדף הבית מוצג
     const wrapper = document.querySelector(".city-car-wrapper");
     if (!wrapper) return;
 
@@ -24,7 +25,7 @@ const HomeContent = ({ isLoading, isError, cars }) => {
 
     wrapper.addEventListener('scroll', handleScroll);
     return () => wrapper.removeEventListener('scroll', handleScroll);
-  }, []); // רץ פעם אחת בטעינה של דף הבית
+  }, []);
 
   return (
     <>
@@ -92,7 +93,8 @@ const HomeContent = ({ isLoading, isError, cars }) => {
         ) : isError ? (
           <div className="error-state">לא ניתן לטעון רכבים כרגע</div>
         ) : (
-          <CarGallery cars={cars} />
+          /* שינוי 2: העברת ה-onViewPrices לקומפוננטת ה-CarGallery */
+          <CarGallery cars={cars} onViewPrices={onViewPrices} />
         )}
       </section>
     </>

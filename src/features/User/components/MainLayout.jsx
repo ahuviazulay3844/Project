@@ -34,7 +34,6 @@ const MainLayout = ({
             <div className="nav-buttons">
               <button className="btn-white-outline" onClick={onNewOrderClick}>הזמנה חדשה</button>
               
-              {/* מציג הרשמה והתחברות רק אם המשתמש לא מחובר */}
               {!currentUser && (
                 <>
                   {onRegisterClick && (
