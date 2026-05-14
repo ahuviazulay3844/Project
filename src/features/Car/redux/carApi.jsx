@@ -117,15 +117,14 @@ updateCarFuel: builder.mutation({
             invalidatesTags: ['Cars'],
         }),
 
-        updateFuelLevel: builder.mutation({
-            query: ({ id, newLevel }) => ({
-                url: `Cars/${id}/fuel`,
-                method: 'PATCH',
-                body: newLevel,
-                headers: { 'Content-Type': 'application/json' },
-            }),
-            invalidatesTags: ['Cars'],
-        }),
+updateFuelLevel: builder.mutation({
+    query: ({ id, newLevel }) => ({
+        url: `Cars/${id}/fuel`,
+        method: 'PATCH',
+        body: newLevel, // RTK יוסיף Content-Type: application/json לבד
+    }),
+    invalidatesTags: (result, error, { id }) => [{ type: 'Cars', id }, { type: 'Cars', id: 'LIST' }],
+}),
 
         updateMileage: builder.mutation({
             query: ({ id, newMileage }) => ({
@@ -146,14 +145,13 @@ updateCarFuel: builder.mutation({
         //     }),
         //     invalidatesTags: ['Cars'],
         // }),
-        updateCarStatus: builder.mutation({
+   updateCarStatus: builder.mutation({
     query: ({ id, status }) => ({
         url: `Cars/${id}/status`,
         method: 'PATCH',
         body: { status },
-        headers: { 'Content-Type': 'application/json' },
     }),
-    invalidatesTags: ['Cars'],
+    invalidatesTags: (result, error, { id }) => [{ type: 'Cars', id }, { type: 'Cars', id: 'LIST' }],
 }),
 
         sendToMaintenance: builder.mutation({
@@ -182,14 +180,12 @@ updateCarFuel: builder.mutation({
 //   invalidatesTags: ['Cars'],
 // }),
 updateCarLock: builder.mutation({
-  query: ({ id, isLocked }) => ({
-    url: `Cars/${id}/toggle-lock`,
-    method: 'PATCH',
-    body: { isLocked }, 
-    headers: { 'Content-Type': 'application/json' },
-  }),
-  // זה יגרום לכל מי שצופה ברכב הזה (כמו דף פרטי רכב) להתרענן
-  invalidatesTags: (result, error, { id }) => [{ type: 'Cars', id }, { type: 'Cars', id: 'LIST' }],
+    query: ({ id, isLocked }) => ({
+        url: `Cars/${id}/toggle-lock`,
+        method: 'PATCH',
+        body: { isLocked }, 
+    }),
+    invalidatesTags: (result, error, { id }) => [{ type: 'Cars', id }, { type: 'Cars', id: 'LIST' }],
 }),
 // בתוך endpoints -> builder
 extendOrder: builder.mutation({

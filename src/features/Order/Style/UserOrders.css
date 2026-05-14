@@ -554,7 +554,68 @@
 .spinner-icon {
     animation: spin 1s linear infinite;
 }
+/* --- עיצוב מד דלק (בהתאם לתמונה) --- */
 
+.fuel-gauge-container {
+    background: #f8fafc; /* רקע אפרפר בהיר מאוד */
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #f1f5f9;
+}
+
+.fuel-label-row {
+    display: flex;
+    justify-content: space-between; /* מפריד בין "רמת דלק" לבין האחוזים */
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    flex-direction: row-reverse; /* כדי שהאחוז יהיה בשמאל והטקסט בימין כמו בתמונה */
+}
+
+/* עיצוב ספציפי לאחוז הדלק בירוק */
+.fuel-label-row strong {
+    color: #10b981; /* ירוק חי כמו בתמונה */
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.fuel-track-bg {
+    height: 10px;
+    background: #e2e8f0; /* צבע המסילה האפורה */
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.fuel-fill-bar {
+    height: 100%;
+    background: #10b981; /* צבע המילוי הירוק */
+    border-radius: 10px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); /* הילה ירוקה עדינה */
+}
+.suggested-car-details-box {
+    background: rgba(230, 126, 34, 0.1); /* צבע כתום עדין מאוד */
+    border-right: 3px solid #e67e22;
+    padding: 8px 12px;
+    margin: 8px 0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.promotion-text {
+    color: #27ae60; /* ירוק של כסף/הטבה */
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+/* שינוי צבע במקרה של דלק קריטי (אופציונלי) */
+.fuel-fill-bar.critical {
+    background: #ef4444;
+}
 @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }

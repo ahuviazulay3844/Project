@@ -42,7 +42,7 @@ const UserOrders = () => {
   const [successMessage, setSuccessMessage] = useState(null);
   const [selectedOrderForInspection, setSelectedOrderForInspection] = useState(null);
 
-  // --- API Queries עם ריענון אוטומטי מה-DB כל 3 שניות ---
+  // --- API Queries ---
   const { data: orders = [], isLoading: ordersLoading, refetch: refetchOrders } = useGetOrdersByUserIdQuery(userId, { 
     skip: !userId, 
     pollingInterval: 3000 
@@ -174,7 +174,6 @@ const UserOrders = () => {
   return (
     <div className="orders-page-wrapper">
       <div className="orders-container">
-        
         <header className="orders-header">
           <div className="title-section">
             <h2 className="orders-title">הנסיעות שלי</h2>
@@ -216,14 +215,10 @@ const UserOrders = () => {
             const lateMinutes = calculateLateMinutes(order.expectedEndTime, order.endTime, order.status);
             const isOverdue = isActive && lateMinutes >= 65;
             const hasConflict = isPending && order.hasConflict;
-
-            // --- התיקון הקריטי: יצירת סטטוס "פתוח" אישי למשתמש ---
-            // הרכב יוצג כפתוח רק אם הוא פתוח ב-DB וגם למשתמש הזה יש זמן פתיחה מתועד בהזמנה
             const isUserCurrentlyOpen = carData?.isLocked === false && order.actualOpeningTime;
 
             return (
               <div key={order.id} className={`order-glass-card ${isActive ? 'card-active-glow' : isPending ? 'card-pending' : ''} ${isOverdue ? 'card-overdue-alarm' : ''}`}>
-                
                 <div className="card-header">
                   <span className="order-number">הזמנה # {order.id}</span>
                   <span className={`status-badge ${isActive ? 'status-active' : isPending ? 'status-pending' : 'status-completed'}`}>
@@ -233,30 +228,33 @@ const UserOrders = () => {
                 </div>
 
                 {hasConflict ? (
-                  <div className="reassigned-action-card conflict-mode">
+                  <div className="reassigned-action-card conflict-mode animate-pulse-border">
                     <div className="reassigned-content">
-                        <AlertTriangle className="blink-icon" size={24} color="#e67e22" />
-                        <div>
-                            <h4 style={{color: '#e67e22', fontWeight: '900'}}>מצטערים, הרכב טרם פונה</h4>
-                            <p>הכנו לך רכב חלופי קרוב + <strong>שעה ראשונה חינם!</strong></p>
-                        </div>
+                      <AlertTriangle className="blink-icon" size={28} color="#e67e22" />
+                      <div>
+                        <h4 className="text-orange-900">עדכון: הרכב הנוכחי מתעכב</h4>
+                        <p>מצאנו עבורך רכב חלופי זמין. אם תאשר, תקבל <strong>שעה ראשונה בחינם!</strong></p>
+                      </div>
                     </div>
                     <div className="reassigned-buttons">
-                        <button className="confirm-btn" onClick={async () => {
-                            try {
-                                await confirmReplacement({ id: order.id, accept: true }).unwrap();
-                                setSuccessMessage("הרכב הוחלף בהצלחה!");
-                                refreshAllData(); 
-                            } catch (err) { setErrorMessage("שגיאה בהחלפת הרכב"); }
-                        }}>
-                            <RefreshCw size={14}/> אשר רכב חלופי ופיצוי
-                        </button>
-                        <button className="cancel-btn-outline" onClick={async () => {
-                            if(window.confirm("האם אתה בטוח שברצונך לבטל?")) {
-                                await confirmReplacement({ id: order.id, accept: false }).unwrap();
-                                refreshAllData();
-                            }
-                        }}> <XCircle size={14}/> ביטול הזמנה</button>
+                      <button className="confirm-btn-shiny" onClick={async () => {
+                        try {
+                          await confirmReplacement({ id: order.id, accept: true }).unwrap();
+                          setSuccessMessage("הרכב הוחלף וההטבה עודכנה!");
+                          refreshAllData(); 
+                        } catch (err) { setErrorMessage("שגיאה באישור ההחלפה"); }
+                      }}>
+                        <Check size={16}/> אשר החלפה וקבל פיצוי
+                      </button>
+                      <button className="cancel-btn-outline" onClick={async () => {
+                        if(window.confirm("ביטול ההזמנה יחזיר לך את הכסף במלואו. לבטל?")) {
+                          await confirmReplacement({ id: order.id, accept: false }).unwrap();
+                          setSuccessMessage("ההזמנה בוטלה בהצלחה.");
+                          refreshAllData();
+                        }
+                      }}> 
+                        <XCircle size={16}/> ביטול הזמנה (ללא עלות)
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -306,7 +304,6 @@ const UserOrders = () => {
 
                     {isActive && (
                       <div className="car-control-section">
-                        
                         <div className="fuel-gauge-container" style={{marginBottom: '15px', padding: '10px', background: 'rgba(0,0,0,0.03)', borderRadius: '12px'}}>
                           <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '13px'}}>
                             <span><Gauge size={14} style={{verticalAlign: 'middle'}}/> רמת דלק:</span>
@@ -320,16 +317,15 @@ const UserOrders = () => {
                               transition: 'width 2s ease'
                             }}></div>
                           </div>
-                          
                           {(carData?.fuelLevel < 50 && !order.didCustomerRefuel) && (
-                            <button className="refuel-btn-minimal" onClick={() => handleRefuelAction(order.id)} disabled={isRefueling} style={{width: '100%', marginTop: '10px', background: '#6366f1', color: 'white', border: 'none', padding: '8px', borderRadius: '8px', fontWeight: '800', cursor: 'pointer'}}>
-                               {isRefueling ? <Loader2 size={14} className="spinner-icon" /> : '⛽ תדלק וקבל ₪30 זיכוי'}
+                            <button className="refuel-btn-minimal" onClick={() => handleRefuelAction(order.id)} disabled={isRefueling}>
+                              {isRefueling ? <Loader2 size={14} className="spinner-icon" /> : '⛽ תדלק וקבל ₪30 זיכוי'}
                             </button>
                           )}
                           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" capture="environment" />
                         </div>
 
-                        {lateMinutes > 0 && (
+                        {lateMinutes > 0 && !order.hasConflict && (
                           <button className="btn-control extend-action-btn" style={{backgroundColor: '#e74c3c', color: 'white', width: '100%', marginBottom: '10px'}} onClick={() => handleExtendOrder(order.id)} disabled={isExtending}>
                             {isExtending ? <Loader2 size={16} className="spinner-icon" /> : <Clock size={16} />}
                             <span>הארך נסיעה בשעה (₪)</span>
@@ -357,12 +353,11 @@ const UserOrders = () => {
                         })()}
 
                         <div className="car-remote-controls">
-                          <button className={`btn-control ${isUserCurrentlyOpen ? 'lock-action' : 'unlock-action'}`}
-                            onClick={async () => {
-                              if (isUserCurrentlyOpen) await updateCarLock({ id: order.carId, isLocked: true }).unwrap();
-                              else await unlockCarOrder(order.id).unwrap();
-                              await refreshAllData();
-                            }}>
+                          <button className={`btn-control ${isUserCurrentlyOpen ? 'lock-action' : 'unlock-action'}`} onClick={async () => {
+                            if (isUserCurrentlyOpen) await updateCarLock({ id: order.carId, isLocked: true }).unwrap();
+                            else await unlockCarOrder(order.id).unwrap();
+                            await refreshAllData();
+                          }}>
                             {isUserCurrentlyOpen ? <Lock size={16} /> : <Unlock size={16} />}
                             {isUserCurrentlyOpen ? 'נעל' : 'פתח'}
                           </button>
