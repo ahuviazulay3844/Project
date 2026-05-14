@@ -225,40 +225,114 @@ const UserOrders = () => {
                     {isActive ? <CheckCircle2 size={14}/> : isPending ? <Clock size={14}/> : <FileCheck size={14}/>}
                     {isActive ? 'בנסיעה' : isPending ? 'ממתינה' : 'הושלמה'}
                   </span>
-                </div>
-
-                {hasConflict ? (
-                  <div className="reassigned-action-card conflict-mode animate-pulse-border">
-                    <div className="reassigned-content">
-                      <AlertTriangle className="blink-icon" size={28} color="#e67e22" />
-                      <div>
-                        <h4 className="text-orange-900">עדכון: הרכב הנוכחי מתעכב</h4>
-                        <p>מצאנו עבורך רכב חלופי זמין. אם תאשר, תקבל <strong>שעה ראשונה בחינם!</strong></p>
-                      </div>
-                    </div>
-                    <div className="reassigned-buttons">
-                      <button className="confirm-btn-shiny" onClick={async () => {
-                        try {
-                          await confirmReplacement({ id: order.id, accept: true }).unwrap();
-                          setSuccessMessage("הרכב הוחלף וההטבה עודכנה!");
-                          refreshAllData(); 
-                        } catch (err) { setErrorMessage("שגיאה באישור ההחלפה"); }
-                      }}>
-                        <Check size={16}/> אשר החלפה וקבל פיצוי
-                      </button>
-                      <button className="cancel-btn-outline" onClick={async () => {
-                        if(window.confirm("ביטול ההזמנה יחזיר לך את הכסף במלואו. לבטל?")) {
-                          await confirmReplacement({ id: order.id, accept: false }).unwrap();
-                          setSuccessMessage("ההזמנה בוטלה בהצלחה.");
-                          refreshAllData();
-                        }
-                      }}> 
-                        <XCircle size={16}/> ביטול הזמנה (ללא עלות)
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
+                </div>{hasConflict ? (
+  <div className={`reassigned-action-card conflict-mode animate-pulse-border ${!order.suggestedReplacementCarId ? 'no-solution' : ''}`}>
+    
+    {order.suggestedReplacementCarId ? (
+      /* --- מצב 1: נמצא רכב חלופי --- */
+      <>
+        <div className="reassigned-content">
+          <div className="conflict-icon-wrapper">
+            <AlertTriangle size={32} color="#e67e22" />
+          </div>
+          <div className="conflict-text-info">
+            <h4 className="conflict-title" style={{color: '#431407', fontWeight: '900', marginBottom: '4px'}}>
+              עדכון: הרכב שלך מתעכב
+            </h4>
+            <p className="conflict-subtitle" style={{color: '#7c2d12', marginBottom: '10px'}}>
+              הנהג הקודם טרם החזיר את הרכב. מצאנו עבורך רכב חלופי זמין מידית:
+            </p>
+            
+            <div className="suggested-car-display-box" style={{background: 'white', padding: '12px', borderRadius: '12px', border: '1px solid #fed7aa', color: '#1e293b', lineHeight: '1.6'}}>
+              <strong>🚗 דגם: {order.suggestedCarModel}</strong> 
+              <br />
+              <span style={{fontSize: '13px'}}>📍 מיקום: {order.suggestedCarLocation}</span>
+              <br />
+              <span style={{fontSize: '13px'}}>💺 מושבים: {order.suggestedCarSeats}</span>
+            </div>
+            
+            <div className="bonus-badge" style={{background: '#f0fdf4', padding: '8px', borderRadius: '8px', border: '1px solid #bbf7d0', marginTop: '10px'}}>
+              <p className="bonus-text" style={{color: '#166534', margin: 0, fontSize: '14px'}}>
+                🎁 <strong>פיצוי על העיכוב:</strong> זוכת ב-₪{order.discountAmount}!
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="reassigned-buttons" style={{marginTop: '15px', display: 'flex', flexDirection: 'column', gap: '8px'}}>
+          <button className="confirm-btn-shiny" style={{background: '#0f172a', color: 'white', padding: '12px', borderRadius: '10px', fontWeight: '800', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}} 
+            onClick={async () => {
+              try {
+                await confirmReplacement({ id: order.id, accept: true }).unwrap();
+                await refreshAllData(); 
+                setSuccessMessage("הרכב הוחלף בהצלחה, אפשר להתחיל נסיעה!");
+              } catch (err) { 
+                setErrorMessage("שגיאה באישור ההחלפה. נסה שוב."); 
+              }
+            }}>
+            <Check size={18}/> אשר מעבר לרכב זה והתחל נסיעה
+          </button>
+          
+          <button className="cancel-btn-outline" style={{background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', padding: '10px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}} 
+            onClick={async () => {
+              if(window.confirm("האם ברצונך לבטל את ההזמנה? (לא תחוייב כלל)")) {
+                try {
+                  await confirmReplacement({ id: order.id, accept: false }).unwrap();
+                  await refreshAllData();
+                  setSuccessMessage("ההזמנה בוטלה ללא חיוב.");
+                } catch(err) {
+                  setErrorMessage("שגיאה בביטול ההזמנה");
+                }
+              }
+            }}> 
+            <XCircle size={16}/> סרב ובטל הזמנה (זיכוי מלא)
+          </button>
+        </div>
+      </>
+    ) : (
+      /* --- מצב 2: הנהג מאחר, ואין כרגע רכב חלופי זמין --- */
+      <>
+        <div className="reassigned-content" style={{background: '#fef2f2', padding: '15px', borderRadius: '12px', border: '1px solid #fecaca'}}>
+          <div className="conflict-icon-wrapper" style={{marginBottom: '10px', textAlign: 'center'}}>
+            <AlertTriangle size={38} color="#ef4444" />
+          </div>
+          <div className="conflict-text-info" style={{textAlign: 'center'}}>
+            <h4 className="conflict-title" style={{color: '#7f1d1d', fontWeight: '900', marginBottom: '8px', fontSize: '18px'}}>
+              מתנצלים, יש עיכוב לא צפוי
+            </h4>
+            <p className="conflict-subtitle" style={{color: '#991b1b', fontSize: '15px', marginBottom: '10px'}}>
+              הנהג הקודם עדיין לא סיים את הנסיעה ברכב שהזמנת. 
+              <br/><b>לצערנו, כרגע אין רכב חלופי פנוי באזורך.</b>
+            </p>
+            <p style={{color: '#b91c1c', fontSize: '13px', background: '#fee2e2', padding: '8px', borderRadius: '8px'}}>
+              תוכל לבטל כעת את ההזמנה ללא שום עלות, או להמתין כאן עד שהרכב יתפנה.
+            </p>
+          </div>
+        </div>
+        
+        <div className="reassigned-buttons" style={{marginTop: '15px'}}>
+          <button className="cancel-btn-outline" style={{width: '100%', background: '#ef4444', color: 'white', border: 'none', padding: '12px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}} 
+            onClick={async () => {
+              if(window.confirm("ההזמנה תבוטל ולא תחויב כלל. להמשיך?")) {
+                try {
+                  // אנחנו שולחים accept: false כדי לבטל את ההזמנה בשרת
+                  await confirmReplacement({ id: order.id, accept: false }).unwrap();
+                  await refreshAllData();
+                  setSuccessMessage("ההזמנה בוטלה בהצלחה.");
+                } catch(err) {
+                  setErrorMessage("שגיאה בביטול ההזמנה");
+                }
+              }
+            }}> 
+            <XCircle size={18}/> בטל הזמנה כעת (ללא חיוב)
+          </button>
+        </div>
+      </>
+    )}
+  </div>
+) : (
+ 
+               <>
                     {isPending && order.isReassigned && (
                       <div className="reassigned-action-card">
                         <div className="reassigned-content">

@@ -616,6 +616,321 @@
 .fuel-fill-bar.critical {
     background: #ef4444;
 }
+/* ==========================================================================
+   עיצוב כרטיס הצעת החלפה (Conflict Reassignment Card) - Ultra Premium
+   ========================================================================== */
+
+.reassigned-action-card.conflict-mode {
+    background: linear-gradient(135deg, #fffaf0 0%, #ffffff 100%);
+    border: 2px solid #f97316; /* כתום בולט אך נעים */
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 25px rgba(249, 115, 22, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* אפקט נשימה עדין למסגרת */
+@keyframes orange-pulse-soft {
+    0%, 100% { border-color: #f97316; box-shadow: 0 10px 25px rgba(249, 115, 22, 0.12); }
+    50% { border-color: #fdba74; box-shadow: 0 10px 35px rgba(249, 115, 22, 0.25); }
+}
+
+.animate-pulse-border {
+    animation: orange-pulse-soft 2.5s infinite ease-in-out;
+}
+
+.reassigned-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.reassigned-content .blink-icon {
+    background: #ffedd5;
+    padding: 10px;
+    border-radius: 14px;
+    color: #ea580c;
+    animation: none; /* הורדנו את ההבהוב המציק, שמנו רקע יפה במקום */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.conflict-title {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #9a3412;
+    margin: 0 0 4px 0;
+}
+
+.conflict-subtitle {
+    font-size: 0.9rem;
+    color: #475569;
+    margin: 0 0 12px 0;
+}
+
+/* קופסת פרטי הרכב החדש */
+.suggested-car-display-box {
+    background: #ffffff;
+    border: 1.5px solid #fed7aa;
+    border-right: 4px solid #f97316; /* פס הדגשה בצד ימין */
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.suggested-car-display-box strong {
+    font-size: 1.1rem;
+    color: #1e293b;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.suggested-car-display-box span {
+    font-size: 0.85rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.bonus-text {
+    font-size: 0.85rem;
+    color: #16a34a;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+}
+
+/* אזור הכפתורים */
+.reassigned-buttons {
+    display: flex;
+    flex-direction: column; /* כפתורים מסודרים אחד תחת השני */
+    gap: 10px; /* מרווח נקי שלא ידבקו */
+    width: 100%;
+}
+
+.confirm-btn-shiny {
+    background: #0f172a; /* שחור עמוק כמו בתמונה */
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+.confirm-btn-shiny:hover {
+    background: #1e293b;
+    transform: translateY(-1px);
+}
+
+.cancel-btn-outline {
+    background: #ffffff;
+    color: #ef4444; /* טקסט אדום לביטול */
+    border: 1.5px solid #fca5a5;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.cancel-btn-outline:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
+}
+/* ==========================================================================
+   עיצוב כרטיס קונפליקט משודרג - פתרון בעיית הניגודיות
+   ========================================================================== */
+
+.reassigned-action-card.conflict-mode {
+    background: #fffcf5; /* רקע שמנת עדין מאוד */
+    border: 2px solid #f97316;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(249, 115, 22, 0.15);
+}
+
+.conflict-icon-wrapper {
+    background: #fff7ed;
+    color: #ea580c;
+    padding: 12px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.conflict-text-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* כותרות כהות וברורות */
+.conflict-title {
+    color: #431407 !important; /* חום-כתום כהה מאוד לקריאות מקסימלית */
+    font-size: 1.15rem;
+    font-weight: 900;
+    margin: 0;
+}
+
+.conflict-subtitle {
+    color: #7c2d12 !important; /* צבע כהה */
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+/* קופסת הרכב המוצע */
+.suggested-car-display-box {
+    background: white;
+    border: 1.5px solid #fed7aa;
+    border-right: 5px solid #f97316;
+    padding: 12px 15px;
+    border-radius: 12px;
+    margin: 8px 0;
+}
+
+.suggested-model {
+    color: #1e293b !important; /* טקסט שחור/כחול כהה */
+    font-size: 1.1rem;
+    display: block;
+}
+
+.suggested-location {
+    color: #64748b !important; /* אפור כהה */
+    font-size: 0.85rem;
+}
+
+/* עיצוב ההטבה (מתנה) */
+.bonus-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0fdf4;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid #bbf7d0;
+    margin-top: 5px;
+}
+
+.bonus-text {
+    color: #166534 !important; /* ירוק כהה קריא */
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.bonus-text strong {
+    font-weight: 900;
+}
+
+/* כפתור אישור - שחור עוצמתי */
+.confirm-btn-shiny {
+    background: #0f172a !important; /* שחור עמוק */
+    color: white !important;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 800;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
+}
+
+.confirm-btn-shiny:hover {
+    background: #1e293b !important;
+    transform: translateY(-2px);
+}
+
+/* כפתור ביטול - אדום עדין */
+.cancel-btn-outline {
+    background: transparent !important;
+    color: #b91c1c !important;
+    border: 1.5px solid #fca5a5 !important;
+    font-weight: 700;
+    padding: 10px;
+}
+
+.cancel-btn-outline:hover {
+    background: #fef2f2 !important;
+    border-color: #ef4444 !important;
+}
+/* פתרון לטקסט שנבלע בלבן */
+.reassigned-action-card.conflict-mode {
+    background: #fffcf0 !important; /* רקע צהבהב-שמנת עדין */
+    border: 2px solid #f97316 !important;
+}
+
+.conflict-title {
+    color: #431407 !important; /* חום-שחור כהה מאוד */
+    font-weight: 900 !important;
+}
+
+.conflict-subtitle {
+    color: #7c2d12 !important; /* כתום כהה מאוד */
+}
+
+.suggested-car-display-box {
+    background: white !important;
+    border: 1px solid #fed7aa !important;
+    border-right: 5px solid #f97316 !important;
+    color: #1e293b !important; /* שחור-כחול כהה */
+    padding: 12px !important;
+    border-radius: 12px !important;
+}
+
+.suggested-model {
+    color: #0f172a !important; /* שחור */
+    display: block;
+    font-size: 1.1rem;
+}
+
+.suggested-location, .suggested-seats {
+    color: #475569 !important; /* אפור כהה */
+    display: block;
+    font-size: 0.9rem;
+}
+
+.bonus-badge {
+    background: #f0fdf4 !important;
+    border: 1px solid #bbf7d0 !important;
+    padding: 8px !important;
+    border-radius: 8px !important;
+}
+
+.bonus-text {
+    color: #166534 !important; /* ירוק כהה קריא */
+    margin: 0 !important;
+}
+/* אנימציית נשימה למסגרת */
+@keyframes pulse-orange-border {
+    0% { border-color: #f97316; }
+    50% { border-color: #fdba74; }
+    100% { border-color: #f97316; }
+}
+
+.animate-pulse-border {
+    animation: pulse-orange-border 2s infinite ease-in-out;
+}
 @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }

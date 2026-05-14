@@ -86,7 +86,9 @@ getOrdersByDateRange: builder.query({
                 method: 'POST',
                 body: newOrder,
             }),
-            invalidatesTags: ['Orders', 'Cars'], // מרענן גם את רשימת הרכבים כדי לעדכן זמינות
+            invalidatesTags: [{ type: 'Cars', id: 'LIST' }]
+
+            // invalidatesTags: ['Orders', 'Cars'], // מרענן גם את רשימת הרכבים כדי לעדכן זמינות
         }),
 
         updateOrder: builder.mutation({
@@ -128,7 +130,8 @@ confirmReplacement: builder.mutation({
         url: `Orders/${id}/confirm-replacement?accept=${accept}`,
         method: 'POST',
     }),
-    invalidatesTags: ['Orders', 'Cars'], // מרענן את הרשימה מיד אחרי הלחיצה
+   invalidatesTags: [{ type: 'Cars', id: 'LIST' }]
+ // מרענן את הרשימה מיד אחרי הלחיצה
 }),
 
         lockCar: builder.mutation({
