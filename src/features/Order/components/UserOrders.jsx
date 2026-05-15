@@ -9,7 +9,8 @@ import {
   useSubmitStartReportMutation,
   useUnlockCarMutation,
   useConfirmReplacementMutation,
-  useReportRefuelMutation 
+  useReportRefuelMutation ,
+  useCancelOrderMutation,
 } from '../redux/orderApi.jsx';
 
 import { 
@@ -40,6 +41,8 @@ const UserOrders = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [orderToCancel, setOrderToCancel] = useState(null);
+
   const [selectedOrderForInspection, setSelectedOrderForInspection] = useState(null);
 
   // --- API Queries ---
@@ -52,7 +55,7 @@ const UserOrders = () => {
     skip: !userId,
     pollingInterval: 3000 
   });
-
+   const [cancelOrder, { isLoading: isCanceling }] = useCancelOrderMutation();
   const [unlockCarOrder] = useUnlockCarMutation();
   const [updateCarLock] = useUpdateCarLockMutation();
   const [finishOrder, { isLoading: isFinishing }] = useFinishOrderMutation();
@@ -170,7 +173,34 @@ const UserOrders = () => {
   if (ordersLoading || carsLoading) {
     return <div className="loader-container"><div className="spinner"></div></div>;
   }
+// 1. פונקציה שרק מחשבת את ההודעה ופותחת את האישור
+// פונקציה 1: חישוב הודעה ופתיחת שכבת האישור בתוך הכרטיס
+  const handleCancelClick = (order) => {
+    const now = new Date();
+    const start = new Date(order.startTime);
+    const diffHrs = (start - now) / (1000 * 60 * 60);
 
+    let msg = "";
+    if (diffHrs >= 24) msg = "הביטול כרגע הוא בחינם. לבטל?";
+    else if (diffHrs >= 2) msg = "ביטול כעת יעלה דמי ביטול של שעת השכרה אחת. לבטל?";
+    else msg = "ביטול ברגע האחרון יעלה 50% מעלות ההזמנה. לבטל?";
+
+    setOrderToCancel({ id: order.id, message: msg });
+  };
+
+  // פונקציה 2: ביצוע הביטול בשרת
+  const executeCancel = async () => {
+    if (!orderToCancel) return;
+    try {
+      await cancelOrder(orderToCancel.id).unwrap();
+      setSuccessMessage("ההזמנה בוטלה בהצלחה.");
+      setOrderToCancel(null);
+      refreshAllData();
+    } catch (err) {
+      setErrorMessage("שגיאה בביטול.");
+      setOrderToCancel(null);
+    }
+  };
   return (
     <div className="orders-page-wrapper">
       <div className="orders-container">
@@ -211,6 +241,7 @@ const UserOrders = () => {
             const isActive = order.status === 1;
             const isPending = order.status === 0;
             const isFinished = order.status === 2;
+            const isCanceled = order.status === 3;
             const carData = cars.find(c => c.id === order.carId);
             const lateMinutes = calculateLateMinutes(order.expectedEndTime, order.endTime, order.status);
             const isOverdue = isActive && lateMinutes >= 65;
@@ -219,13 +250,49 @@ const UserOrders = () => {
 
             return (
               <div key={order.id} className={`order-glass-card ${isActive ? 'card-active-glow' : isPending ? 'card-pending' : ''} ${isOverdue ? 'card-overdue-alarm' : ''}`}>
-                <div className="card-header">
-                  <span className="order-number">הזמנה # {order.id}</span>
-                  <span className={`status-badge ${isActive ? 'status-active' : isPending ? 'status-pending' : 'status-completed'}`}>
-                    {isActive ? <CheckCircle2 size={14}/> : isPending ? <Clock size={14}/> : <FileCheck size={14}/>}
-                    {isActive ? 'בנסיעה' : isPending ? 'ממתינה' : 'הושלמה'}
-                  </span>
-                </div>{hasConflict ? (
+                {orderToCancel?.id === order.id && (
+  <div className="card-cancel-overlay">
+    <div className="overlay-content">
+      <AlertTriangle size={32} color="#ef4444" />
+      <p>{orderToCancel.message}</p>
+      <div className="overlay-buttons">
+        <button className="confirm-yes-btn" onClick={executeCancel}>כן, בטל</button>
+        <button className="confirm-no-btn" onClick={() => setOrderToCancel(null)}>חזור</button>
+      </div>
+    </div>
+  </div>
+)}
+<div className="card-header">
+  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <span className="order-number">הזמנה # {order.id}</span>
+    
+    {/* כפתור ביטול - מופיע רק לממתינות ורק אם אין הודעת החלפת רכב פתוחה */}
+    {isPending && !hasConflict && (
+      <button 
+        className="cancel-minimal-btn" 
+        onClick={() => handleCancelClick(order)}
+        disabled={isCanceling}
+      >
+        <XCircle size={14} /> ביטול הזמנה
+      </button>
+    )}
+  </div>
+
+<span className={`status-badge ${
+  isActive ? 'status-active' : 
+  isPending ? 'status-pending' : 
+  isFinished ? 'status-completed' : 'status-canceled' // סטטוס 3
+}`}>
+  {isActive ? <CheckCircle2 size={14}/> : 
+   isPending ? <Clock size={14}/> : 
+   isFinished ? <FileCheck size={14}/> : <XCircle size={14}/>} 
+  
+  {isActive ? 'בנסיעה' : 
+   isPending ? 'ממתינה' : 
+   isFinished ? 'הושלמה' : 'בוטלה'}
+</span>
+</div>
+{hasConflict ? (
   <div className={`reassigned-action-card conflict-mode animate-pulse-border ${!order.suggestedReplacementCarId ? 'no-solution' : ''}`}>
     
     {order.suggestedReplacementCarId ? (

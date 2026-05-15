@@ -931,6 +931,106 @@
 .animate-pulse-border {
     animation: pulse-orange-border 2s infinite ease-in-out;
 }
+/* --- עיצוב כפתור ביטול מינימלי בראש הכרטיס --- */
+.cancel-minimal-btn {
+    background: transparent;
+    border: 1px solid transparent; /* גבול שקוף שמופיע רק ב-Hover */
+    color: #ef4444; /* אדום Danger */
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.85;
+}
+
+/* אפקט Hover לכפתור הביטול */
+.cancel-minimal-btn:hover:not(:disabled) {
+    background: #fff1f2; /* רקע אדמדם בהיר מאוד */
+    border-color: #fecaca; /* גבול ורדרד עדין */
+    opacity: 1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.08);
+}
+
+/* סיבוב קטן של ה-X בזמן Hover */
+.cancel-minimal-btn:hover svg {
+    transform: rotate(90deg);
+}
+
+/* מצב לחיצה */
+.cancel-minimal-btn:active {
+    transform: scale(0.95);
+}
+
+/* מצב טעינה (Disabled) */
+.cancel-minimal-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    color: #94a3b8;
+}
+/* סטטוס בוטלה ב-Badge */
+.status-canceled {
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+}
+
+/* כרטיס שבוטל - מראה דהוי ומקובקב */
+.order-glass-card.card-canceled {
+    opacity: 0.6;
+    filter: grayscale(0.5);
+    border: 1.5px dashed #ef4444 !important;
+    pointer-events: none; /* שלא יוכלו ללחוץ על כלום */
+}
+
+/* שכבת אישור הביטול בתוך הכרטיס */
+.card-cancel-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255, 255, 255, 0.97);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 24px;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+}
+
+.overlay-content { text-align: center; padding: 20px; }
+.overlay-content p { font-weight: 800; color: #1e293b; margin: 12px 0 20px 0; font-size: 1.1rem; }
+.overlay-buttons { display: flex; gap: 12px; justify-content: center; }
+
+.confirm-yes-btn {
+    background: #ef4444; color: white; border: none;
+    padding: 10px 24px; border-radius: 12px; font-weight: 800; cursor: pointer;
+}
+
+.confirm-no-btn {
+    background: #f1f5f9; color: #475569; border: none;
+    padding: 10px 24px; border-radius: 12px; font-weight: 800; cursor: pointer;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+/* התאמה לניידים - מניעת הידבקות למספר ההזמנה */
+@media (max-width: 480px) {
+    .card-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .cancel-minimal-btn {
+        width: fit-content;
+        padding-right: 0;
+    }
+}
 @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
