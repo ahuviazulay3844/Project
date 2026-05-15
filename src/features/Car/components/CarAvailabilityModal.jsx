@@ -2,11 +2,30 @@ import React from "react";
 import "../Style/CarAvailabilityModal.css";
 
 const CarAvailabilityModal = ({ car, selectedTime, onClose, onEditTime, onConfirmSelection }) => {
-  const formatTime = (dateString) => {
-    if (!dateString) return "";
-    return new Date(dateString).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
-  };
+const formatTime = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const now = new Date();
 
+  const isToday = date.getDate() === now.getDate() &&
+                  date.getMonth() === now.getMonth() &&
+                  date.getFullYear() === now.getFullYear();
+
+  const timeStr = date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+  
+  if (isToday) {
+    return `שעה ${timeStr}`;
+  } else {
+    // הוספת year: "numeric" כדי להציג את השנה
+    const dateStr = date.toLocaleDateString("he-IL", { 
+      day: "2-digit", 
+      month: "2-digit", 
+      year: "numeric" 
+    }).replace(/\//g, '.'); // הופך את התאריך לפורמט 15.05.2026
+    
+    return `שעה ${timeStr} בתאריך ${dateStr}`;
+  }
+};
   const status = Number(car?.status);
   
   // הנתונים היבשים מהשרת
@@ -23,9 +42,9 @@ const CarAvailabilityModal = ({ car, selectedTime, onClose, onEditTime, onConfir
     if (status === 3) return "הרכב נמצא כרגע בתחזוקה או דורש תדלוק ולא ניתן להזמנה.";
 
     // 2. מצב תפוס לגמרי (סטטוס 2)
-    if (status === 2) {
-      return `הרכב תפוס כרגע. הוא צפוי להתפנות ב-${formatTime(blockEnd)}.`;
-    }
+if (status === 2) {
+  return `הרכב תפוס כרגע. הוא צפוי להתפנות ב${formatTime(blockEnd)}.`; 
+}
 
     // 3. מצב פנוי חלקית (סטטוס 1) - כאן הלוגיקה המורכבת
     if (status === 1 && blockStart && blockEnd) {

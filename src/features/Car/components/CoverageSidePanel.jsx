@@ -19,11 +19,25 @@ export default function CoverageSidePanel({ selectedCar, orderDetails, onClose, 
   const waiverCost = (fullDays * 50) + (remainingHours * 3);
 
   const isBlocked = useMemo(() => {
-    if (!orderDetails?.end) return false;
+    if (!orderDetails?.start || !orderDetails?.end) return false;
+
+    const start = new Date(orderDetails.start);
     const end = new Date(orderDetails.end);
-    return (end.getDay() === 5 && end.getHours() >= 16) || (end.getDay() === 6 && end.getHours() < 20);
+
+    const isInsideShabbat = (date) => {
+      const day = date.getDay(); // 5 = שישי, 6 = שבת
+      const hours = date.getHours();
+
+      if (day === 5 && hours >= 16) return true;
+      if (day === 6 && hours < 20) return true;
+      
+      return false;
+    };
+
+    return isInsideShabbat(start) || isInsideShabbat(end);
   }, [orderDetails]);
 
+  // הגדרת הפונקציה כאן (לפני ה-return) פותרת את השגיאה מהצילום מסך
   const handleFinalConfirm = () => {
     if (isBlocked) return;
     localStorage.setItem("coverage_waiver", JSON.stringify(waiver));
@@ -42,9 +56,18 @@ export default function CoverageSidePanel({ selectedCar, orderDetails, onClose, 
             <div className="waiver-selection"><span className="price-tag">₪{waiverCost}</span><div className={`custom-checkbox ${waiver ? 'checked' : ''}`}>{waiver && <span className="check-mark">✓</span>}</div></div>
           </div>
         </div>
-        {isBlocked && <div className="shabbat-alert"><strong>🕯️ זמני החזרה אינם זמינים בשבת</strong></div>}
-        <button className={`confirm-btn ${isBlocked ? 'disabled' : ''}`} disabled={isBlocked} onClick={handleFinalConfirm}>
-          {isBlocked ? 'מועד לא זמין' : `אישור ${waiver ? `(₪${waiverCost})` : 'ללא כיסוי'}`}
+        
+        {isBlocked && (
+          <div className="shabbat-alert">
+            <strong>🕯️ זמני אסיפה/החזרה אינם זמינים בשבת</strong>
+          </div>
+        )}
+
+        <button 
+          className={`confirm-btn ${isBlocked ? 'shabbat-mode' : ''}`} 
+          onClick={handleFinalConfirm}
+        >
+          {isBlocked ? 'לא ניתן להזמין בשבת' : `אישור ${waiver ? `(₪${waiverCost})` : 'ללא כיסוי'}`}
         </button>
       </div>
     </div>
