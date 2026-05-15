@@ -1,49 +1,71 @@
 import React from "react";
 import "../Style/CarAvailabilityModal.css";
 
-const CarAvailabilityModal = ({ car, onClose, onEditTime, onConfirmSelection }) => {
-  const getStatusInfo = (status) => {
-    const s = Number(status);
-    switch (s) {
-      case 0: return { label: "פנוי", color: "#16a34a" };
-      case 1: return { label: "פנוי חלקית", color: "#ea580c" };
-      case 2: return { label: "תפוס", color: "#dc2626" };
-      case 3: return { label: "בטיפול", color: "#7c3aed" };
-      default: return { label: "לא זמין", color: "#4b5563" };
-    }
-  };
-
+const CarAvailabilityModal = ({ car, selectedTime, onClose, onEditTime, onConfirmSelection }) => {
   const formatTime = (dateString) => {
     if (!dateString) return "";
     return new Date(dateString).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    return new Date(dateString).toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" });
-  };
-
   const status = Number(car?.status);
-  const statusInfo = getStatusInfo(status);
   
-  const availabilityStart = car?.blockingOrderStart; 
-  const availabilityEnd = car?.blockingOrderEnd;   
+  // הנתונים היבשים מהשרת
+  const blockStart = car?.blockingOrderStart ? new Date(car.blockingOrderStart) : null;
+  const blockEnd = car?.blockingOrderEnd ? new Date(car.blockingOrderEnd) : null;
   
-  const isPartialOrBusy = status === 1 || status === 2;
+  // הזמן שהלקוח ביקש והזמן של עכשיו
+  const reqStart = new Date(selectedTime.start);
+  const reqEnd = new Date(selectedTime.end);
+  const now = new Date();
 
   const getAvailabilityMessage = () => {
-    // מקרה 1: תפוס (סטטוס 2) - נגיד מתי הוא מתפנה (End)
-    if (status === 2 && availabilityEnd) {
-      return `הרכב תפוס כרגע וצפוי להתפנות ב-${formatTime(availabilityEnd)} בתאריך ${formatDate(availabilityEnd)}.`;
+    // 1. מצב בטיפול
+    if (status === 3) return "הרכב נמצא כרגע בתחזוקה או דורש תדלוק ולא ניתן להזמנה.";
+
+    // 2. מצב תפוס לגמרי (סטטוס 2)
+    if (status === 2) {
+      return `הרכב תפוס כרגע. הוא צפוי להתפנות ב-${formatTime(blockEnd)}.`;
     }
 
-    // מקרה 2: פנוי חלקית (סטטוס 1) - נגיד עד מתי הוא פנוי (Start)
-    if (status === 1 && availabilityStart) {
-      return `שים לב: הרכב פנוי להזמנה רק עד שעה ${formatTime(availabilityStart)} בתאריך ${formatDate(availabilityStart)}.`;
+    // 3. מצב פנוי חלקית (סטטוס 1) - כאן הלוגיקה המורכבת
+    if (status === 1 && blockStart && blockEnd) {
+      
+      // חישוב חלון פנוי בתחילה: מהרגע שהלקוח רוצה (או מעכשיו) ועד שהרכב נתפס
+      const effectiveStart = now > reqStart ? now : reqStart;
+      const startGapMinutes = (blockStart - effectiveStart) / 60000;
+      
+      // חישוב חלון פנוי בסוף: מהרגע שהרכב משתחרר ועד סוף ההזמנה המבוקשת
+      const endGapMinutes = (reqEnd - blockEnd) / 60000;
+
+      // מקרה א: יש חלון של שעה לפני וגם חלון אחרי
+      if (startGapMinutes >= 60 && endGapMinutes > 0) {
+        return `שים לב: הרכב פנוי להזמנה עד שעה ${formatTime(blockStart)} ושוב החל משעה ${formatTime(blockEnd)}.`;
+      }
+      
+      // מקרה ב: יש חלון של שעה רק לפני (והחלון שאחרי כבר עבר או לא קיים)
+      if (startGapMinutes >= 60) {
+        return `שים לב: הרכב פנוי להזמנה רק עד שעה ${formatTime(blockStart)}.`;
+      }
+
+      // מקרה ג: החלון שלפני קטן משעה או כבר עבר - נציג רק את החלון שאחרי
+      if (endGapMinutes > 0) {
+        return `הרכב תפוס בחלק מהזמן שבחרת. הוא יהיה פנוי עבורך החל משעה ${formatTime(blockEnd)}.`;
+      }
     }
-    
-    return 'הרכב כרגע לא זמין להזמנה בזמנים שנבחרו.';
+
+    return "הרכב לא זמין להזמנה בטווח הזמן המדויק שצוין.";
   };
+
+  const statusInfo = (s) => {
+    switch (s) {
+      case 0: return { label: "פנוי", color: "#16a34a" };
+      case 1: return { label: "פנוי חלקית", color: "#ea580c" };
+      case 2: return { label: "תפוס", color: "#dc2626" };
+      default: return { label: "לא זמין", color: "#4b5563" };
+    }
+  };
+
+  const info = statusInfo(status);
 
   return (
     <div className="availability-modal-overlay" onClick={onClose}>
@@ -59,13 +81,13 @@ const CarAvailabilityModal = ({ car, onClose, onEditTime, onConfirmSelection }) 
         </div>
 
         <div className="modal-status-section">
-          <div className="status-badge-large" style={{ borderColor: statusInfo.color, color: statusInfo.color }}>
-            <span>{statusInfo.label}</span>
+          <div className="status-badge-large" style={{ borderColor: info.color, color: info.color }}>
+            <span>{info.label}</span>
           </div>
         </div>
 
-        {isPartialOrBusy && (
-          <div className="availability-warning-card">
+        {(status === 1 || status === 2 || status === 3) && (
+          <div className={`availability-warning-card ${status === 2 ? 'busy' : 'partial'}`}>
             <div className="warning-title">⚠️ מידע חשוב על הזמינות</div>
             <p className="warning-text">{getAvailabilityMessage()}</p>
           </div>
@@ -73,7 +95,7 @@ const CarAvailabilityModal = ({ car, onClose, onEditTime, onConfirmSelection }) 
 
         <div className="modal-specs">
           <div className="spec-item-modal"><span>⛽ {car?.fuelLevel}%</span></div>
-          <div className="spec-item-modal"><span>📏 {(car?.distance || 0).toFixed(1)} ק"מ מהמיקום</span></div>
+          <div className="spec-item-modal"><span>📏 {(car?.distance || 0).toFixed(1)} ק"מ</span></div>
           <div className="spec-item-modal"><span>💺 {car?.seats} מושבים</span></div>
         </div>
 
@@ -84,7 +106,7 @@ const CarAvailabilityModal = ({ car, onClose, onEditTime, onConfirmSelection }) 
             disabled={status === 2 || status === 3}
             onClick={() => onConfirmSelection(car)}
           >
-            {status === 2 || status === 3 ? "לא ניתן להזמין" : "הזמן נסיעה עכשיו"}
+            {status === 2 || status === 3 ? "הרכב תפוס" : "הזמן נסיעה עכשיו"}
           </button>
         </div>
       </div>
