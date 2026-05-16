@@ -225,6 +225,7 @@ const UserOrders = () => {
               <option value="0">ממתינה</option>
               <option value="1">בנסיעה</option>
               <option value="2">הושלמה</option>
+              <option value="3">בוטלה</option>
             </select>
           </div>
           <div className="filter-group-main">
