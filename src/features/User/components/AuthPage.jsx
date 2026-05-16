@@ -3,21 +3,18 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom'; 
 import { 
     useLoginUserMutation, 
-    useRegisterUserMutation, 
     userApi 
 } from '../redux/userApi';
 import { setUser } from '../redux/userSlice.jsx';
 import '../Style/AuthPage.css';
 
-const AuthPage = ({ onLoginSuccess, onClose }) => {
-    const [isLogin, setIsLogin] = useState(true);
-    const [formData, setFormData] = useState({ email: '', pass: '', firstName: '', lastName: '' });
+const AuthPage = ({ onLoginSuccess, onClose, onRegisterNavigate }) => {
+    const [formData, setFormData] = useState({ email: '', pass: '' });
     const [message, setMessage] = useState({ text: '', type: '' });
 
     const dispatch = useDispatch();
     const navigate = useNavigate(); 
     const [loginUser, { isLoading: isLoginLoading }] = useLoginUserMutation();
-    const [registerUser, { isLoading: isRegLoading }] = useRegisterUserMutation();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,52 +23,64 @@ const AuthPage = ({ onLoginSuccess, onClose }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage({ text: '', type: '' });
+
+        if (!formData.email.trim() || !formData.pass.trim()) {
+            setMessage({ text: 'נא להזין אימייל וסיסמה כדי להמשיך', type: 'error' });
+            return;
+        }
         
         try {
-            if (isLogin) {
-                const result = await loginUser({ 
-                    email: formData.email.trim().toLowerCase(), 
-                    pass: formData.pass 
-                }).unwrap();
-                
-                if (result) {
-                    const token = typeof result === 'string' ? result : result.token;
-                    localStorage.setItem('token', token);
+            const result = await loginUser({ 
+                email: formData.email.trim().toLowerCase(), 
+                pass: formData.pass 
+            }).unwrap();
+            
+            if (result) {
+                // חילוץ הטוקן מהאובייקט (מותאם ל-Ok(new { token }))
+                const token = result.token || result;
+                localStorage.setItem('token', token);
 
-                    // שליפת נתוני המשתמש המעודכנים מהשרת
-                    const userAction = await dispatch(userApi.endpoints.getCurrentUser.initiate(undefined, { forceRefetch: true }));
-                    const user = userAction.data;
+                const userAction = await dispatch(userApi.endpoints.getCurrentUser.initiate(undefined, { forceRefetch: true }));
+                const user = userAction.data;
 
-                    if (user) {                        
-                        dispatch(setUser(user));
-                        setMessage({ text: 'התחברת בהצלחה!', type: 'success' });
-                        
-                        const isAdmin = user.userType == 1 || 
-                                        user.userType === 'Admin' || 
-                                        user.userType === '1';
+                if (user) {                        
+                    dispatch(setUser(user));
+                    setMessage({ text: 'התחברת בהצלחה!', type: 'success' });
+                    
+                    const isAdmin = user.userType == 1 || user.userType === 'Admin' || user.userType === '1';
 
-                        if (isAdmin) {
-                            navigate('/admin');
-                        } else {
-                            // כאן מופעלת הלוגיקה של ה-MainPage שמעבירה לדף המיועד
-                            setTimeout(() => onLoginSuccess(), 500);
-                        }
+                    if (isAdmin) {
+                        navigate('/admin');
+                    } else {
+                        setTimeout(() => onLoginSuccess(), 500);
                     }
                 }
-            } else {
-                await registerUser({
-                    email: formData.email.trim().toLowerCase(),
-                    password: formData.pass, 
-                    firstName: formData.firstName.trim(),
-                    lastName: formData.lastName.trim()
-                }).unwrap();
-
-                setMessage({ text: 'נרשמת בהצלחה! כעת ניתן להתחבר', type: 'success' });
-                setTimeout(() => setIsLogin(true), 2000);
             }
         } catch (error) {
             console.error("Login Error:", error);
-            setMessage({ text: error?.data?.message || 'שגיאה בביצוע הפעולה', type: 'error' });
+            
+            // תרחיש 1: מייל קיים אך סיסמה שגויה (סטטוס 401 מהשרת)
+            // כאן רק מודיעים על טעות ולא עוברים דף
+            if (error.status === 401) {
+                setMessage({ text: 'אחד מהנתונים שהקשת שגוי, אנא נסה שוב', type: 'error' });
+            } 
+            
+            // תרחיש 2: מייל לא קיים / שניהם שגויים (סטטוס 404 מהשרת)
+            // רק כאן עוברים להרשמה
+            else if (error.status === 404) {
+                setMessage({ text: 'הפרטים לא זוהו במערכת, מעביר אותך להרשמה...', type: 'error' });
+                
+                setTimeout(() => {
+                    onRegisterNavigate();
+                }, 1800);
+            }
+            
+            else if (error.status === 403) {
+                setMessage({ text: 'המשתמש חסום במערכת', type: 'error' });
+            }
+            else {
+                setMessage({ text: 'חלה שגיאה בחיבור לשרת', type: 'error' });
+            }
         }
     };
 
@@ -81,19 +90,26 @@ const AuthPage = ({ onLoginSuccess, onClose }) => {
                 <button className="auth-close-btn" onClick={onClose}>✕</button>
                 <div className="auth-header">
                     <img src="/src/assets/top_icon.png" alt="City Car" className="auth-logo" />
-                    <h2>{isLogin ? 'ברוכים הבאים לסיטי קאר' : 'יצירת חשבון חדש'}</h2>
+                    <h2>ברוכים הבאים לסיטי קאר</h2>
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    {!isLogin && (
-                        <div className="name-row">
-                            <input type="text" name="firstName" placeholder="שם פרטי" onChange={handleChange} required />
-                            <input type="text" name="lastName" placeholder="שם משפחה" onChange={handleChange} required />
-                        </div>
-                    )}
-
-                    <input type="email" name="email" placeholder="אימייל" onChange={handleChange} required />
-                    <input type="password" name="pass" placeholder="סיסמה" onChange={handleChange} required />
+                <form onSubmit={handleSubmit} noValidate>
+                    <input 
+                        type="email" 
+                        name="email" 
+                        placeholder="אימייל" 
+                        value={formData.email}
+                        onChange={handleChange} 
+                        required 
+                    />
+                    <input 
+                        type="password" 
+                        name="pass" 
+                        placeholder="סיסמה" 
+                        value={formData.pass}
+                        onChange={handleChange} 
+                        required 
+                    />
 
                     {message.text && (
                         <div className={`message-banner ${message.type}`}>
@@ -101,14 +117,14 @@ const AuthPage = ({ onLoginSuccess, onClose }) => {
                         </div>
                     )}
 
-                    <button type="submit" className="main-btn" disabled={isLoginLoading || isRegLoading}>
-                        {isLoginLoading || isRegLoading ? 'מבצע...' : (isLogin ? 'התחברות' : 'הרשמה')}
+                    <button type="submit" className="main-btn" disabled={isLoginLoading}>
+                        {isLoginLoading ? 'בודק נתונים...' : 'התחברות'}
                     </button>
                 </form>
 
                 <div className="auth-footer">
-                    <button onClick={() => setIsLogin(!isLogin)} type="button">
-                        {isLogin ? 'עדיין אין לך חשבון? להרשמה' : 'כבר רשום? להתחברות'}
+                    <button onClick={onRegisterNavigate} type="button" style={{ background: 'none', border: 'none', color: '#7c3aed', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}>
+                        עדיין אין לך חשבון? להרשמה
                     </button>
                 </div>
             </div>

@@ -34,14 +34,20 @@ const MainLayout = ({
             <div className="nav-buttons">
               <button className="btn-white-outline" onClick={onNewOrderClick}>הזמנה חדשה</button>
               
-              {!currentUser && (
+              {/* {!currentUser && (
                 <>
                   {onRegisterClick && (
                     <button className="btn-white-outline" onClick={onRegisterClick}>הרשמה</button>
                   )}
                   <button className="btn-white-outline" onClick={onLoginClick}>התחברות</button>
                 </>
-              )}
+              )} */}
+              {!currentUser && (
+  <>
+    <button className="btn-white-outline" onClick={onRegisterClick}>הרשמה</button>
+    <button className="btn-white-outline" onClick={onLoginClick}>התחברות</button>
+  </>
+)}
             </div>
           </div>
         </div>
