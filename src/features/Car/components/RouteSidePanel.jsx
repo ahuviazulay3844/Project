@@ -85,6 +85,12 @@ const RouteSidePanel = ({ onClose, onConfirm, initialData, selectedCar }) => {
 
  const handleConfirm = async () => {
     setErrorMessage(null);
+     const nowForCheck = new Date();
+    nowForCheck.setMinutes(nowForCheck.getMinutes() - 2); // באפר של 2 דקות לסובלנות מרגע פתיחת הפאנל
+    if (startDateTime < nowForCheck) {
+      setErrorMessage("❌ לא ניתן לבצע הזמנה לזמן שכבר עבר");
+      return;
+    }
     if (!loggedInUserId) {
       setErrorMessage("יש להתחבר למערכת כדי לבצע הזמנה");
       return;
