@@ -170,7 +170,13 @@
     background: #ffffff;
     border: 1px solid #f1f5f9;
     padding: 25px;
+    color: black;
     border-radius: 25px;
+}
+.info-card p {
+    color: black;
+    line-height: 1.6;
+    margin: 0;
 }
 
 .info-card h3 {
@@ -497,8 +503,111 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-}ז
+}
+/* שיפור ניגודיות למניעת לבן-על-לבן */
+.info-card.financial {
+    background-color: #f8fafc !important; /* רקע אפרפר עדין שובר לבן */
+    border: 1px solid #e2e8f0;
+}
 
+.breakdown-subtitle {
+    color: #475569;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 15px;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    color: #1e293b; /* טקסט כחול-כהה מאוד, בולט על לבן/אפור */
+    font-weight: 500;
+}
+
+.price-value {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* עיצוב שורות מיוחדות */
+.extra-charge {
+    color: #e11d48; /* אדום לחיוב נוסף */
+}
+
+.penalty-row {
+    background: #fff1f2;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #be123c;
+    border: 1px solid #fecaca;
+}
+
+.credit-row {
+    color: #16a34a !important; /* ירוק חזק לזיכויים */
+}
+
+.success-text {
+    font-weight: 800;
+}
+
+/* סיכום סופי */
+.total-divider {
+    height: 2px;
+    background: #cbd5e1;
+    margin: 20px 0 15px 0;
+    border: none;
+}
+
+.final-label-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.total-label {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.tax-note {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.price-big {
+    color: #4f46e5 !important; /* צבע המותג שלך - סגול כהה */
+    font-size: 2.8rem !important;
+    font-weight: 900;
+}
+
+.payment-confirmation-box {
+    margin-top: 25px;
+    background: #f0fdf4;
+    color: #166534;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid #bbf7d0;
+}
+
+/* SPEC PILLS נגד לבן על לבן */
+.car-specs-mini .spec-pill {
+    background: #1e293b;
+    color: #fbbf24;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
 .spinner-icon { animation: spin 1s linear infinite; color: #4f46e5; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
@@ -507,4 +616,108 @@
     .order-main-layout { grid-template-columns: 1fr; }
     .order-header-section { flex-direction: column; text-align: center; gap: 20px; }
     .car-name-title { font-size: 1.8rem; }
+}
+/* שיפור ניגודיות למניעת לבן-על-לבן */
+.info-card.financial {
+    background-color: #f8fafc !important; /* רקע אפרפר עדין שובר לבן */
+    border: 1px solid #e2e8f0;
+}
+
+.breakdown-subtitle {
+    color: #475569;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 15px;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    color: #1e293b; /* טקסט כחול-כהה מאוד, בולט על לבן/אפור */
+    font-weight: 500;
+}
+
+.price-value {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* עיצוב שורות מיוחדות */
+.extra-charge {
+    color: #e11d48; /* אדום לחיוב נוסף */
+}
+
+.penalty-row {
+    background: #fff1f2;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #be123c;
+    border: 1px solid #fecaca;
+}
+
+.credit-row {
+    color: #16a34a !important; /* ירוק חזק לזיכויים */
+}
+
+.success-text {
+    font-weight: 800;
+}
+
+/* סיכום סופי */
+.total-divider {
+    height: 2px;
+    background: #cbd5e1;
+    margin: 20px 0 15px 0;
+    border: none;
+}
+
+.final-label-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.total-label {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.tax-note {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.price-big {
+    color: #4f46e5 !important; /* צבע המותג שלך - סגול כהה */
+    font-size: 2.8rem !important;
+    font-weight: 900;
+}
+
+.payment-confirmation-box {
+    margin-top: 25px;
+    background: #f0fdf4;
+    color: #166534;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid #bbf7d0;
+}
+
+/* SPEC PILLS נגד לבן על לבן */
+.car-specs-mini .spec-pill {
+    background: #1e293b;
+    color: #fbbf24;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
