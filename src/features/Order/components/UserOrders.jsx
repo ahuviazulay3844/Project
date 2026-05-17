@@ -136,7 +136,7 @@ const UserOrders = () => {
 
   // --- Helpers ---
   const calculateLateMinutes = useCallback((expectedEnd, actualEnd, status) => {
-    if (status === 0) return 0;
+    if (status === 0||status === 3) return 0;
     const end = status === 2 ? new Date(actualEnd) : currentTime;
     const expected = new Date(expectedEnd);
     const diff = Math.floor((end - expected) / 60000);

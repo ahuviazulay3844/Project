@@ -83,10 +83,55 @@ const RouteSidePanel = ({ onClose, onConfirm, initialData, selectedCar }) => {
     }
   };
 
+// const handleConfirm = async () => {
+//     setErrorMessage(null);
+//     const actualNow = new Date();
+    
+//     const earliestAllowed = new Date(actualNow.getTime() - 15 * 60000); 
+//     if (startDateTime < earliestAllowed) {
+//         setErrorMessage("❌ הזמן שנבחר עבר. אנא עדכני לשעה קרובה יותר.");
+//         return;
+//     }
+
+//     if (!loggedInUserId) {
+//         setErrorMessage("יש להתחבר למערכת כדי לבצע הזמנה");
+//         return;
+//     }
+
+//     try {
+//         // פונקציית עזר קטנה ששומרת על הזמן המקומי בדיוק כפי שהמשתמש בחר
+//         const toLocalString = (date) => {
+//             const pad = (n) => n.toString().padStart(2, '0');
+//             return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+//         };
+
+//         const res = await checkOverlap({
+//             userId: Number(loggedInUserId), 
+//             start: toLocalString(startDateTime), // שולח למשל 14:00:00 במקום 11:00:00Z
+//             end: toLocalString(endDateTime)
+//         }).unwrap();
+
+//         if (res?.hasOverlap === true || res === true) {
+//             setErrorMessage("❌ יש לך כבר הזמנה קיימת בטווח הזה");
+//             return;
+//         }
+
+//         onConfirm({
+//             start: startDateTime,
+//             end: endDateTime,
+//             selectedCar,
+//         });
+
+//     } catch (err) {
+//         // השארת הלוגיקה שלך - אם הבדיקה נכשלה, ממשיכים
+//         onConfirm({ start: startDateTime, end: endDateTime, selectedCar });
+//     }
+// };
 const handleConfirm = async () => {
     setErrorMessage(null);
     const actualNow = new Date();
     
+    // בדיקה שהזמנה לא בעבר
     const earliestAllowed = new Date(actualNow.getTime() - 15 * 60000); 
     if (startDateTime < earliestAllowed) {
         setErrorMessage("❌ הזמן שנבחר עבר. אנא עדכני לשעה קרובה יותר.");
@@ -99,19 +144,23 @@ const handleConfirm = async () => {
     }
 
     try {
-        // פונקציית עזר קטנה ששומרת על הזמן המקומי בדיוק כפי שהמשתמש בחר
+        // --- הפונקציה ששולחת את הזמן בדיוק כפי שהוא מופיע במסך (Local) ---
         const toLocalString = (date) => {
             const pad = (n) => n.toString().padStart(2, '0');
             return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
         };
 
+        // שימוש ב-toLocalString במקום ב-toISOString
         const res = await checkOverlap({
             userId: Number(loggedInUserId), 
-            start: toLocalString(startDateTime), // שולח למשל 14:00:00 במקום 11:00:00Z
+            start: toLocalString(startDateTime), 
             end: toLocalString(endDateTime)
         }).unwrap();
 
-        if (res?.hasOverlap === true || res === true) {
+        // בדיקה אם res הוא אובייקט עם hasOverlap או פשוט boolean (השארתי את הלוגיקה שלך)
+        const hasOverlap = typeof res === 'boolean' ? res : res?.hasOverlap;
+
+        if (hasOverlap === true) {
             setErrorMessage("❌ יש לך כבר הזמנה קיימת בטווח הזה");
             return;
         }
@@ -123,11 +172,10 @@ const handleConfirm = async () => {
         });
 
     } catch (err) {
-        // השארת הלוגיקה שלך - אם הבדיקה נכשלה, ממשיכים
+        console.error("Check overlap failed:", err);
         onConfirm({ start: startDateTime, end: endDateTime, selectedCar });
     }
 };
-
   return (
     <div className="route-panel-overlay" onClick={onClose}>
       <div className="route-panel" onClick={(e) => e.stopPropagation()}>
