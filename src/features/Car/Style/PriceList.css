@@ -154,3 +154,158 @@
 .spec-text strong {
     color: #0f172a;
 }
+/* סרגל סינונים */
+.catalog-filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1300px;
+    margin: 0 auto 50px auto;
+    padding: 20px 30px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    border: 1px solid #f1f5f9;
+}
+
+/* חיפוש חופשי */
+.search-input-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 500px;
+}
+
+.search-input-wrapper input {
+    width: 100%;
+    padding: 14px 20px 14px 50px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.search-input-wrapper input:focus {
+    border-color: #5d299a;
+    background: white;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(93, 41, 154, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    pointer-events: none;
+}
+
+/* דרופדאונים */
+.filters-group {
+    display: flex;
+    gap: 15px;
+}
+
+.select-wrapper select {
+    padding: 12px 40px 12px 15px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    font-family: inherit;
+    appearance: none; /* מסתיר את החץ המקורי של הדפדפן */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 15px;
+}
+
+.select-wrapper select:hover {
+    border-color: #cbd5e1;
+}
+
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 100px;
+    color: #94a3b8;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+/* תיקון צבע הכותרת המשנית (המשפט שביקשת) */
+.catalog-header p {
+    color: #64748b !important; /* אפור כהה קריא */
+    font-size: 1.1rem;
+    margin-top: 10px;
+}
+
+/* תיקון צבע הטקסט בתוך תיבת החיפוש */
+.search-input-wrapper input {
+    color: #0f172a !important; /* שחור-כחול עמוק */
+}
+
+/* תיקון צבע ה-Placeholder (הטקסט שכתוב לפני שמקלידים) */
+.search-input-wrapper input::placeholder {
+    color: #94a3b8;
+}
+/* תיקון המשפט: "סקירה טכנית ומחירי שימוש..." */
+.catalog-header p {
+    color: #1e293b !important; /* כחול-כהה עמוק, מאוד בולט */
+    background: transparent !important; /* לוודא שאין רקע כחול/לבן שחוסם */
+    font-weight: 700 !important;
+    opacity: 1 !important;
+}
+
+/* תיקון טקסט החיפוש בזמן הקלדה */
+.search-input-wrapper input {
+    color: #000000 !important; /* שחור מוחלט */
+    background: #ffffff !important;
+    border: 2px solid #cbd5e1 !important;
+}
+
+/* עיצוב תיבות הבחירה (קטגוריות/מושבים) */
+.select-wrapper select {
+    color: #0f172a !important; /* שחור-כחול */
+    background-color: #f8fafc !important; /* רקע אפרפר בהיר מאוד לניגודיות */
+    border: 1px solid #94a3b8 !important;
+    font-weight: 800 !important;
+}
+
+/* הדגשת סרגל הסינונים כדי שיבלוט על הרקע הכללי */
+.catalog-filter-bar {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important; /* צל שמפריד מהרקע */
+    padding: 25px !important;
+}
+
+/* שינוי צבע ה-Icon של החיפוש */
+.search-icon {
+    filter: grayscale(1) contrast(2); /* הופך את האימוג'י ליותר כהה */
+}
+/* הוספת ניגודיות לתיבות הבחירה (Select) כדי שלא יהיו שקופות */
+.select-wrapper select {
+    color: #1e293b !important;
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+/* הוספת צל עדין לסרגל הסינונים כדי להפריד אותו מהרקע הלבן */
+.catalog-filter-bar {
+    background: #f8fafc !important; /* רקע אפרפר עדין מאוד */
+    border: 1px solid #e2e8f0 !important;
+}
+/* התאמה לנייד */
+@media (max-width: 768px) {
+    .catalog-filter-bar {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .search-input-wrapper {
+        max-width: 100%;
+    }
+}
