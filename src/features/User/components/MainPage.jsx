@@ -94,7 +94,7 @@ const MainPage = () => {
     const renderContent = () => {
         switch (activeView) {
             case 'register': return <Register onStepClick={(step) => setActiveView(step)} isForeign={userData.isForeignCitizen} />;
-            case 'auth': return <AuthPage onLoginSuccess={() => setActiveView(redirectTo)} onClose={() => setActiveView('home')} onRegisterNavigate={() => setActiveView('register')} />;
+            case 'auth': return <AuthPage onLoginSuccess={() => setActiveView(redirectTo)} onClose={() => setActiveView('home')} onRegisterNavigate={() => setActiveView('register') } />;
             case 'questions': return <PersonalQuestions userData={userData} setUserData={setUserData} onBack={() => setActiveView('register')} onNext={() => setActiveView('upload')} />;
             case 'upload': return <UploadDocuments uploadData={uploadData} setUploadData={setUploadData} onBack={() => setActiveView('questions')} onFinish={() => userData.isForeignCitizen ? setActiveView('foreign') : setActiveView('signature')} />;
             case 'foreign': return <UploadForeignDocuments uploadData={foreignUploadData} setUploadData={setForeignUploadData} onBack={() => setActiveView('upload')} onFinish={() => setActiveView('signature')} />;

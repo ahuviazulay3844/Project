@@ -32,7 +32,47 @@
     cursor: pointer;
     transition: transform 0.2s, background 0.2s;
 }
+/* עטיפה שמאפשרת לאלמנטים בפנים להיות במיקום אבסולוטי */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1rem; /* שומר על המרווח שהיה ל-input המקורי */
+}
 
+/* מבטל את המרווח התחתון של ה-input בתוך העטיפה כדי שלא יהיה רווח כפול */
+.password-wrapper input {
+    margin-bottom: 0;
+    padding-left: 45px; /* יוצר מקום לעין בצד שמאל */
+}
+
+/* עיצוב כפתור העין */
+.password-toggle-btn {
+    position: absolute;
+    left: 12px; /* מיקום בצד שמאל (מתאים לעברית) */
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280; /* צבע אפור עדין */
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    z-index: 2;
+}
+
+.password-toggle-btn:hover {
+    color: #7c3aed; /* משנה צבע לסגול בריחוף */
+}
+
+/* מבטל מסגרות כחולות של דפדפן בלחיצה */
+.password-toggle-btn:focus {
+    outline: none;
+}
 .auth-close-btn:hover {
     transform: scale(1.05);
     background: #e5e7eb;

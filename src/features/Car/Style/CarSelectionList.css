@@ -236,7 +236,10 @@
     cursor: pointer;
     transition: 0.2s;
 }
-
+.location-text
+{
+    color: black;
+}
 .order-button:hover:not(:disabled) {
     background: #4a1d82;
     box-shadow: 0 8px 20px rgba(93, 41, 154, 0.3);

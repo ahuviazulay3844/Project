@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom'; 
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { 
     useLoginUserMutation, 
     userApi 
@@ -11,7 +12,7 @@ import '../Style/AuthPage.css';
 const AuthPage = ({ onLoginSuccess, onClose, onRegisterNavigate }) => {
     const [formData, setFormData] = useState({ email: '', pass: '' });
     const [message, setMessage] = useState({ text: '', type: '' });
-
+    const [showPassword, setShowPassword] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate(); 
     const [loginUser, { isLoading: isLoginLoading }] = useLoginUserMutation();
@@ -102,14 +103,25 @@ const AuthPage = ({ onLoginSuccess, onClose, onRegisterNavigate }) => {
                         onChange={handleChange} 
                         required 
                     />
-                    <input 
-                        type="password" 
-                        name="pass" 
-                        placeholder="סיסמה" 
-                        value={formData.pass}
-                        onChange={handleChange} 
-                        required 
-                    />
+                  {/* עטיפה חדשה לשדה הסיסמה */}
+<div className="password-wrapper">
+    <input 
+        type={showPassword ? "text" : "password"} 
+        name="pass" 
+        placeholder="סיסמה" 
+        value={formData.pass}
+        onChange={handleChange} 
+        required 
+    />
+    <button 
+        type="button" 
+        onClick={() => setShowPassword(!showPassword)}
+        className="password-toggle-btn"
+        aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
+    >
+        {showPassword ? <FaEyeSlash /> : <FaEye />}
+    </button>
+</div>
 
                     {message.text && (
                         <div className={`message-banner ${message.type}`}>

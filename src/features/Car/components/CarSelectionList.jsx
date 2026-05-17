@@ -82,7 +82,7 @@ const CarSelectionList = ({ cars, onSelectCar, onEditTime, selectedTime }) => {
                     <h3>{car.model}</h3>
                     <div className="price-tag"><span className="price-val">₪{car.pricePerHour}</span><span className="price-unit">/שעה</span></div>
                   </div>
-                  <p className="location-text">📍 {car.startParking}</p>
+                  <p className="location-text"> {car.startParking}</p>
                   
                   <div className="specs-grid">
                     <div className="spec-item"><span className="spec-label">⛽ דלק</span><span className="spec-val">{car.fuelLevel}%</span></div>
