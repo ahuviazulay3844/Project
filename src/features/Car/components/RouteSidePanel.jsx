@@ -57,7 +57,6 @@ const RouteSidePanel = ({ onClose, onConfirm, initialData, selectedCar }) => {
     const d = String(date.getDate()).padStart(2, "0");
     return `${y}-${m}-${d}`;
   };
-
   const handleDateTimeChange = (isStart, dateVal, timeVal) => {
     const [hours, mins] = timeVal.split(":").map(Number);
     const [y, m, d] = dateVal.split("-").map(Number);
@@ -66,22 +65,60 @@ const RouteSidePanel = ({ onClose, onConfirm, initialData, selectedCar }) => {
 
     if (isStart) {
       setStartDateTime(newDate);
+      
+      // לוגיקה מקורית: הזזת הסיום לפי הדלתא של הדקות
       const minuteDelta = newDate.getMinutes() - startDateTime.getMinutes();
       const candidateEnd = new Date(endDateTime.getTime() + minuteDelta * 60000);
 
       if (candidateEnd.getTime() >= newDate.getTime() + ONE_HOUR_MS) {
         setEndDateTime(candidateEnd);
-      } else if (newDate.getTime() + ONE_HOUR_MS > endDateTime.getTime()) {
+      } else {
         setEndDateTime(new Date(newDate.getTime() + ONE_HOUR_MS));
       }
     } else {
-      if (newDate.getTime() < startDateTime.getTime() + ONE_HOUR_MS) {
+      let finalEnd = newDate;
+
+      // --- פתרון לחצות: אם זמן הסיום קטן מההתחלה באותו יום, כנראה התכוונו למחר ---
+      if (finalEnd.getTime() <= startDateTime.getTime()) {
+        finalEnd = new Date(finalEnd.getTime() + ONE_DAY_MS);
+      }
+
+      // --- פתרון לסינכרון דקות: מוודאים שדקות הסיום תואמות לדקות ההתחלה ---
+      finalEnd.setMinutes(startDateTime.getMinutes());
+
+      // בדיקה מינימלית של שעה הפרש (כפי שהיה לך)
+      if (finalEnd.getTime() < startDateTime.getTime() + ONE_HOUR_MS) {
         setEndDateTime(new Date(startDateTime.getTime() + ONE_HOUR_MS));
       } else {
-        setEndDateTime(newDate);
+        setEndDateTime(finalEnd);
       }
     }
   };
+
+  // const handleDateTimeChange = (isStart, dateVal, timeVal) => {
+  //   const [hours, mins] = timeVal.split(":").map(Number);
+  //   const [y, m, d] = dateVal.split("-").map(Number);
+
+  //   const newDate = roundTo5(new Date(y, m - 1, d, hours, mins));
+
+  //   if (isStart) {
+  //     setStartDateTime(newDate);
+  //     const minuteDelta = newDate.getMinutes() - startDateTime.getMinutes();
+  //     const candidateEnd = new Date(endDateTime.getTime() + minuteDelta * 60000);
+
+  //     if (candidateEnd.getTime() >= newDate.getTime() + ONE_HOUR_MS) {
+  //       setEndDateTime(candidateEnd);
+  //     } else if (newDate.getTime() + ONE_HOUR_MS > endDateTime.getTime()) {
+  //       setEndDateTime(new Date(newDate.getTime() + ONE_HOUR_MS));
+  //     }
+  //   } else {
+  //     if (newDate.getTime() < startDateTime.getTime() + ONE_HOUR_MS) {
+  //       setEndDateTime(new Date(startDateTime.getTime() + ONE_HOUR_MS));
+  //     } else {
+  //       setEndDateTime(newDate);
+  //     }
+  //   }
+  // };
 
 // const handleConfirm = async () => {
 //     setErrorMessage(null);
