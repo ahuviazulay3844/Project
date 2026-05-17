@@ -83,49 +83,50 @@ const RouteSidePanel = ({ onClose, onConfirm, initialData, selectedCar }) => {
     }
   };
 
- const handleConfirm = async () => {
+const handleConfirm = async () => {
     setErrorMessage(null);
-     const nowForCheck = new Date();
-    nowForCheck.setMinutes(nowForCheck.getMinutes() - 2); // באפר של 2 דקות לסובלנות מרגע פתיחת הפאנל
-    if (startDateTime < nowForCheck) {
-      setErrorMessage("❌ לא ניתן לבצע הזמנה לזמן שכבר עבר");
-      return;
-    }
-    if (!loggedInUserId) {
-      setErrorMessage("יש להתחבר למערכת כדי לבצע הזמנה");
-      return;
+    const actualNow = new Date();
+    
+    const earliestAllowed = new Date(actualNow.getTime() - 15 * 60000); 
+    if (startDateTime < earliestAllowed) {
+        setErrorMessage("❌ הזמן שנבחר עבר. אנא עדכני לשעה קרובה יותר.");
+        return;
     }
 
-    // פונקציית עזר ליצירת פורמט ISO מקומי ללא המרה ל-UTC
-    const toLocalISO = (date) => {
-      const pad = (num) => String(num).padStart(2, '0');
-      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-    };
+    if (!loggedInUserId) {
+        setErrorMessage("יש להתחבר למערכת כדי לבצע הזמנה");
+        return;
+    }
 
     try {
-      const res = await checkOverlap({
-        userId: Number(loggedInUserId), 
-        // שליחת התאריך בפורמט תקני אך ללא שינוי אזור זמן
-        start: toLocalISO(startDateTime),
-        end: toLocalISO(endDateTime)
-      }).unwrap();
+        // פונקציית עזר קטנה ששומרת על הזמן המקומי בדיוק כפי שהמשתמש בחר
+        const toLocalString = (date) => {
+            const pad = (n) => n.toString().padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        };
 
-      if (res?.hasOverlap === true) {
-        setErrorMessage("❌ יש לך כבר הזמנה קיימת בטווח הזה");
-        return;
-      }
+        const res = await checkOverlap({
+            userId: Number(loggedInUserId), 
+            start: toLocalString(startDateTime), // שולח למשל 14:00:00 במקום 11:00:00Z
+            end: toLocalString(endDateTime)
+        }).unwrap();
 
-      onConfirm({
-        start: startDateTime,
-        end: endDateTime,
-        selectedCar,
-      });
+        if (res?.hasOverlap === true || res === true) {
+            setErrorMessage("❌ יש לך כבר הזמנה קיימת בטווח הזה");
+            return;
+        }
+
+        onConfirm({
+            start: startDateTime,
+            end: endDateTime,
+            selectedCar,
+        });
 
     } catch (err) {
-      console.error("Overlap check failed:", err);
-      onConfirm({ start: startDateTime, end: endDateTime, selectedCar });
+        // השארת הלוגיקה שלך - אם הבדיקה נכשלה, ממשיכים
+        onConfirm({ start: startDateTime, end: endDateTime, selectedCar });
     }
-  };
+};
 
   return (
     <div className="route-panel-overlay" onClick={onClose}>
